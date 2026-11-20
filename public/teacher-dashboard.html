@@ -1,0 +1,1690 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>لوحة تحليلات المعلم — بوابة اللغة الصينية - المستوى الأول</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Noto+Serif+SC:wght@600;700&family=Tajawal:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --canvas: #F9F6F0;
+        --surface: #FFFFFF;
+        --surface-muted: #F2ECE1;
+        --ink: #1C1917;
+        --ink-muted: #57534E;
+        --border: rgba(28, 25, 23, 0.12);
+        --border-subtle: rgba(28, 25, 23, 0.08);
+        --cinnabar: #B91C1C;
+        --cinnabar-hover: #991B1B;
+        --cinnabar-soft: rgba(185, 28, 28, 0.09);
+        --gold: #D97706;
+        --gold-soft: rgba(217, 119, 6, 0.12);
+        --jade: #15803D;
+        --jade-soft: rgba(21, 128, 61, 0.1);
+        --dot-color: rgba(28, 25, 23, 0.04);
+        --backdrop: rgba(18, 17, 16, 0.62);
+      }
+
+      .dark {
+        --canvas: #121110;
+        --surface: #1E1C1A;
+        --surface-muted: #292623;
+        --ink: #F5F2EB;
+        --ink-muted: #A8A29E;
+        --border: rgba(245, 242, 235, 0.12);
+        --border-subtle: rgba(245, 242, 235, 0.08);
+        --cinnabar: #EF4444;
+        --cinnabar-hover: #DC2626;
+        --cinnabar-soft: rgba(239, 68, 68, 0.14);
+        --gold: #F59E0B;
+        --gold-soft: rgba(245, 158, 11, 0.16);
+        --jade: #22C55E;
+        --jade-soft: rgba(34, 197, 94, 0.14);
+        --dot-color: rgba(245, 242, 235, 0.04);
+        --backdrop: rgba(0, 0, 0, 0.72);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Tajawal', 'Cairo', system-ui, sans-serif;
+        background-color: var(--canvas);
+        background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+        background-size: 24px 24px;
+        color: var(--ink);
+        line-height: 1.6;
+        transition: background-color 180ms ease, color 180ms ease;
+      }
+
+      .dark body {
+        letter-spacing: 0.01em;
+      }
+
+      body.modal-open {
+        overflow: hidden;
+      }
+
+      h1, h2, h3, button, th {
+        font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+      }
+
+      .font-hanzi {
+        font-family: 'Noto Serif SC', 'KaiTi', 'STKaiti', serif;
+      }
+
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* شريط التنقل العلوي */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        border-bottom: 1px solid var(--border);
+        background-color: var(--canvas);
+        backdrop-filter: blur(8px);
+      }
+
+      .topbar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
+      }
+
+      .seal {
+        width: 34px;
+        height: 34px;
+        border-radius: 4px;
+        border: 1.5px solid var(--cinnabar);
+        color: var(--cinnabar);
+        background: var(--cinnabar-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .brand-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      /* الإطار الصيني التقليدي */
+      .neo-frame {
+        position: relative;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+
+      .neo-frame::before,
+      .neo-frame::after {
+        content: '';
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      .neo-frame::before {
+        top: 7px;
+        right: 7px;
+        border-top: 1.5px solid var(--cinnabar);
+        border-right: 1.5px solid var(--cinnabar);
+      }
+
+      .neo-frame::after {
+        bottom: 7px;
+        left: 7px;
+        border-bottom: 1.5px solid var(--cinnabar);
+        border-left: 1.5px solid var(--cinnabar);
+      }
+
+      /* أزرار وحقول */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background-color: var(--surface);
+        color: var(--ink);
+        white-space: nowrap;
+        transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+      }
+
+      .btn:hover:not(:disabled) {
+        border-color: var(--cinnabar);
+      }
+
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background-color: var(--cinnabar);
+        border-color: var(--cinnabar);
+        color: #FFFFFF;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background-color: var(--cinnabar-hover);
+        border-color: var(--cinnabar-hover);
+      }
+
+      .btn-ghost {
+        background-color: transparent;
+        color: var(--ink-muted);
+      }
+
+      .btn-ghost:hover:not(:disabled) {
+        color: var(--cinnabar);
+      }
+
+      .input {
+        width: 100%;
+        min-height: 42px;
+        padding: 9px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background-color: var(--canvas);
+        color: var(--ink);
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+      }
+
+      .input:focus {
+        border-color: var(--cinnabar);
+        box-shadow: 0 0 0 3px var(--cinnabar-soft);
+      }
+
+      .input-ltr {
+        direction: ltr;
+        text-align: left;
+      }
+
+      /* الحاوية الرئيسية */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 20px 56px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .page-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .meta-line {
+        font-size: 12px;
+        color: var(--ink-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .page-title {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      /* لوحة إعداد رابط جدول البيانات */
+      .config-panel {
+        padding: 20px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .config-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .config-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .config-status {
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .status-live {
+        color: var(--jade);
+      }
+
+      .status-preview {
+        color: var(--gold);
+      }
+
+      .status-error {
+        color: var(--cinnabar);
+      }
+
+      .config-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .config-input-wrap {
+        flex: 1 1 320px;
+      }
+
+      .config-hint {
+        margin: 0;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      /* بطاقات المؤشرات */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      @media (max-width: 960px) {
+        .kpi-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 540px) {
+        .kpi-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .kpi-card {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .kpi-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ink-muted);
+      }
+
+      .kpi-value {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .kpi-sub {
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .tone-cinnabar {
+        color: var(--cinnabar);
+      }
+
+      .tone-gold {
+        color: var(--gold);
+      }
+
+      .tone-jade {
+        color: var(--jade);
+      }
+
+      /* قسم الجدول */
+      .table-section {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .table-toolbar {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .search-wrap {
+        flex: 1 1 260px;
+        max-width: 380px;
+      }
+
+      .table-meta {
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .table-scroll {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 860px;
+      }
+
+      thead th {
+        background-color: var(--surface-muted);
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-align: right;
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+        transition: color 150ms ease;
+      }
+
+      thead th:hover {
+        color: var(--cinnabar);
+      }
+
+      thead th.sorted {
+        color: var(--cinnabar);
+      }
+
+      .sort-arrow {
+        display: inline-block;
+        margin-right: 5px;
+        font-size: 11px;
+        opacity: 0.7;
+      }
+
+      tbody td {
+        padding: 14px 16px;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border-subtle);
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      tbody tr.student-row {
+        cursor: pointer;
+        transition: background-color 140ms ease;
+      }
+
+      tbody tr.student-row:hover,
+      tbody tr.student-row:focus-visible {
+        background-color: var(--canvas);
+        outline: none;
+      }
+
+      .student-name-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .student-name {
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .student-row:hover .student-name {
+        color: var(--cinnabar);
+      }
+
+      .row-drilldown-hint {
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+
+      .progress-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 125px;
+      }
+
+      .progress-track {
+        flex: 1;
+        height: 6px;
+        border-radius: 999px;
+        background-color: var(--border);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        background-color: var(--cinnabar);
+      }
+
+      .progress-fill.good {
+        background-color: var(--jade);
+      }
+
+      .progress-fill.warn {
+        background-color: var(--gold);
+      }
+
+      .empty-row {
+        text-align: center;
+        padding: 36px 20px;
+        color: var(--ink-muted);
+        font-size: 14px;
+      }
+
+      .error-banner {
+        display: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--cinnabar);
+        background-color: var(--cinnabar-soft);
+        color: var(--cinnabar);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .error-banner.visible {
+        display: block;
+      }
+
+      /* نافذة بروفايل الطالب التفصيلي */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background-color: var(--backdrop);
+        backdrop-filter: blur(3px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal-dialog {
+        width: 100%;
+        max-width: 940px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+      }
+
+      .modal-header {
+        padding: 22px 26px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        background-color: var(--surface);
+      }
+
+      .modal-student-id {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .modal-seal {
+        width: 46px;
+        height: 46px;
+        font-size: 20px;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .modal-body {
+        padding: 22px 26px 26px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background-color: var(--canvas);
+      }
+
+      .modal-stats-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      @media (max-width: 720px) {
+        .modal-stats-strip {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .mini-stat {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .mini-stat-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink-muted);
+      }
+
+      .mini-stat-value {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .chapters-card {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .chapters-card-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .chapters-card-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .legend-inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+
+      .chapters-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 640px;
+      }
+
+      .chapters-table thead th {
+        cursor: default;
+        padding: 11px 14px;
+      }
+
+      .chapters-table thead th:hover {
+        color: var(--ink-muted);
+      }
+
+      .chapters-table tbody td {
+        padding: 11px 14px;
+        font-size: 13px;
+      }
+
+      .chapters-table tbody tr.high-error-row {
+        background-color: var(--cinnabar-soft);
+      }
+
+      .chapter-name-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .chapter-numeral {
+        width: 28px;
+        height: 28px;
+        border-radius: 5px;
+        border: 1px solid var(--border);
+        background-color: var(--canvas);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .high-error-row .chapter-numeral {
+        border-color: var(--cinnabar);
+        color: var(--cinnabar);
+      }
+
+      .status-text {
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      footer {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="seal font-hanzi" aria-hidden="true">师</span>
+          <span class="brand-title">لوحة تحليلات المعلم — بوابة اللغة الصينية</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button type="button" id="refreshBtn" class="btn btn-primary">
+            <span id="refreshBtnLabel">تحديث البيانات</span>
+          </button>
+          <button type="button" id="themeToggleBtn" class="btn" aria-label="تبديل المظهر">
+            <span id="themeToggleLabel">حبر الليل</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-header">
+        <div>
+          <div class="meta-line">
+            <span>متابعة تقدم الطلاب</span>
+            <span aria-hidden="true">·</span>
+            <span>المستوى الأول</span>
+            <span aria-hidden="true">·</span>
+            <span>تحليل الفصول الخمسة عشر</span>
+          </div>
+          <h1 class="page-title">تقارير أداء الطلاب</h1>
+        </div>
+        <div class="meta-line tabular-nums" id="lastFetchLabel">آخر تحديث: —</div>
+      </section>
+
+      <!-- إعداد رابط جدول المعلم -->
+      <section class="neo-frame config-panel" aria-label="إعداد رابط الربط مع جداول البيانات">
+        <div class="config-header">
+          <h2 class="config-title">رابط مزامنة جدول بيانات المعلم</h2>
+          <span id="connectionStatus" class="config-status status-preview">
+            وضع المعاينة التجريبية (لم يتم إدخال الرابط بعد)
+          </span>
+        </div>
+
+        <form id="urlConfigForm" class="config-form">
+          <div class="config-input-wrap">
+            <input
+              id="scriptUrlInput"
+              type="url"
+              class="input input-ltr"
+              placeholder="الصق رابط تطبيق الويب الخاص بجدول البيانات هنا..."
+              autocomplete="off"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">حفظ الرابط وجلب البيانات</button>
+          <button type="button" id="clearUrlBtn" class="btn btn-ghost">مسح الرابط</button>
+        </form>
+
+        <p class="config-hint">
+          يُحفظ الرابط محلياً في متصفح المعلم فقط. اضغط على اسم أي طالب في الجدول أدناه لفتح
+          بروفايل الطالب التفصيلي وتحليل الفصول الـ ١٥.
+        </p>
+
+        <div id="errorBanner" class="error-banner" role="alert"></div>
+      </section>
+
+      <!-- بطاقات مؤشرات الأداء العليا -->
+      <section class="kpi-grid" aria-label="ملخص مؤشرات الصف">
+        <article class="kpi-card">
+          <span class="kpi-label">إجمالي عدد الساعات الكلي لجميع الطلاب</span>
+          <span id="kpiTotalHours" class="kpi-value tabular-nums tone-gold">0.0 ساعة</span>
+          <span id="kpiTotalMinutesSub" class="kpi-sub tabular-nums">0 دقيقة دراسة نشطة</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">إجمالي الأسئلة المحلولة لجميع الطلاب</span>
+          <span id="kpiTotalSolvedAll" class="kpi-value tabular-nums">0</span>
+          <span id="kpiCorrectWrongSub" class="kpi-sub tabular-nums">0 صحيح · 0 خطأ</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">إجمالي الطلاب النشطين</span>
+          <span id="kpiActiveToday" class="kpi-value tabular-nums tone-cinnabar">0</span>
+          <span id="kpiTotalStudentsSub" class="kpi-sub tabular-nums">من أصل 0 طالب مسجل</span>
+        </article>
+
+        <article class="kpi-card">
+          <span class="kpi-label">متوسط نسبة الدقة العامة</span>
+          <span id="kpiAvgAccuracy" class="kpi-value tabular-nums tone-jade">0%</span>
+          <span class="kpi-sub">متوسط صحة الإجابات على مستوى الصف</span>
+        </article>
+      </section>
+
+      <!-- جدول الطلاب القابل للبحث والفرز والنقر -->
+      <section class="table-section" aria-label="جدول إحصائيات الطلاب">
+        <div class="table-toolbar">
+          <div class="search-wrap">
+            <input
+              id="searchInput"
+              type="search"
+              class="input"
+              placeholder="ابحث باسم الطالب أو الرمز..."
+              aria-label="بحث في قائمة الطلاب"
+            />
+          </div>
+          <div id="tableCountMeta" class="table-meta tabular-nums">عرض 0 من أصل 0 طالب</div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th data-sort="studentName">اسم الطالب<span class="sort-arrow"></span></th>
+                <th data-sort="studentCode">الرمز<span class="sort-arrow"></span></th>
+                <th data-sort="totalSolved">المحلولة<span class="sort-arrow"></span></th>
+                <th data-sort="correctCount">صحيح<span class="sort-arrow"></span></th>
+                <th data-sort="wrongCount">خطأ<span class="sort-arrow"></span></th>
+                <th data-sort="accuracyPercent">الدقة<span class="sort-arrow"></span></th>
+                <th data-sort="activeMinutes">الوقت (دقيقة)<span class="sort-arrow"></span></th>
+                <th data-sort="overallProgressPercent">التقدم العام<span class="sort-arrow"></span></th>
+                <th data-sort="lastActive">آخر نشاط<span class="sort-arrow"></span></th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- نافذة بروفايل الطالب التفصيلي (تحليل الفصول الـ 15) -->
+    <div
+      id="studentModalBackdrop"
+      class="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalStudentName"
+    >
+      <div class="neo-frame modal-dialog" id="studentModalDialog">
+        <div class="modal-header">
+          <div class="modal-student-id">
+            <span class="seal modal-seal font-hanzi" aria-hidden="true">生</span>
+            <div>
+              <div class="meta-line">
+                <span>بروفايل الطالب التفصيلي</span>
+                <span aria-hidden="true">·</span>
+                <span id="modalStudentCode" class="tabular-nums">الرمز: —</span>
+                <span aria-hidden="true">·</span>
+                <span id="modalStudentLastActive" class="tabular-nums">آخر نشاط: —</span>
+              </div>
+              <h2 id="modalStudentName" class="modal-title">—</h2>
+            </div>
+          </div>
+
+          <button type="button" id="closeModalBtn" class="btn">إغلاق</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-stats-strip">
+            <div class="mini-stat">
+              <span class="mini-stat-label">إجمالي ساعات الدراسة</span>
+              <span id="modalTotalHours" class="mini-stat-value tabular-nums tone-gold">0.0 ساعة</span>
+            </div>
+            <div class="mini-stat">
+              <span class="mini-stat-label">نسبة الدقة العامة</span>
+              <span id="modalAccuracy" class="mini-stat-value tabular-nums tone-jade">0%</span>
+            </div>
+            <div class="mini-stat">
+              <span class="mini-stat-label">التقدم في المنهج</span>
+              <span id="modalProgress" class="mini-stat-value tabular-nums">0%</span>
+            </div>
+            <div class="mini-stat">
+              <span class="mini-stat-label">إجمالي المحلول والأخطاء</span>
+              <span id="modalSolvedSummary" class="mini-stat-value tabular-nums">0 / 0</span>
+            </div>
+          </div>
+
+          <div class="chapters-card">
+            <div class="chapters-card-header">
+              <h3 class="chapters-card-title">تحليل الفصول الـ ١٥</h3>
+              <div class="legend-inline">
+                <span class="tone-jade">ممتاز (٨٥٪ فأكثر)</span>
+                <span aria-hidden="true">·</span>
+                <span class="tone-gold">متوسط (٧٠٪ – ٨٤٪)</span>
+                <span aria-hidden="true">·</span>
+                <span class="tone-cinnabar">أخطاء مرتفعة / يحتاج مراجعة</span>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table class="chapters-table">
+                <thead>
+                  <tr>
+                    <th>الفصل</th>
+                    <th>إجمالي الأسئلة المحلولة</th>
+                    <th>الإجابات الصحيحة</th>
+                    <th>الأخطاء</th>
+                    <th>نسبة الدقة</th>
+                    <th>التقييم</th>
+                  </tr>
+                </thead>
+                <tbody id="modalChaptersBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span>بوابة اللغة الصينية - المستوى الأول</span>
+      <span>لوحة متابعة مستقلة للمعلم</span>
+    </footer>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var DEFAULT_SCRIPT_WEB_APP_URL = '';
+        var STORAGE_URL_KEY = 'teacher_dashboard_sheets_url_v1';
+        var STORAGE_THEME_KEY = 'teacher_dashboard_theme_v1';
+
+        var CHAPTERS_META = [
+          { id: 1, zh: '一', ar: 'الفصل الأول' },
+          { id: 2, zh: '二', ar: 'الفصل الثاني' },
+          { id: 3, zh: '三', ar: 'الفصل الثالث' },
+          { id: 4, zh: '四', ar: 'الفصل الرابع' },
+          { id: 5, zh: '五', ar: 'الفصل الخامس' },
+          { id: 6, zh: '六', ar: 'الفصل السادس' },
+          { id: 7, zh: '七', ar: 'الفصل السابع' },
+          { id: 8, zh: '八', ar: 'الفصل الثامن' },
+          { id: 9, zh: '九', ar: 'الفصل التاسع' },
+          { id: 10, zh: '十', ar: 'الفصل العاشر' },
+          { id: 11, zh: '十一', ar: 'الفصل الحادي عشر' },
+          { id: 12, zh: '十二', ar: 'الفصل الثاني عشر' },
+          { id: 13, zh: '十三', ar: 'الفصل الثالث عشر' },
+          { id: 14, zh: '十四', ar: 'الفصل الرابع عشر' },
+          { id: 15, zh: '十五', ar: 'الفصل الخامس عشر' }
+        ];
+
+        function makeMockBreakdown(overrides) {
+          var map = {};
+          for (var i = 0; i < overrides.length; i++) {
+            map[overrides[i].chapterId] = overrides[i];
+          }
+          var list = [];
+          for (var c = 1; c <= 15; c++) {
+            if (map[c]) {
+              list.push(map[c]);
+            } else {
+              list.push({ chapterId: c, solved: 0, correct: 0, wrong: 0 });
+            }
+          }
+          return list;
+        }
+
+        var todayIso = new Date().toISOString();
+        var yesterdayIso = new Date(Date.now() - 86400000).toISOString();
+        var twoDaysAgoIso = new Date(Date.now() - 2 * 86400000).toISOString();
+
+        var SAMPLE_STUDENTS = [
+          {
+            studentId: 'ST01',
+            studentName: 'أحمد محمد',
+            studentCode: '1234',
+            totalSolved: 92,
+            correctCount: 77,
+            wrongCount: 15,
+            accuracyPercent: 84,
+            activeMinutes: 145,
+            overallProgressPercent: 33,
+            lastActive: todayIso,
+            chaptersBreakdown: makeMockBreakdown([
+              { chapterId: 1, solved: 24, correct: 23, wrong: 1 },
+              { chapterId: 2, solved: 20, correct: 18, wrong: 2 },
+              { chapterId: 3, solved: 18, correct: 11, wrong: 7 },
+              { chapterId: 4, solved: 16, correct: 14, wrong: 2 },
+              { chapterId: 5, solved: 14, correct: 11, wrong: 3 }
+            ])
+          },
+          {
+            studentId: 'ST02',
+            studentName: 'سارة علي',
+            studentCode: '5678',
+            totalSolved: 128,
+            correctCount: 119,
+            wrongCount: 9,
+            accuracyPercent: 93,
+            activeMinutes: 210,
+            overallProgressPercent: 47,
+            lastActive: todayIso,
+            chaptersBreakdown: makeMockBreakdown([
+              { chapterId: 1, solved: 22, correct: 22, wrong: 0 },
+              { chapterId: 2, solved: 20, correct: 19, wrong: 1 },
+              { chapterId: 3, solved: 20, correct: 19, wrong: 1 },
+              { chapterId: 4, solved: 18, correct: 17, wrong: 1 },
+              { chapterId: 5, solved: 18, correct: 16, wrong: 2 },
+              { chapterId: 6, solved: 16, correct: 15, wrong: 1 },
+              { chapterId: 7, solved: 14, correct: 11, wrong: 3 }
+            ])
+          },
+          {
+            studentId: 'ST03',
+            studentName: 'عمر خالد',
+            studentCode: '2468',
+            totalSolved: 54,
+            correctCount: 36,
+            wrongCount: 18,
+            accuracyPercent: 67,
+            activeMinutes: 82,
+            overallProgressPercent: 20,
+            lastActive: yesterdayIso,
+            chaptersBreakdown: makeMockBreakdown([
+              { chapterId: 1, solved: 20, correct: 16, wrong: 4 },
+              { chapterId: 2, solved: 18, correct: 10, wrong: 8 },
+              { chapterId: 3, solved: 16, correct: 10, wrong: 6 }
+            ])
+          },
+          {
+            studentId: 'ST04',
+            studentName: 'مريم حسن',
+            studentCode: '3579',
+            totalSolved: 76,
+            correctCount: 64,
+            wrongCount: 12,
+            accuracyPercent: 84,
+            activeMinutes: 135,
+            overallProgressPercent: 27,
+            lastActive: twoDaysAgoIso,
+            chaptersBreakdown: makeMockBreakdown([
+              { chapterId: 1, solved: 20, correct: 19, wrong: 1 },
+              { chapterId: 2, solved: 20, correct: 18, wrong: 2 },
+              { chapterId: 3, solved: 18, correct: 15, wrong: 3 },
+              { chapterId: 4, solved: 18, correct: 12, wrong: 6 }
+            ])
+          }
+        ];
+
+        var state = {
+          students: [],
+          searchQuery: '',
+          sortField: 'accuracyPercent',
+          sortDir: 'desc',
+          isLoading: false,
+          selectedStudent: null
+        };
+
+        var elHtml = document.documentElement;
+        var elThemeBtn = document.getElementById('themeToggleBtn');
+        var elThemeLabel = document.getElementById('themeToggleLabel');
+        var elRefreshBtn = document.getElementById('refreshBtn');
+        var elRefreshLabel = document.getElementById('refreshBtnLabel');
+        var elUrlForm = document.getElementById('urlConfigForm');
+        var elUrlInput = document.getElementById('scriptUrlInput');
+        var elClearUrlBtn = document.getElementById('clearUrlBtn');
+        var elConnectionStatus = document.getElementById('connectionStatus');
+        var elErrorBanner = document.getElementById('errorBanner');
+        var elLastFetch = document.getElementById('lastFetchLabel');
+        var elSearchInput = document.getElementById('searchInput');
+        var elTableBody = document.getElementById('studentsTableBody');
+        var elTableMeta = document.getElementById('tableCountMeta');
+
+        var elKpiHours = document.getElementById('kpiTotalHours');
+        var elKpiMinsSub = document.getElementById('kpiTotalMinutesSub');
+        var elKpiTotalSolvedAll = document.getElementById('kpiTotalSolvedAll');
+        var elKpiCorrectWrongSub = document.getElementById('kpiCorrectWrongSub');
+        var elKpiActiveToday = document.getElementById('kpiActiveToday');
+        var elKpiTotalStudentsSub = document.getElementById('kpiTotalStudentsSub');
+        var elKpiAvg = document.getElementById('kpiAvgAccuracy');
+
+        var elModalBackdrop = document.getElementById('studentModalBackdrop');
+        var elCloseModalBtn = document.getElementById('closeModalBtn');
+        var elModalName = document.getElementById('modalStudentName');
+        var elModalCode = document.getElementById('modalStudentCode');
+        var elModalLastActive = document.getElementById('modalStudentLastActive');
+        var elModalHours = document.getElementById('modalTotalHours');
+        var elModalAccuracy = document.getElementById('modalAccuracy');
+        var elModalProgress = document.getElementById('modalProgress');
+        var elModalSolvedSummary = document.getElementById('modalSolvedSummary');
+        var elModalChaptersBody = document.getElementById('modalChaptersBody');
+
+        var headerCells = Array.prototype.slice.call(
+          document.querySelectorAll('.table-section thead th[data-sort]')
+        );
+
+        function getSavedUrl() {
+          try {
+            var stored = localStorage.getItem(STORAGE_URL_KEY);
+            return (stored !== null ? stored : DEFAULT_SCRIPT_WEB_APP_URL).trim();
+          } catch (e) {
+            return DEFAULT_SCRIPT_WEB_APP_URL.trim();
+          }
+        }
+
+        function saveUrl(url) {
+          try {
+            localStorage.setItem(STORAGE_URL_KEY, url.trim());
+          } catch (e) {
+            // تجاهل
+          }
+        }
+
+        function applyTheme(mode) {
+          if (mode === 'dark') {
+            elHtml.classList.add('dark');
+            elThemeLabel.textContent = 'ورق الأرز';
+          } else {
+            elHtml.classList.remove('dark');
+            elThemeLabel.textContent = 'حبر الليل';
+          }
+          try {
+            localStorage.setItem(STORAGE_THEME_KEY, mode);
+          } catch (e) {
+            // تجاهل
+          }
+        }
+
+        function initTheme() {
+          var saved = 'light';
+          try {
+            saved = localStorage.getItem(STORAGE_THEME_KEY) === 'dark' ? 'dark' : 'light';
+          } catch (e) {
+            saved = 'light';
+          }
+          applyTheme(saved);
+        }
+
+        function showError(msg) {
+          if (!msg) {
+            elErrorBanner.textContent = '';
+            elErrorBanner.classList.remove('visible');
+            return;
+          }
+          elErrorBanner.textContent = msg;
+          elErrorBanner.classList.add('visible');
+        }
+
+        function escapeHtml(text) {
+          return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function isSameLocalDay(isoString) {
+          if (!isoString) return false;
+          var d = new Date(isoString);
+          if (isNaN(d.getTime())) return false;
+          var now = new Date();
+          return (
+            d.getFullYear() === now.getFullYear() &&
+            d.getMonth() === now.getMonth() &&
+            d.getDate() === now.getDate()
+          );
+        }
+
+        function formatLastActive(isoString) {
+          if (!isoString) return '—';
+          var d = new Date(isoString);
+          if (isNaN(d.getTime())) return String(isoString);
+          return d.toLocaleString('ar-EG', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+
+        function formatHours(minutes) {
+          var hrs = minutes / 60;
+          return hrs.toFixed(1) + ' ساعة';
+        }
+
+        function parseChaptersBreakdown(raw) {
+          var parsed = raw;
+          if (typeof raw === 'string' && raw.trim()) {
+            try {
+              parsed = JSON.parse(raw);
+            } catch (e) {
+              parsed = [];
+            }
+          }
+
+          var byId = {};
+          if (Array.isArray(parsed)) {
+            for (var i = 0; i < parsed.length; i++) {
+              var entry = parsed[i];
+              if (entry && entry.chapterId) {
+                var cid = Number(entry.chapterId);
+                var solved = Math.max(0, Number(entry.solved || 0));
+                var correct = Math.max(0, Math.min(solved, Number(entry.correct || 0)));
+                var wrong =
+                  entry.wrong !== undefined && entry.wrong !== ''
+                    ? Math.max(0, Number(entry.wrong))
+                    : Math.max(0, solved - correct);
+                byId[cid] = { chapterId: cid, solved: solved, correct: correct, wrong: wrong };
+              }
+            }
+          } else if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(function (k) {
+              var cid = Number(k);
+              var entry = parsed[k];
+              if (cid >= 1 && cid <= 15 && entry) {
+                var solved = Math.max(0, Number(entry.solved || 0));
+                var correct = Math.max(0, Math.min(solved, Number(entry.correct || 0)));
+                var wrong =
+                  entry.wrong !== undefined && entry.wrong !== ''
+                    ? Math.max(0, Number(entry.wrong))
+                    : Math.max(0, solved - correct);
+                byId[cid] = { chapterId: cid, solved: solved, correct: correct, wrong: wrong };
+              }
+            });
+          }
+
+          var normalized = [];
+          for (var c = 1; c <= 15; c++) {
+            normalized.push(byId[c] || { chapterId: c, solved: 0, correct: 0, wrong: 0 });
+          }
+          return normalized;
+        }
+
+        function normalizeStudentRow(row, idx) {
+          var solved = Number(row.totalSolved || 0);
+          var correct = Number(row.correctCount || 0);
+          var wrong =
+            row.wrongCount !== undefined && row.wrongCount !== ''
+              ? Number(row.wrongCount)
+              : Math.max(0, solved - correct);
+          var accuracy =
+            row.accuracyPercent !== undefined && row.accuracyPercent !== ''
+              ? Number(row.accuracyPercent)
+              : solved > 0
+                ? Math.round((correct / solved) * 100)
+                : 0;
+
+          return {
+            uid: String(row.studentId || row.studentCode || 'row-' + idx),
+            studentId: String(row.studentId || ''),
+            studentName: String(row.studentName || 'طالب غير مسمى'),
+            studentCode: String(row.studentCode || '—'),
+            totalSolved: solved,
+            correctCount: correct,
+            wrongCount: wrong,
+            accuracyPercent: Math.max(0, Math.min(100, Math.round(accuracy))),
+            activeMinutes: Math.max(0, Math.round(Number(row.activeMinutes || 0))),
+            overallProgressPercent: Math.max(
+              0,
+              Math.min(100, Math.round(Number(row.overallProgressPercent || 0)))
+            ),
+            lastActive: row.lastActive ? String(row.lastActive) : '',
+            chaptersBreakdown: parseChaptersBreakdown(row.chaptersBreakdown)
+          };
+        }
+
+        function renderKPIs(students) {
+          var totalStudents = students.length;
+          var sumAccuracy = 0;
+          var totalMinutes = 0;
+          var totalSolvedAll = 0;
+          var totalCorrectAll = 0;
+          var totalWrongAll = 0;
+          var activeToday = 0;
+
+          for (var i = 0; i < students.length; i++) {
+            var s = students[i];
+            sumAccuracy += s.accuracyPercent;
+            totalMinutes += s.activeMinutes;
+            totalSolvedAll += s.totalSolved;
+            totalCorrectAll += s.correctCount;
+            totalWrongAll += s.wrongCount;
+            if (isSameLocalDay(s.lastActive)) {
+              activeToday += 1;
+            }
+          }
+
+          var avgAccuracy = totalStudents > 0 ? Math.round(sumAccuracy / totalStudents) : 0;
+
+          elKpiHours.textContent = formatHours(totalMinutes);
+          elKpiMinsSub.textContent = totalMinutes + ' دقيقة دراسة نشطة';
+          elKpiTotalSolvedAll.textContent = String(totalSolvedAll);
+          elKpiCorrectWrongSub.textContent =
+            totalCorrectAll + ' صحيح · ' + totalWrongAll + ' خطأ';
+          elKpiActiveToday.textContent = String(activeToday);
+          elKpiTotalStudentsSub.textContent = 'من أصل ' + totalStudents + ' طالب مسجل';
+          elKpiAvg.textContent = avgAccuracy + '%';
+        }
+
+        function renderSortIndicators() {
+          headerCells.forEach(function (th) {
+            var field = th.getAttribute('data-sort');
+            var arrowSpan = th.querySelector('.sort-arrow');
+            if (field === state.sortField) {
+              th.classList.add('sorted');
+              arrowSpan.textContent = state.sortDir === 'asc' ? '▲' : '▼';
+            } else {
+              th.classList.remove('sorted');
+              arrowSpan.textContent = '↕';
+            }
+          });
+        }
+
+        function renderTable() {
+          var query = state.searchQuery.trim().toLowerCase();
+          var filtered = state.students.filter(function (s) {
+            if (!query) return true;
+            return (
+              s.studentName.toLowerCase().indexOf(query) !== -1 ||
+              s.studentCode.toLowerCase().indexOf(query) !== -1
+            );
+          });
+
+          filtered.sort(function (a, b) {
+            var field = state.sortField;
+            var dir = state.sortDir === 'asc' ? 1 : -1;
+            var valA = a[field];
+            var valB = b[field];
+
+            if (field === 'lastActive') {
+              var tA = valA ? new Date(valA).getTime() : 0;
+              var tB = valB ? new Date(valB).getTime() : 0;
+              return (tA - tB) * dir;
+            }
+
+            if (typeof valA === 'number' && typeof valB === 'number') {
+              return (valA - valB) * dir;
+            }
+
+            return String(valA).localeCompare(String(valB), 'ar') * dir;
+          });
+
+          elTableMeta.textContent =
+            'عرض ' + filtered.length + ' من أصل ' + state.students.length + ' طالب';
+
+          renderSortIndicators();
+
+          if (filtered.length === 0) {
+            elTableBody.innerHTML =
+              '<tr><td colspan="9" class="empty-row">لا توجد نتائج مطابقة للبحث الحالي.</td></tr>';
+            return;
+          }
+
+          var rowsHtml = filtered
+            .map(function (s) {
+              var accTone =
+                s.accuracyPercent >= 80
+                  ? 'tone-jade'
+                  : s.accuracyPercent >= 60
+                    ? 'tone-gold'
+                    : 'tone-cinnabar';
+              var fillCls =
+                s.overallProgressPercent >= 100 ? 'progress-fill good' : 'progress-fill';
+
+              return (
+                '<tr class="student-row" tabindex="0" data-student-uid="' +
+                escapeHtml(s.uid) +
+                '">' +
+                '<td>' +
+                '<div class="student-name-cell">' +
+                '<span class="student-name">' + escapeHtml(s.studentName) + '</span>' +
+                '<span class="row-drilldown-hint">اضغط لعرض تحليل الفصول الـ ١٥</span>' +
+                '</div>' +
+                '</td>' +
+                '<td class="tabular-nums">' + escapeHtml(s.studentCode) + '</td>' +
+                '<td class="tabular-nums"><strong>' + s.totalSolved + '</strong></td>' +
+                '<td class="tabular-nums tone-jade"><strong>' + s.correctCount + '</strong></td>' +
+                '<td class="tabular-nums tone-cinnabar"><strong>' + s.wrongCount + '</strong></td>' +
+                '<td class="tabular-nums ' + accTone + '"><strong>' + s.accuracyPercent + '%</strong></td>' +
+                '<td class="tabular-nums">' + s.activeMinutes + '</td>' +
+                '<td>' +
+                '<div class="progress-cell tabular-nums">' +
+                '<div class="progress-track"><div class="' + fillCls + '" style="width:' + s.overallProgressPercent + '%"></div></div>' +
+                '<span><strong>' + s.overallProgressPercent + '%</strong></span>' +
+                '</div>' +
+                '</td>' +
+                '<td class="tabular-nums">' + escapeHtml(formatLastActive(s.lastActive)) + '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
+
+          elTableBody.innerHTML = rowsHtml;
+        }
+
+        function openStudentModal(student) {
+          if (!student) return;
+          state.selectedStudent = student;
+
+          elModalName.textContent = student.studentName;
+          elModalCode.textContent = 'الرمز: ' + student.studentCode;
+          elModalLastActive.textContent = 'آخر نشاط: ' + formatLastActive(student.lastActive);
+          elModalHours.textContent = formatHours(student.activeMinutes);
+          elModalAccuracy.textContent = student.accuracyPercent + '%';
+          elModalProgress.textContent = student.overallProgressPercent + '%';
+          elModalSolvedSummary.textContent =
+            student.totalSolved + ' سؤال · ' + student.wrongCount + ' خطأ';
+
+          var breakdown = student.chaptersBreakdown || [];
+          var html = CHAPTERS_META.map(function (meta) {
+            var entry = breakdown.find(function (b) {
+              return b.chapterId === meta.id;
+            }) || { chapterId: meta.id, solved: 0, correct: 0, wrong: 0 };
+
+            var hasActivity = entry.solved > 0;
+            var accuracy = hasActivity ? Math.round((entry.correct / entry.solved) * 100) : 0;
+            var isHighError = hasActivity && (accuracy < 70 || entry.wrong >= 5);
+            var isGood = hasActivity && !isHighError && accuracy >= 85;
+            var isMedium = hasActivity && !isHighError && accuracy >= 70 && accuracy < 85;
+
+            var rowCls = isHighError ? 'high-error-row' : '';
+            var fillCls = isGood
+              ? 'progress-fill good'
+              : isMedium
+                ? 'progress-fill warn'
+                : 'progress-fill';
+            var accTone = !hasActivity
+              ? ''
+              : isHighError
+                ? 'tone-cinnabar'
+                : isGood
+                  ? 'tone-jade'
+                  : 'tone-gold';
+
+            var statusLabel = !hasActivity
+              ? '<span class="status-text" style="color:var(--ink-muted)">لم يبدأ بعد</span>'
+              : isHighError
+                ? '<span class="status-text tone-cinnabar">أخطاء مرتفعة · يحتاج مراجعة</span>'
+                : isGood
+                  ? '<span class="status-text tone-jade">ممتاز</span>'
+                  : '<span class="status-text tone-gold">متوسط</span>';
+
+            return (
+              '<tr class="' + rowCls + '">' +
+              '<td>' +
+              '<div class="chapter-name-wrap">' +
+              '<span class="chapter-numeral font-hanzi">' + meta.zh + '</span>' +
+              '<strong>' + meta.ar + '</strong>' +
+              '</div>' +
+              '</td>' +
+              '<td class="tabular-nums"><strong>' + entry.solved + '</strong></td>' +
+              '<td class="tabular-nums tone-jade"><strong>' + entry.correct + '</strong></td>' +
+              '<td class="tabular-nums ' + (entry.wrong > 0 ? 'tone-cinnabar' : '') + '"><strong>' + entry.wrong + '</strong></td>' +
+              '<td>' +
+              (hasActivity
+                ? '<div class="progress-cell tabular-nums">' +
+                  '<div class="progress-track"><div class="' + fillCls + '" style="width:' + accuracy + '%"></div></div>' +
+                  '<span class="' + accTone + '"><strong>' + accuracy + '%</strong></span>' +
+                  '</div>'
+                : '<span style="color:var(--ink-muted)">—</span>') +
+              '</td>' +
+              '<td>' + statusLabel + '</td>' +
+              '</tr>'
+            );
+          }).join('');
+
+          elModalChaptersBody.innerHTML = html;
+          elModalBackdrop.classList.add('open');
+          document.body.classList.add('modal-open');
+          elCloseModalBtn.focus();
+        }
+
+        function closeStudentModal() {
+          state.selectedStudent = null;
+          elModalBackdrop.classList.remove('open');
+          document.body.classList.remove('modal-open');
+        }
+
+        function setLoading(loading) {
+          state.isLoading = loading;
+          elRefreshBtn.disabled = loading;
+          elRefreshLabel.textContent = loading ? 'جارٍ التحديث...' : 'تحديث البيانات';
+        }
+
+        function updateConnectionStatus(mode, text) {
+          elConnectionStatus.classList.remove('status-live', 'status-preview', 'status-error');
+          elConnectionStatus.classList.add(mode);
+          elConnectionStatus.textContent = text;
+        }
+
+        function fetchStudentData() {
+          showError('');
+          var url = getSavedUrl();
+
+          if (!url) {
+            state.students = SAMPLE_STUDENTS.map(normalizeStudentRow);
+            updateConnectionStatus(
+              'status-preview',
+              'وضع المعاينة التجريبية (أضف رابط الجدول لعرض البيانات الفعلية)'
+            );
+            elLastFetch.textContent =
+              'آخر تحديث: ' +
+              new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            renderKPIs(state.students);
+            renderTable();
+            return;
+          }
+
+          setLoading(true);
+          fetch(url, { method: 'GET' })
+            .then(function (response) {
+              if (!response.ok) {
+                throw new Error('تعذر الاتصال بالرابط (' + response.status + ')');
+              }
+              return response.json();
+            })
+            .then(function (data) {
+              var rawList = Array.isArray(data)
+                ? data
+                : Array.isArray(data && data.students)
+                  ? data.students
+                  : Array.isArray(data && data.rows)
+                    ? data.rows
+                    : [];
+
+              state.students = rawList.map(normalizeStudentRow);
+              updateConnectionStatus('status-live', 'متصل بجدول بيانات المعلم');
+              elLastFetch.textContent =
+                'آخر تحديث: ' +
+                new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+              renderKPIs(state.students);
+              renderTable();
+            })
+            .catch(function () {
+              updateConnectionStatus('status-error', 'تعذر جلب البيانات من الرابط');
+              showError(
+                'تعذر قراءة البيانات من رابط تطبيق الويب. تأكد من نشر سكربت الجلب بصلاحية الوصول للجميع، وسيتم عرض البيانات الحالية مؤقتاً.'
+              );
+              if (state.students.length === 0) {
+                state.students = SAMPLE_STUDENTS.map(normalizeStudentRow);
+                renderKPIs(state.students);
+                renderTable();
+              }
+            })
+            .finally(function () {
+              setLoading(false);
+            });
+        }
+
+        // ربط الأحداث
+        elThemeBtn.addEventListener('click', function () {
+          var isDark = elHtml.classList.contains('dark');
+          applyTheme(isDark ? 'light' : 'dark');
+        });
+
+        elRefreshBtn.addEventListener('click', function () {
+          fetchStudentData();
+        });
+
+        elUrlForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var val = elUrlInput.value.trim();
+          saveUrl(val);
+          fetchStudentData();
+        });
+
+        elClearUrlBtn.addEventListener('click', function () {
+          elUrlInput.value = '';
+          saveUrl('');
+          fetchStudentData();
+        });
+
+        elSearchInput.addEventListener('input', function (e) {
+          state.searchQuery = e.target.value || '';
+          renderTable();
+        });
+
+        headerCells.forEach(function (th) {
+          th.addEventListener('click', function () {
+            var field = th.getAttribute('data-sort');
+            if (state.sortField === field) {
+              state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+              state.sortField = field;
+              state.sortDir = field === 'studentName' || field === 'studentCode' ? 'asc' : 'desc';
+            }
+            renderTable();
+          });
+        });
+
+        // فتح بروفايل الطالب عند النقر أو الضغط على Enter في أي صف
+        function handleRowTrigger(targetEl) {
+          var row = targetEl.closest ? targetEl.closest('tr.student-row') : null;
+          if (!row) return;
+          var uid = row.getAttribute('data-student-uid');
+          var found = state.students.find(function (s) {
+            return s.uid === uid;
+          });
+          if (found) {
+            openStudentModal(found);
+          }
+        }
+
+        elTableBody.addEventListener('click', function (e) {
+          handleRowTrigger(e.target);
+        });
+
+        elTableBody.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            var row = e.target.closest ? e.target.closest('tr.student-row') : null;
+            if (row) {
+              e.preventDefault();
+              handleRowTrigger(row);
+            }
+          }
+        });
+
+        elCloseModalBtn.addEventListener('click', closeStudentModal);
+        elModalBackdrop.addEventListener('click', function (e) {
+          if (e.target === elModalBackdrop) {
+            closeStudentModal();
+          }
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && elModalBackdrop.classList.contains('open')) {
+            closeStudentModal();
+          }
+        });
+
+        // التشغيل الابتدائي
+        initTheme();
+        elUrlInput.value = getSavedUrl();
+        fetchStudentData();
+      })();
+    </script>
+  </body>
+</html>
