@@ -2038,9 +2038,9 @@
 
             var hasActivity = entry.solved > 0;
             var accuracy = hasActivity ? Math.round((entry.correct / entry.solved) * 100) : 0;
-            var isHighError = hasActivity && (accuracy < 70 || entry.wrong >= 5);
-            var isGood = hasActivity && !isHighError && accuracy >= 85;
-            var isMedium = hasActivity && !isHighError && accuracy >= 70 && accuracy < 85;
+            var isGood = hasActivity && accuracy >= 85;
+            var isMedium = hasActivity && accuracy >= 70 && accuracy < 85;
+            var isHighError = hasActivity && accuracy < 70;
 
             var rowCls = isHighError ? 'high-error-row' : '';
             var fillCls = isGood
@@ -2050,19 +2050,19 @@
                 : 'progress-fill';
             var accTone = !hasActivity
               ? ''
-              : isHighError
-                ? 'tone-cinnabar'
-                : isGood
-                  ? 'tone-jade'
-                  : 'tone-gold';
+              : isGood
+                ? 'tone-jade'
+                : isMedium
+                  ? 'tone-gold'
+                  : 'tone-cinnabar';
 
             var statusLabel = !hasActivity
               ? '<span class="status-text" style="color:var(--ink-muted)">لم يبدأ بعد</span>'
-              : isHighError
-                ? '<span class="status-text tone-cinnabar">أخطاء مرتفعة · يحتاج مراجعة</span>'
-                : isGood
-                  ? '<span class="status-text tone-jade">ممتاز</span>'
-                  : '<span class="status-text tone-gold">متوسط</span>';
+              : isGood
+                ? '<span class="status-text tone-jade">ممتاز</span>'
+                : isMedium
+                  ? '<span class="status-text tone-gold">متوسط</span>'
+                  : '<span class="status-text tone-cinnabar">أخطاء مرتفعة · يحتاج مراجعة</span>';
 
             return (
               '<tr class="' + rowCls + '">' +
