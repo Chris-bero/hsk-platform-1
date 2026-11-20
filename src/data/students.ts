@@ -1,25 +1,18 @@
 import { Student } from '../types';
 
 /**
- * قائمة الطلاب المسموح لهم بالدخول (يديرها المعلم).
- * لإضافة طالب جديد، أضف كائناً جديداً يحتوي على id و name و code.
+ * قائمة الطلاب المسموح لهم بالدخول محلياً.
+ * تبقى فارغة افتراضياً حتى يتم التحقق من الطلاب المسجلين فعلياً عبر جدول بيانات المعلم.
  */
-export const ALLOWED_STUDENTS: Student[] = [
-  {
-    id: 'ST01',
-    name: 'أحمد محمد',
-    code: '1234',
-  },
-  {
-    id: 'ST02',
-    name: 'سارة علي',
-    code: '5678',
-  },
-];
+export const ALLOWED_STUDENTS: Student[] = [];
+
+function normalizeText(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
 
 export function authenticateStudent(nameOrId: string, code: string): Student | null {
-  const cleanedIdentity = nameOrId.trim();
-  const cleanedCode = code.trim();
+  const cleanedIdentity = normalizeText(nameOrId);
+  const cleanedCode = normalizeText(code);
 
   if (!cleanedIdentity || !cleanedCode) {
     return null;
@@ -28,9 +21,9 @@ export function authenticateStudent(nameOrId: string, code: string): Student | n
   return (
     ALLOWED_STUDENTS.find(
       (student) =>
-        (student.name.trim() === cleanedIdentity ||
-          student.id.toLowerCase() === cleanedIdentity.toLowerCase()) &&
-        student.code.trim() === cleanedCode
+        (normalizeText(student.name) === cleanedIdentity ||
+          normalizeText(student.id) === cleanedIdentity) &&
+        normalizeText(student.code) === cleanedCode
     ) ?? null
   );
 }

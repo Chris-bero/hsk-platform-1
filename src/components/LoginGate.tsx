@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { AlertCircle, KeyRound, Loader2, Moon, Sun, User } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
-import { ALLOWED_STUDENTS } from '../data/students';
-import { verifyStudentFromSheet } from '../services/sheetsSync';
+import { getConfiguredSheetsUrl, verifyStudentFromSheet } from '../services/sheetsSync';
 
 const LOGIN_SCROLL_ART = '/src/assets/images/neo_chinese_login_scroll_1795181947033.jpg';
 
@@ -20,15 +19,26 @@ export function LoginGate() {
     if (isVerifying) return;
     setErrorMsg('');
 
-    if (!nameInput.trim() || !codeInput.trim()) {
+    const cleanedName = nameInput.trim().replace(/\s+/g, ' ');
+    const cleanedCode = codeInput.trim();
+
+    if (!cleanedName || !cleanedCode) {
       setErrorMsg('يرجى إدخال اسم الطالب ورمز الدخول.');
       return;
     }
 
     setIsVerifying(true);
     try {
-      const verifiedStudent = await verifyStudentFromSheet(nameInput, codeInput);
+      const configuredUrl = getConfiguredSheetsUrl();
+      const verifiedStudent = await verifyStudentFromSheet(cleanedName, cleanedCode);
+
       if (!verifiedStudent) {
+        if (!configuredUrl) {
+          setErrorMsg(
+            'لم يتم ربط المنصة بجدول بيانات المعلم بعد. يرجى من المعلم إضافة رابط مزامنة الجدول أولاً لتفعيل تسجيل الدخول.'
+          );
+          return;
+        }
         setErrorMsg('تعذر التحقق من البيانات. تأكد من مطابقة الاسم والرمز المسجل لدى المعلم.');
         return;
       }
@@ -40,12 +50,6 @@ export function LoginGate() {
     } finally {
       setIsVerifying(false);
     }
-  };
-
-  const fillTestStudent = (name: string, code: string) => {
-    setNameInput(name);
-    setCodeInput(code);
-    setErrorMsg('');
   };
 
   return (
@@ -186,29 +190,6 @@ export function LoginGate() {
                   )}
                 </button>
               </form>
-            </div>
-
-            {/* حسابات تجريبية سريعة للمعاينة */}
-            <div className="mt-8 pt-6 border-t border-[#1C1917]/10 dark:border-[#F5F2EB]/10">
-              <p className="text-xs font-semibold text-[#57534E] dark:text-[#A8A29E] mb-3">
-                حسابات تجريبية جاهزة للمعاينة (اضغط للتعبئة التلقائية):
-              </p>
-              <div className="flex flex-wrap gap-2.5">
-                {ALLOWED_STUDENTS.map((student) => (
-                  <button
-                    key={student.id}
-                    type="button"
-                    onClick={() => fillTestStudent(student.name, student.code)}
-                    className="px-3.5 py-2 text-xs rounded-md border border-[#1C1917]/12 dark:border-[#F5F2EB]/15 bg-[#F9F6F0] dark:bg-[#121110] hover:border-[#B91C1C]/45 dark:hover:border-[#EF4444]/45 text-[#1C1917] dark:text-[#F5F2EB] transition-colors"
-                  >
-                    <span className="font-semibold">{student.name}</span>
-                    <span className="mx-1.5 text-[#57534E] dark:text-[#A8A29E]">·</span>
-                    <span className="tabular-nums text-[#57534E] dark:text-[#A8A29E]">
-                      الرمز: {student.code}
-                    </span>
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 

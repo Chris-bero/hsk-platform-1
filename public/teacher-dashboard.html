@@ -1106,7 +1106,8 @@
       (function () {
         'use strict';
 
-        var DEFAULT_SCRIPT_WEB_APP_URL = '';
+        // ضع رابط Google Apps Script هنا لتعبئته تلقائياً، أو أدخله من واجهة الصفحة لحفظه في المتصفح
+        var GOOGLE_SCRIPT_WEB_APP_URL = '';
         var STORAGE_URL_KEY = 'teacher_dashboard_sheets_url_v1';
         var STORAGE_THEME_KEY = 'teacher_dashboard_theme_v1';
         var LOCAL_REGISTERED_STUDENTS_KEY = 'chinese_portal_registered_students_v1';
@@ -1290,11 +1291,14 @@
         var copyTimerId = null;
 
         function getSavedUrl() {
+          if (GOOGLE_SCRIPT_WEB_APP_URL.trim()) {
+            return GOOGLE_SCRIPT_WEB_APP_URL.trim();
+          }
           try {
             var stored = localStorage.getItem(STORAGE_URL_KEY);
-            return (stored !== null ? stored : DEFAULT_SCRIPT_WEB_APP_URL).trim();
+            return stored ? stored.trim() : '';
           } catch (e) {
-            return DEFAULT_SCRIPT_WEB_APP_URL.trim();
+            return '';
           }
         }
 
@@ -1790,7 +1794,7 @@
           e.preventDefault();
           showGeneratorError('');
 
-          var studentName = elNewStudentName.value.trim();
+          var studentName = elNewStudentName.value.trim().replace(/\s+/g, ' ');
           if (!studentName) {
             showGeneratorError('يرجى كتابة اسم الطالب أولاً قبل توليد الكود.');
             elNewStudentName.focus();
@@ -1849,6 +1853,10 @@
             })
               .then(function () {
                 elGeneratorStatus.textContent = 'تم التسجيل والربط بالشيت';
+                // تحديث الجدول من الشيت بعد إتمام الحفظ لضمان التطابق الكامل
+                setTimeout(function () {
+                  fetchStudentData();
+                }, 1800);
               })
               .catch(function () {
                 elGeneratorStatus.textContent = 'حُفظ محلياً (تعذر الاتصال بالشيت)';
@@ -1857,7 +1865,7 @@
                 elGenerateBtn.disabled = false;
               });
           } else {
-            elGeneratorStatus.textContent = 'تم التوليد والحفظ محلياً';
+            elGeneratorStatus.textContent = 'تم التوليد والحفظ محلياً (أضف رابط الشيت للمزامنة)';
           }
         }
 
@@ -1881,7 +1889,7 @@
           }
 
           setLoading(true);
-          fetch(url, { method: 'GET' })
+          fetch(url, { method: 'GET', cache: 'no-store' })
             .then(function (response) {
               if (!response.ok) {
                 throw new Error('تعذر الاتصال بالرابط (' + response.status + ')');

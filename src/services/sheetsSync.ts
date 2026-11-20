@@ -177,13 +177,22 @@ function doGet(e) {
 import { ALLOWED_STUDENTS, authenticateStudent } from '../data/students';
 import { SheetsSyncPayload, Student } from '../types';
 
-export const GOOGLE_SCRIPT_WEB_APP_URL = '';
+export const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxA27jKarngLH1l9aIK8vVxd_vNj1UZG6dXTMqluOcaBe6VoFd0VzE7snVvPXqQFdR_fQ/exec ';
 
 const LOCAL_SYNC_BACKUP_KEY = 'chinese_portal_sheets_sync_backup_v1';
 const STUDENT_PROGRESS_PREFIX = 'chinese_portal_progress_v1_';
-const TEACHER_URL_STORAGE_KEY = 'teacher_dashboard_sheets_url_v1';
+export const TEACHER_URL_STORAGE_KEY = 'teacher_dashboard_sheets_url_v1';
 const LOCAL_REGISTERED_STUDENTS_KEY = 'chinese_portal_registered_students_v1';
 const TOTAL_CHAPTERS = 15;
+
+// مزامنة الرابط المعرّف في الكود مع التخزين المحلي تلقائياً ليبقى متطابقاً مع لوحة المعلم
+if (typeof window !== 'undefined' && GOOGLE_SCRIPT_WEB_APP_URL.trim()) {
+  try {
+    localStorage.setItem(TEACHER_URL_STORAGE_KEY, GOOGLE_SCRIPT_WEB_APP_URL.trim());
+  } catch {
+    // تجاهل أخطاء التخزين المحلي
+  }
+}
 
 export interface ChapterBreakdownEntry {
   chapterId: number;
@@ -202,7 +211,15 @@ export interface SyncResult {
   timestamp: string;
 }
 
-function getEffectiveScriptUrl(): string {
+function normalizeCredential(value: string): string {
+  return value.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function normalizeCodeCompact(value: string): string {
+  return value.trim().replace(/\s+/g, '').toLowerCase();
+}
+
+export function getConfiguredSheetsUrl(): string {
   const configured = GOOGLE_SCRIPT_WEB_APP_URL.trim();
   if (configured) return configured;
 
@@ -215,11 +232,14 @@ function getEffectiveScriptUrl(): string {
 }
 
 function registerDynamicStudentInMemory(student: Student): void {
+  const normId = normalizeCredential(student.id);
+  const normName = normalizeCredential(student.name);
+  const normCode = normalizeCodeCompact(student.code);
+
   const exists = ALLOWED_STUDENTS.some(
     (s) =>
-      s.id.toLowerCase() === student.id.toLowerCase() ||
-      (s.name.trim() === student.name.trim() &&
-        s.code.trim().toLowerCase() === student.code.trim().toLowerCase())
+      normalizeCredential(s.id) === normId ||
+      (normalizeCredential(s.name) === normName && normalizeCodeCompact(s.code) === normCode)
   );
   if (!exists) {
     ALLOWED_STUDENTS.push(student);
@@ -227,8 +247,9 @@ function registerDynamicStudentInMemory(student: Student): void {
 }
 
 function findLocallyRegisteredStudent(name: string, code: string): Student | null {
-  const cleanedName = name.trim().toLowerCase();
-  const cleanedCode = code.trim().toLowerCase();
+  const cleanedName = normalizeCredential(name);
+  const cleanedCode = normalizeCredential(code);
+  const compactCode = normalizeCodeCompact(code);
   if (!cleanedName || !cleanedCode) return null;
 
   try {
@@ -246,13 +267,16 @@ function findLocallyRegisteredStudent(name: string, code: string): Student | nul
     if (!Array.isArray(list)) return null;
 
     for (const item of list) {
-      const sName = String(item.studentName ?? item.name ?? '').trim();
-      const sCode = String(item.studentCode ?? item.code ?? '').trim();
+      const sName = String(item.studentName ?? item.name ?? '').trim().replace(/\s+/g, ' ');
+      const sCode = String(item.studentCode ?? item.code ?? '').trim().replace(/\s+/g, ' ');
       const sId = String(item.studentId ?? item.id ?? sCode).trim();
-      if (
-        (sName.toLowerCase() === cleanedName || sId.toLowerCase() === cleanedName) &&
-        sCode.toLowerCase() === cleanedCode
-      ) {
+
+      const nameMatches =
+        normalizeCredential(sName) === cleanedName || normalizeCredential(sId) === cleanedName;
+      const codeMatches =
+        normalizeCredential(sCode) === cleanedCode || normalizeCodeCompact(sCode) === compactCode;
+
+      if (nameMatches && codeMatches) {
         const matched: Student = { id: sId, name: sName, code: sCode };
         registerDynamicStudentInMemory(matched);
         return matched;
@@ -266,22 +290,23 @@ function findLocallyRegisteredStudent(name: string, code: string): Student | nul
 }
 
 /**
- * التحقق الديناميكي من بيانات الطالب عبر Google Sheets (GET) مع الرجوع الآمن
- * إلى القائمة المحلية (students.ts والطلاب المولّدين محلياً) في حال عدم توفر الاتصال أو الرابط.
+ * التحقق الديناميكي من بيانات الطالب عبر Google Sheets (GET) مع توحيد المسافات
+ * والرجوع الآمن إلى القائمة المحلية في حال انقطاع الاتصال.
  */
 export async function verifyStudentFromSheet(
   name: string,
   code: string
 ): Promise<Student | null> {
-  const cleanedName = name.trim();
-  const cleanedCode = code.trim();
-  if (!cleanedName || !cleanedCode) return null;
+  const normalizedInputName = normalizeCredential(name);
+  const normalizedInputCode = normalizeCredential(code);
+  const compactInputCode = normalizeCodeCompact(code);
+  if (!normalizedInputName || !normalizedInputCode) return null;
 
-  const endpoint = getEffectiveScriptUrl();
+  const endpoint = getConfiguredSheetsUrl();
 
   if (endpoint) {
     try {
-      const response = await fetch(endpoint, { method: 'GET' });
+      const response = await fetch(endpoint, { method: 'GET', cache: 'no-store' });
       if (response.ok) {
         const data: unknown = await response.json();
         const rows = Array.isArray(data)
@@ -301,18 +326,25 @@ export async function verifyStudentFromSheet(
         for (const rawRow of rows) {
           if (!rawRow || typeof rawRow !== 'object') continue;
           const row = rawRow as Record<string, unknown>;
-          const rowName = String(row.studentName ?? row.name ?? '').trim();
-          const rowCode = String(row.studentCode ?? row.code ?? '').trim();
+          const rowName = String(row.studentName ?? row.name ?? '')
+            .trim()
+            .replace(/\s+/g, ' ');
+          const rowCode = String(row.studentCode ?? row.code ?? '')
+            .trim()
+            .replace(/\s+/g, ' ');
           const rowId = String(row.studentId ?? row.id ?? rowCode).trim();
 
-          if (
-            (rowName.toLowerCase() === cleanedName.toLowerCase() ||
-              rowId.toLowerCase() === cleanedName.toLowerCase()) &&
-            rowCode.toLowerCase() === cleanedCode.toLowerCase()
-          ) {
+          const nameMatches =
+            normalizeCredential(rowName) === normalizedInputName ||
+            normalizeCredential(rowId) === normalizedInputName;
+          const codeMatches =
+            normalizeCredential(rowCode) === normalizedInputCode ||
+            normalizeCodeCompact(rowCode) === compactInputCode;
+
+          if (nameMatches && codeMatches) {
             const matched: Student = {
               id: rowId || rowCode,
-              name: rowName || cleanedName,
+              name: rowName || name.trim().replace(/\s+/g, ' '),
               code: rowCode,
             };
             registerDynamicStudentInMemory(matched);
@@ -325,12 +357,12 @@ export async function verifyStudentFromSheet(
     }
   }
 
-  const localDynamic = findLocallyRegisteredStudent(cleanedName, cleanedCode);
+  const localDynamic = findLocallyRegisteredStudent(name, code);
   if (localDynamic) {
     return localDynamic;
   }
 
-  return authenticateStudent(cleanedName, cleanedCode);
+  return authenticateStudent(name, code);
 }
 
 function buildChaptersBreakdownFromStorage(studentId: string): ChapterBreakdownEntry[] {
@@ -409,7 +441,7 @@ export async function syncStudentStatsToSheets(
 
   saveLocalBackup(enrichedPayload);
 
-  const endpoint = getEffectiveScriptUrl();
+  const endpoint = getConfiguredSheetsUrl();
   if (!endpoint) {
     return {
       syncedRemotely: false,
