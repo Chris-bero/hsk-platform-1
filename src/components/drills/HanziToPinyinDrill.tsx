@@ -1,5 +1,6 @@
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { DrillQuestion, QuizMode } from '../../types';
+import { SpeakChineseButton } from './SpeakChineseButton';
 
 interface DrillEngineProps {
   question: DrillQuestion;
@@ -36,6 +37,9 @@ export function HanziToPinyinDrill({
             المعنى: {question.promptSecondary}
           </p>
         )}
+        <div className="pt-2">
+          <SpeakChineseButton text={question.audioText ?? question.promptPrimary} />
+        </div>
       </div>
 
       {/* ٥ خيارات للبينين */}

@@ -44,7 +44,8 @@ export type DrillType =
   | 'match-2-col'
   | 'match-3-col'
   | 'listening'
-  | 'sentence-translation'
+  | 'sentence-hanzi-to-arabic'
+  | 'sentence-arabic-to-hanzi'
   | 'sentence-builder'
   | 'fill-in-blank';
 
@@ -52,7 +53,28 @@ export type SessionDrillKey = DrillType | 'mixed';
 
 export type QuizMode = 'practice' | 'exam';
 
-export type AppView = 'home' | 'chapters' | 'chapter-hub' | 'drill' | 'analytics';
+export type AppView =
+  | 'home'
+  | 'chapters'
+  | 'chapter-hub'
+  | 'custom-builder'
+  | 'drill'
+  | 'analytics';
+
+export interface CustomQuizConfig {
+  chapterIds: number[];
+  drillScope: DrillType | 'all';
+  questionLimit: 10 | 20 | 40 | 'all';
+  mode: QuizMode;
+}
+
+export interface MistakeItem {
+  key: string;
+  chapterId: number;
+  drillType: DrillType;
+  sourceItemId: string;
+  recordedAt: string;
+}
 
 export interface DrillOption {
   id: string;
@@ -71,23 +93,26 @@ export interface MatchingEntry {
 
 export interface DrillQuestion {
   id: string;
+  chapterId: number;
+  sourceItemId?: string;
   drillType: DrillType;
   promptPrimary: string;
   promptPinyin?: string;
   promptSecondary?: string;
   /** Used in Sentence Translation to indicate direction */
   direction?: 'hanzi-to-arabic' | 'arabic-to-hanzi';
-  /** Used in Listening drill for speechSynthesis */
+  /** Used in Listening or TTS buttons for speechSynthesis */
   audioText?: string;
-  /** Multiple-choice options (Drills 1, 2, 3, 6, 7, 9) */
+  /** Multiple-choice options */
   options?: DrillOption[];
   correctOptionId?: string;
   /** Matching sets (Drills 4, 5) */
   matchingEntries?: MatchingEntry[];
-  /** Sentence Builder (Drill 8) */
+  /** Sentence Builder */
   correctSegments?: string[];
   shuffledSegments?: { tileId: string; text: string }[];
-  /** Fill in the Blank (Drill 9) */
+  /** Fill in the Blank */
+  targetBlank?: string;
   sentenceWithBlank?: string;
   sentenceFullHanzi?: string;
   sentenceFullPinyin?: string;
@@ -99,6 +124,8 @@ export interface DrillQuestion {
 
 export interface QuestionAnswerRecord {
   questionId: string;
+  chapterId: number;
+  sourceItemId?: string;
   drillType: DrillType;
   isAnswered: boolean;
   isCorrect: boolean;
@@ -129,7 +156,9 @@ export interface StudentProgress {
   studyDates: string[];
   lastActive: string;
   drillStats: Record<DrillType, DrillStatEntry>;
+  drillTimeSeconds: Record<DrillType, number>;
   chapterStats: Record<number, ChapterStatEntry>;
+  mistakes: MistakeItem[];
 }
 
 export interface SheetsSyncPayload {

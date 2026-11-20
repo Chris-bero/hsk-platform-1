@@ -1,5 +1,6 @@
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { DrillQuestion, QuizMode } from '../../types';
+import { SpeakChineseButton } from './SpeakChineseButton';
 
 interface SentenceTranslationProps {
   question: DrillQuestion;
@@ -19,15 +20,17 @@ export function SentenceTranslationDrill({
   onSelectOption,
 }: SentenceTranslationProps) {
   const showFeedback = mode === 'practice' && isLocked;
-  const isHanziPrompt = question.direction !== 'arabic-to-hanzi';
+  const isHanziPrompt =
+    question.drillType === 'sentence-hanzi-to-arabic' ||
+    question.direction === 'hanzi-to-arabic';
 
   return (
     <div className="space-y-8">
       <div className="neo-frame rounded-xl py-9 px-6 text-center space-y-3 bg-white dark:bg-[#1E1C1A]">
         <p className="text-xs font-semibold text-[#57534E] dark:text-[#A8A29E]">
           {isHanziPrompt
-            ? 'اختر الترجمة العربية الصحيحة للجملة الصينية'
-            : 'اختر الجملة الصينية المطابقة للجملة العربية'}
+            ? 'اقرأ الجملة الصينية واختر الترجمة العربية الصحيحة'
+            : 'اقرأ الجملة العربية واختر الجملة الصينية المطابقة لها'}
         </p>
 
         <div
@@ -44,6 +47,12 @@ export function SentenceTranslationDrill({
           <p className="font-pinyin text-base text-[#D97706] dark:text-[#F59E0B] font-medium">
             {question.promptPinyin}
           </p>
+        )}
+
+        {isHanziPrompt && (
+          <div className="pt-2">
+            <SpeakChineseButton text={question.audioText ?? question.promptPrimary} />
+          </div>
         )}
       </div>
 

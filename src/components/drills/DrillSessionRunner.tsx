@@ -1,24 +1,33 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
   Award,
   CheckCircle2,
   ClipboardCheck,
+  Clock,
   RotateCcw,
   XCircle,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useApp } from '../../context/AppContext';
-import { DRILL_METADATA } from '../../data/chaptersData';
+import { CHAPTERS_DATA, DRILL_METADATA } from '../../data/chaptersData';
 import {
   ChapterData,
+  CustomQuizConfig,
   DrillQuestion,
+  DrillType,
+  MistakeItem,
   QuestionAnswerRecord,
   QuizMode,
   SessionDrillKey,
 } from '../../types';
-import { generateDrillQuestions, stopChineseSpeech } from '../../utils/drillGenerators';
+import {
+  generateCustomQuizQuestions,
+  generateDrillQuestions,
+  generateMistakeReviewQuestions,
+  stopChineseSpeech,
+} from '../../utils/drillGenerators';
 import { ArabicToHanziDrill } from './ArabicToHanziDrill';
 import { FillInBlankDrill } from './FillInBlankDrill';
 import { HanziToArabicDrill } from './HanziToArabicDrill';
@@ -28,45 +37,181 @@ import { MatchingThreeColDrill } from './MatchingThreeColDrill';
 import { MatchingTwoColDrill } from './MatchingTwoColDrill';
 import { SentenceBuilderDrill } from './SentenceBuilderDrill';
 import { SentenceTranslationDrill } from './SentenceTranslationDrill';
+import { SpeakChineseButton } from './SpeakChineseButton';
+
+export type DrillSessionSource =
+  | { kind: 'chapter'; chapter: ChapterData; drillKey: SessionDrillKey; mode: QuizMode }
+  | { kind: 'custom'; config: CustomQuizConfig }
+  | { kind: 'mistakes' };
 
 interface DrillSessionRunnerProps {
-  chapter: ChapterData;
-  drillKey: SessionDrillKey;
-  mode: QuizMode;
+  source: DrillSessionSource;
   onExit: () => void;
 }
 
-export function DrillSessionRunner({
-  chapter,
-  drillKey,
-  mode,
-  onExit,
-}: DrillSessionRunnerProps) {
-  const { showPinyin, recordCompletedSession } = useApp();
+function formatStopwatch(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const hrs = Math.floor(safe / 3600);
+  const mins = Math.floor((safe % 3600) / 60);
+  const secs = safe % 60;
+  const mm = String(mins).padStart(2, '0');
+  const ss = String(secs).padStart(2, '0');
+  if (hrs > 0) {
+    return `${String(hrs).padStart(2, '0')}:${mm}:${ss}`;
+  }
+  return `${mm}:${ss}`;
+}
+
+export function DrillSessionRunner({ source, onExit }: DrillSessionRunnerProps) {
+  const { showPinyin, progress, recordCompletedSession, addDrillElapsedTime } = useApp();
+
+  const mode: QuizMode =
+    source.kind === 'chapter'
+      ? source.mode
+      : source.kind === 'custom'
+        ? source.config.mode
+        : 'practice';
 
   const [sessionSeed, setSessionSeed] = useState(0);
-  const questions = useMemo<DrillQuestion[]>(
-    () => generateDrillQuestions(chapter, drillKey),
-    [chapter, drillKey, sessionSeed]
+  // نلتقط نسخة ثابتة من الأخطاء عند بداية الجلسة حتى لا تتغير الأسئلة أثناء المراجعة أو شاشة النتائج
+  const [mistakesSnapshot, setMistakesSnapshot] = useState<MistakeItem[]>(
+    () => progress?.mistakes ?? []
   );
+
+  const questions = useMemo<DrillQuestion[]>(() => {
+    if (source.kind === 'chapter') {
+      return generateDrillQuestions(source.chapter, source.drillKey);
+    }
+    if (source.kind === 'custom') {
+      return generateCustomQuizQuestions(CHAPTERS_DATA, source.config);
+    }
+    return generateMistakeReviewQuestions(CHAPTERS_DATA, mistakesSnapshot);
+  }, [source, mistakesSnapshot, sessionSeed]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, QuestionAnswerRecord>>({});
   const [lockedQuestions, setLockedQuestions] = useState<Record<string, boolean>>({});
   const [isFinished, setIsFinished] = useState(false);
   const [syncSavedMessage, setSyncSavedMessage] = useState<string>('');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  const sessionTitle =
-    drillKey === 'mixed' ? 'اختبار شامل للفصل' : DRILL_METADATA[drillKey].titleAr;
+  const drillTimeRef = useRef<Partial<Record<DrillType, number>>>({});
+  const flushedTimeRef = useRef(false);
+  const currentDrillTypeRef = useRef<DrillType | null>(null);
+  const addDrillElapsedTimeRef = useRef(addDrillElapsedTime);
+
+  useEffect(() => {
+    addDrillElapsedTimeRef.current = addDrillElapsedTime;
+  }, [addDrillElapsedTime]);
 
   const currentQuestion = questions[currentIndex];
   const currentRecord = currentQuestion ? answers[currentQuestion.id] : undefined;
   const isCurrentLocked = currentQuestion ? Boolean(lockedQuestions[currentQuestion.id]) : false;
 
+  useEffect(() => {
+    currentDrillTypeRef.current = currentQuestion?.drillType ?? null;
+  }, [currentQuestion]);
+
+  // مؤقت الجلسة المباشر (يتوقف عند الانتهاء أو إخفاء التبويب ويراكم الثواني حسب نوع التدريب)
+  useEffect(() => {
+    if (isFinished || questions.length === 0) return;
+
+    const timerId = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      setElapsedSeconds((prev) => prev + 1);
+      const activeType = currentDrillTypeRef.current;
+      if (activeType) {
+        drillTimeRef.current[activeType] = (drillTimeRef.current[activeType] ?? 0) + 1;
+      }
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, [isFinished, questions.length, sessionSeed]);
+
+  // حفظ الوقت المتراكم عند الخروج المبكر أو تفكيك المكوّن دون مضاعفة الحساب
+  const flushElapsedTimeOnExit = () => {
+    if (flushedTimeRef.current) return;
+    const captured = { ...drillTimeRef.current };
+    const hasTime = Object.values(captured).some((s) => (s ?? 0) > 0);
+    flushedTimeRef.current = true;
+    drillTimeRef.current = {};
+    if (hasTime) {
+      addDrillElapsedTimeRef.current(captured);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopChineseSpeech();
+      if (!flushedTimeRef.current) {
+        const captured = { ...drillTimeRef.current };
+        const hasTime = Object.values(captured).some((s) => (s ?? 0) > 0);
+        flushedTimeRef.current = true;
+        drillTimeRef.current = {};
+        if (hasTime) {
+          addDrillElapsedTimeRef.current(captured);
+        }
+      }
+    };
+  }, []);
+
+  const chapterTitleMap = useMemo(
+    () => new Map(CHAPTERS_DATA.map((ch) => [ch.id, ch.titleAr])),
+    []
+  );
+
+  const sessionContextLabel = useMemo(() => {
+    if (source.kind === 'chapter') {
+      return `${source.chapter.titleAr} · ${mode === 'practice' ? 'وضع التدريب' : 'وضع الامتحان'}`;
+    }
+    if (source.kind === 'custom') {
+      const chCount = source.config.chapterIds.length;
+      const chLabel =
+        chCount === 1
+          ? (chapterTitleMap.get(source.config.chapterIds[0]) ?? 'فصل واحد')
+          : `${chCount} فصول مختارة`;
+      return `جلسة مخصصة · ${chLabel} · ${mode === 'practice' ? 'وضع التدريب' : 'وضع الامتحان'}`;
+    }
+    return 'مراجعة الأخطاء السابقة · وضع التدريب';
+  }, [source, mode, chapterTitleMap]);
+
+  const sessionTitle = useMemo(() => {
+    if (source.kind === 'chapter') {
+      return source.drillKey === 'mixed'
+        ? 'اختبار شامل للفصل'
+        : DRILL_METADATA[source.drillKey].titleAr;
+    }
+    if (source.kind === 'custom') {
+      return source.config.drillScope === 'all'
+        ? 'تدريب مخصص (جميع الأنماط)'
+        : DRILL_METADATA[source.config.drillScope].titleAr;
+    }
+    return 'مراجعة أخطائي';
+  }, [source]);
+
+  const isMultiDrillSession =
+    (source.kind === 'chapter' && source.drillKey === 'mixed') ||
+    (source.kind === 'custom' && source.config.drillScope === 'all') ||
+    source.kind === 'mistakes';
+
   const answeredCount = questions.filter((q) => answers[q.id]?.isAnswered).length;
+
+  const handleExitClick = () => {
+    stopChineseSpeech();
+    flushElapsedTimeOnExit();
+    onExit();
+  };
 
   const handleRestart = () => {
     stopChineseSpeech();
+    if (source.kind === 'mistakes') {
+      setMistakesSnapshot(progress?.mistakes ?? []);
+    }
+    drillTimeRef.current = {};
+    flushedTimeRef.current = false;
+    setElapsedSeconds(0);
     setSessionSeed((s) => s + 1);
     setCurrentIndex(0);
     setAnswers({});
@@ -81,6 +226,8 @@ export function DrillSessionRunner({
       ...prev,
       [currentQuestion.id]: {
         questionId: currentQuestion.id,
+        chapterId: currentQuestion.chapterId,
+        sourceItemId: currentQuestion.sourceItemId,
         drillType: currentQuestion.drillType,
         isAnswered: true,
         isCorrect,
@@ -105,6 +252,8 @@ export function DrillSessionRunner({
       ...prev,
       [currentQuestion.id]: {
         questionId: currentQuestion.id,
+        chapterId: currentQuestion.chapterId,
+        sourceItemId: currentQuestion.sourceItemId,
         drillType: currentQuestion.drillType,
         isAnswered: true,
         isCorrect: allPerfect,
@@ -132,6 +281,8 @@ export function DrillSessionRunner({
       ...prev,
       [currentQuestion.id]: {
         questionId: currentQuestion.id,
+        chapterId: currentQuestion.chapterId,
+        sourceItemId: currentQuestion.sourceItemId,
         drillType: currentQuestion.drillType,
         isAnswered: mode === 'exam' ? nextTileIds.length > 0 : isComplete,
         isCorrect: isComplete && isCorrect,
@@ -153,6 +304,8 @@ export function DrillSessionRunner({
       if (existing) return existing;
       return {
         questionId: q.id,
+        chapterId: q.chapterId,
+        sourceItemId: q.sourceItemId,
         drillType: q.drillType,
         isAnswered: true,
         isCorrect: false,
@@ -160,8 +313,14 @@ export function DrillSessionRunner({
       };
     });
 
+    const capturedDrillTime = { ...drillTimeRef.current };
+    drillTimeRef.current = {};
+    flushedTimeRef.current = true;
+
     setIsFinished(true);
-    const syncRes = await recordCompletedSession(chapter.id, finalRecords);
+    const syncRes = await recordCompletedSession(finalRecords, capturedDrillTime, {
+      isMistakeReview: source.kind === 'mistakes',
+    });
     if (syncRes) {
       setSyncSavedMessage(
         syncRes.syncedRemotely
@@ -175,17 +334,21 @@ export function DrillSessionRunner({
     return (
       <section className="mx-auto max-w-3xl px-4 sm:px-6 py-14 text-center space-y-4">
         <h2 className="text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-          محتوى هذا الفصل قيد الإضافة
+          {source.kind === 'mistakes'
+            ? 'لا توجد أخطاء مسجلة للمراجعة حالياً'
+            : 'لا توجد أسئلة متاحة لهذا الاختيار'}
         </h2>
         <p className="text-sm text-[#57534E] dark:text-[#A8A29E]">
-          لا توجد عناصر كافية لتشغيل هذا التمرين حالياً.
+          {source.kind === 'mistakes'
+            ? 'أحسنت! أتقنت جميع الأسئلة التي أخطأت فيها سابقاً.'
+            : 'لا توجد عناصر كافية لتشغيل هذا التمرين حالياً.'}
         </p>
         <button
           type="button"
-          onClick={onExit}
+          onClick={handleExitClick}
           className="px-6 py-3 rounded-lg bg-[#B91C1C] dark:bg-[#EF4444] text-white text-sm font-bold"
         >
-          العودة إلى الفصل
+          العودة
         </button>
       </section>
     );
@@ -197,6 +360,7 @@ export function DrillSessionRunner({
     const correctTotal = questions.filter((q) => answers[q.id]?.isCorrect).length;
     const wrongTotal = total - correctTotal;
     const scorePercent = Math.round((correctTotal / total) * 100);
+    const remainingMistakesCount = progress?.mistakes.length ?? 0;
 
     return (
       <motion.section
@@ -213,11 +377,22 @@ export function DrillSessionRunner({
 
           <div className="space-y-1.5">
             <p className="text-xs font-semibold text-[#57534E] dark:text-[#A8A29E]">
-              {chapter.titleAr} · {sessionTitle} · {mode === 'practice' ? 'وضع التدريب' : 'وضع الامتحان'}
+              {sessionContextLabel} · {sessionTitle}
             </p>
             <h1 className="text-3xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              اكتملت الجلسة بنتيجة <span className="tabular-nums text-[#B91C1C] dark:text-[#EF4444]">{scorePercent}%</span>
+              اكتملت الجلسة بنتيجة{' '}
+              <span className="tabular-nums text-[#B91C1C] dark:text-[#EF4444]">
+                {scorePercent}%
+              </span>
             </h1>
+
+            {source.kind === 'mistakes' && correctTotal > 0 && (
+              <p className="text-xs font-semibold text-[#15803D] dark:text-[#22C55E] pt-1">
+                تمت إزالة {correctTotal} {correctTotal === 1 ? 'سؤال متقن' : 'أسئلة متقنة'} من قائمة
+                أخطائك تلقائياً.
+              </p>
+            )}
+
             {syncSavedMessage && (
               <p className="text-xs font-semibold text-[#15803D] dark:text-[#22C55E] pt-1">
                 {syncSavedMessage}
@@ -225,7 +400,7 @@ export function DrillSessionRunner({
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-4 max-w-md mx-auto pt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 max-w-xl mx-auto pt-2">
             <div className="rounded-lg border border-[#1C1917]/10 dark:border-[#F5F2EB]/10 p-3.5 bg-[#F9F6F0] dark:bg-[#121110]">
               <p className="text-xs text-[#57534E] dark:text-[#A8A29E] mb-1">الإجمالي</p>
               <p className="text-xl font-bold tabular-nums">{total}</p>
@@ -242,25 +417,43 @@ export function DrillSessionRunner({
                 {wrongTotal}
               </p>
             </div>
+            <div className="rounded-lg border border-[#D97706]/25 dark:border-[#F59E0B]/25 p-3.5 bg-[#D97706]/8 dark:bg-[#F59E0B]/10">
+              <p className="text-xs text-[#D97706] dark:text-[#F59E0B] mb-1">المدة</p>
+              <p className="text-xl font-bold tabular-nums text-[#92400E] dark:text-[#F59E0B]">
+                {formatStopwatch(elapsedSeconds)}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleRestart}
-              className="inline-flex items-center gap-2 px-6 py-3 min-h-[46px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white text-sm font-bold transition-colors"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>إعادة التمرين</span>
-            </button>
+            {(source.kind !== 'mistakes' || remainingMistakesCount > 0) && (
+              <button
+                type="button"
+                onClick={handleRestart}
+                className="inline-flex items-center gap-2 px-6 py-3 min-h-[46px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white text-sm font-bold transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>
+                  {source.kind === 'mistakes'
+                    ? `مراجعة الأخطاء المتبقية (${remainingMistakesCount})`
+                    : 'إعادة التمرين'}
+                </span>
+              </button>
+            )}
 
             <button
               type="button"
-              onClick={onExit}
+              onClick={handleExitClick}
               className="inline-flex items-center gap-2 px-6 py-3 min-h-[46px] rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F9F6F0] dark:bg-[#121110] hover:border-[#B91C1C]/40 text-sm font-bold transition-colors"
             >
               <ArrowRight className="w-4 h-4" />
-              <span>العودة إلى مركز الفصل</span>
+              <span>
+                {source.kind === 'chapter'
+                  ? 'العودة إلى مركز الفصل'
+                  : source.kind === 'custom'
+                    ? 'العودة إلى منشئ الاختبار المخصص'
+                    : 'العودة إلى الرئيسية'}
+              </span>
             </button>
           </div>
         </div>
@@ -275,18 +468,57 @@ export function DrillSessionRunner({
             {questions.map((q, idx) => {
               const rec = answers[q.id];
               const isRight = Boolean(rec?.isCorrect);
+              const isFillBlank = q.drillType === 'fill-in-blank' && Boolean(q.sentenceWithBlank);
+              const blankParts = isFillBlank ? (q.sentenceWithBlank ?? '').split('____') : [];
+              const targetBlank = q.targetBlank ?? q.correctDisplay;
+              const wrongUserChoice =
+                !isRight && rec?.userDisplay && rec.userDisplay !== 'لم تتم الإجابة'
+                  ? rec.userDisplay
+                  : null;
+
               return (
                 <div key={q.id} className="py-4 flex items-start justify-between gap-4">
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="flex items-center gap-2 text-xs text-[#57534E] dark:text-[#A8A29E]">
+                  <div className="space-y-1.5 min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[#57534E] dark:text-[#A8A29E]">
                       <span className="tabular-nums font-bold">سؤال {idx + 1}</span>
                       <span aria-hidden="true">·</span>
                       <span>{DRILL_METADATA[q.drillType].titleAr}</span>
+                      {source.kind !== 'chapter' && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>{chapterTitleMap.get(q.chapterId) ?? `الفصل ${q.chapterId}`}</span>
+                        </>
+                      )}
                     </div>
 
-                    <p className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB] break-words">
-                      {q.sentenceWithBlank ?? q.promptPrimary}
-                    </p>
+                    {isFillBlank && blankParts.length >= 2 ? (
+                      <div className="space-y-1">
+                        <div
+                          dir="ltr"
+                          className="font-hanzi text-lg sm:text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB] flex flex-wrap items-center justify-end gap-1"
+                        >
+                          <span>{blankParts[0]}</span>
+                          <span className="inline-flex items-center gap-1 mx-0.5">
+                            {wrongUserChoice && (
+                              <span className="line-through decoration-2 text-[#B91C1C] dark:text-[#EF4444] bg-[#B91C1C]/10 dark:bg-[#EF4444]/15 px-1.5 py-0.5 rounded">
+                                {wrongUserChoice}
+                              </span>
+                            )}
+                            <span className="text-[#15803D] dark:text-[#22C55E] bg-[#15803D]/12 dark:bg-[#22C55E]/18 px-2 py-0.5 rounded border border-[#15803D]/30 dark:border-[#22C55E]/35">
+                              {targetBlank}
+                            </span>
+                          </span>
+                          <span>{blankParts.slice(1).join('____')}</span>
+                        </div>
+                        <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">
+                          المعنى: {q.promptPrimary}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB] break-words">
+                        {q.sentenceWithBlank ?? q.promptPrimary}
+                      </p>
+                    )}
 
                     <div className="text-xs space-y-1 pt-1">
                       <p className="text-[#57534E] dark:text-[#A8A29E]">
@@ -315,7 +547,7 @@ export function DrillSessionRunner({
                     </div>
                   </div>
 
-                  <div className="shrink-0 mt-1">
+                  <div className="shrink-0 mt-1 flex flex-col items-end gap-2">
                     {isRight ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-[#15803D] dark:text-[#22C55E]">
                         <CheckCircle2 className="w-5 h-5" />
@@ -326,6 +558,10 @@ export function DrillSessionRunner({
                         <XCircle className="w-5 h-5" />
                         <span>خطأ</span>
                       </span>
+                    )}
+
+                    {q.audioText && (
+                      <SpeakChineseButton text={q.audioText} compact showSlow={false} />
                     )}
                   </div>
                 </div>
@@ -348,15 +584,12 @@ export function DrillSessionRunner({
       transition={{ duration: 0.18 }}
       className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-10 space-y-6"
     >
-      {/* شريط معلومات الجلسة */}
+      {/* شريط معلومات الجلسة مع ساعة الإيقاف المباشرة */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#1C1917]/10 dark:border-[#F5F2EB]/10 pb-4">
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => {
-              stopChineseSpeech();
-              onExit();
-            }}
+            onClick={handleExitClick}
             className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-md border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-xs font-bold hover:border-[#B91C1C]/40 transition-colors"
           >
             <ArrowRight className="w-4 h-4" />
@@ -364,12 +597,10 @@ export function DrillSessionRunner({
           </button>
 
           <div>
-            <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">
-              {chapter.titleAr} · {mode === 'practice' ? 'وضع التدريب' : 'وضع الامتحان'}
-            </p>
+            <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">{sessionContextLabel}</p>
             <h1 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
               {sessionTitle}
-              {drillKey === 'mixed' && currentQuestion && (
+              {isMultiDrillSession && currentQuestion && (
                 <span className="text-xs font-normal text-[#57534E] dark:text-[#A8A29E] mr-2">
                   ({DRILL_METADATA[currentQuestion.drillType].titleAr})
                 </span>
@@ -378,8 +609,18 @@ export function DrillSessionRunner({
           </div>
         </div>
 
-        <div className="text-xs sm:text-sm font-bold tabular-nums text-[#1C1917] dark:text-[#F5F2EB]">
-          السؤال {currentIndex + 1} من {questions.length}
+        <div className="flex items-center gap-3">
+          <div
+            aria-label="الوقت المنقضي في الجلسة"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] text-xs sm:text-sm font-bold tabular-nums text-[#D97706] dark:text-[#F59E0B]"
+          >
+            <Clock className="w-4 h-4 shrink-0" />
+            <span>{formatStopwatch(elapsedSeconds)}</span>
+          </div>
+
+          <div className="text-xs sm:text-sm font-bold tabular-nums text-[#1C1917] dark:text-[#F5F2EB]">
+            السؤال {currentIndex + 1} من {questions.length}
+          </div>
         </div>
       </div>
 
@@ -488,7 +729,8 @@ export function DrillSessionRunner({
           />
         )}
 
-        {currentQuestion.drillType === 'sentence-translation' && (
+        {(currentQuestion.drillType === 'sentence-hanzi-to-arabic' ||
+          currentQuestion.drillType === 'sentence-arabic-to-hanzi') && (
           <SentenceTranslationDrill
             question={currentQuestion}
             mode={mode}
@@ -528,34 +770,42 @@ export function DrillSessionRunner({
         isCurrentLocked &&
         currentQuestion.drillType !== 'sentence-builder' && (
           <div
-            className={`rounded-xl border p-4 flex items-start gap-3 ${
+            className={`rounded-xl border p-4 flex items-start justify-between gap-3 ${
               currentRecord?.isCorrect
                 ? 'border-[#15803D]/35 dark:border-[#22C55E]/40 bg-[#15803D]/10 dark:bg-[#22C55E]/12 text-[#15803D] dark:text-[#22C55E]'
                 : 'border-[#B91C1C]/35 dark:border-[#EF4444]/40 bg-[#B91C1C]/10 dark:bg-[#EF4444]/12 text-[#B91C1C] dark:text-[#EF4444]'
             }`}
           >
-            {currentRecord?.isCorrect ? (
-              <CheckCircle2 className="w-5 h-5 mt-0.5 shrink-0" />
-            ) : (
-              <XCircle className="w-5 h-5 mt-0.5 shrink-0" />
-            )}
-            <div className="space-y-1 text-sm">
-              <p className="font-bold">
-                {currentRecord?.isCorrect
-                  ? 'إجابة صحيحة! أحسنت.'
-                  : 'إجابة غير صحيحة — راجع الإجابة الصحيحة أدناه:'}
-              </p>
-              {!currentRecord?.isCorrect && (
-                <p className="text-[#1C1917] dark:text-[#F5F2EB]">
-                  الإجابة الصحيحة: <strong>{currentQuestion.correctDisplay}</strong>
-                  {showPinyin && currentQuestion.correctPinyinDisplay && (
-                    <span className="font-pinyin mr-2 text-[#57534E] dark:text-[#A8A29E]">
-                      ({currentQuestion.correctPinyinDisplay})
-                    </span>
-                  )}
-                </p>
+            <div className="flex items-start gap-3">
+              {currentRecord?.isCorrect ? (
+                <CheckCircle2 className="w-5 h-5 mt-0.5 shrink-0" />
+              ) : (
+                <XCircle className="w-5 h-5 mt-0.5 shrink-0" />
               )}
+              <div className="space-y-1 text-sm">
+                <p className="font-bold">
+                  {currentRecord?.isCorrect
+                    ? 'إجابة صحيحة! أحسنت.'
+                    : 'إجابة غير صحيحة — راجع الإجابة الصحيحة أدناه:'}
+                </p>
+                {!currentRecord?.isCorrect && (
+                  <p className="text-[#1C1917] dark:text-[#F5F2EB]">
+                    الإجابة الصحيحة: <strong>{currentQuestion.correctDisplay}</strong>
+                    {showPinyin && currentQuestion.correctPinyinDisplay && (
+                      <span className="font-pinyin mr-2 text-[#57534E] dark:text-[#A8A29E]">
+                        ({currentQuestion.correctPinyinDisplay})
+                      </span>
+                    )}
+                  </p>
+                )}
+              </div>
             </div>
+
+            {currentQuestion.audioText &&
+              (currentQuestion.drillType === 'arabic-to-hanzi' ||
+                currentQuestion.drillType === 'sentence-arabic-to-hanzi') && (
+                <SpeakChineseButton text={currentQuestion.audioText} compact />
+              )}
           </div>
         )}
 

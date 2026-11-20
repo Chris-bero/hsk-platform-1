@@ -1,5 +1,6 @@
 import { CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
 import { DrillQuestion, QuizMode } from '../../types';
+import { SpeakChineseButton } from './SpeakChineseButton';
 
 interface SentenceBuilderProps {
   question: DrillQuestion;
@@ -172,13 +173,16 @@ export function SentenceBuilderDrill({
           ) : (
             <XCircle className="w-5 h-5 mt-0.5 shrink-0" />
           )}
-          <div className="space-y-1 text-sm">
+          <div className="space-y-2 text-sm flex-1">
             <p className="font-bold">
               {isCorrectNow ? 'أحسنت! ترتيب الجملة صحيح تماماً.' : 'الترتيب غير مطابق، إليك الصياغة الصحيحة:'}
             </p>
-            <p className="font-hanzi text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              {expectedText}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="font-hanzi text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                {expectedText}
+              </p>
+              <SpeakChineseButton text={expectedText} compact />
+            </div>
           </div>
         </div>
       )}

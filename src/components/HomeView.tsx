@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { ArrowLeft, BarChart3, BookOpen, Clock, Flame, Target } from 'lucide-react';
+import {
+  ArrowLeft,
+  BarChart3,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  Flame,
+  RotateCcw,
+  SlidersHorizontal,
+  Target,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { formatStudyDurationAr } from '../hooks/useActiveStudyTimer';
@@ -9,11 +19,14 @@ const HERO_INK_ART = '/src/assets/images/neo_chinese_hero_ink_1795181947264.jpg'
 
 interface HomeViewProps {
   onNavigate: (view: AppView) => void;
+  onStartMistakeReview: () => void;
 }
 
-export function HomeView({ onNavigate }: HomeViewProps) {
+export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
   const { currentStudent, progress, analytics } = useApp();
   const [heroImgError, setHeroImgError] = useState(false);
+
+  const mistakesCount = progress?.mistakes?.length ?? 0;
 
   const summaryMetrics = [
     {
@@ -57,7 +70,7 @@ export function HomeView({ onNavigate }: HomeViewProps) {
             <span aria-hidden="true">·</span>
             <span>المستوى الأول</span>
             <span aria-hidden="true">·</span>
-            <span>٩ أنماط تدريبية</span>
+            <span>١٠ أنماط تدريبية</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-[#1C1917] dark:text-[#F5F2EB] leading-tight mb-4 [text-wrap:balance]">
@@ -69,7 +82,7 @@ export function HomeView({ onNavigate }: HomeViewProps) {
             متابعة فورية لمستوى إتقانك في كل فصل.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3.5">
             <button
               type="button"
               onClick={() => onNavigate('chapters')}
@@ -116,6 +129,82 @@ export function HomeView({ onNavigate }: HomeViewProps) {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* بطاقتا الأدوات السريعة: تدريب واختبار مخصص + مراجعة أخطائي */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          type="button"
+          onClick={() => onNavigate('custom-builder')}
+          className="text-right rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C]/45 dark:hover:border-[#EF4444]/45 p-6 flex items-center justify-between gap-4 transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C]"
+        >
+          <div className="flex items-start gap-4">
+            <span className="w-12 h-12 rounded-lg border border-[#D97706]/30 dark:border-[#F59E0B]/35 bg-[#D97706]/10 dark:bg-[#F59E0B]/12 flex items-center justify-center shrink-0">
+              <SlidersHorizontal className="w-5 h-5 text-[#D97706] dark:text-[#F59E0B]" />
+            </span>
+            <div className="space-y-1">
+              <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                تدريب واختبار مخصص
+              </h2>
+              <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                ادمج فصلاً أو عدة فصول مع مهارة محددة أو جميع المهارات العشر وعدد الأسئلة الذي تريده.
+              </p>
+            </div>
+          </div>
+          <ArrowLeft className="w-5 h-5 text-[#B91C1C] dark:text-[#EF4444] shrink-0" />
+        </button>
+
+        <button
+          type="button"
+          disabled={mistakesCount === 0}
+          onClick={onStartMistakeReview}
+          className={`text-right rounded-xl border p-6 flex items-center justify-between gap-4 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] ${
+            mistakesCount > 0
+              ? 'border-[#B91C1C]/30 dark:border-[#EF4444]/35 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C] dark:hover:border-[#EF4444] hover:-translate-y-0.5'
+              : 'border-[#1C1917]/10 dark:border-[#F5F2EB]/10 bg-white/75 dark:bg-[#1E1C1A]/75 opacity-80 cursor-default'
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <span
+              className={`w-12 h-12 rounded-lg border flex items-center justify-center shrink-0 ${
+                mistakesCount > 0
+                  ? 'border-[#B91C1C]/30 dark:border-[#EF4444]/35 bg-[#B91C1C]/10 dark:bg-[#EF4444]/15'
+                  : 'border-[#15803D]/25 dark:border-[#22C55E]/30 bg-[#15803D]/10 dark:bg-[#22C55E]/12'
+              }`}
+            >
+              {mistakesCount > 0 ? (
+                <RotateCcw className="w-5 h-5 text-[#B91C1C] dark:text-[#EF4444]" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5 text-[#15803D] dark:text-[#22C55E]" />
+              )}
+            </span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                  مراجعة أخطائي
+                </h2>
+                <span
+                  className={`px-2 py-0.5 rounded-md text-xs font-bold tabular-nums ${
+                    mistakesCount > 0
+                      ? 'bg-[#B91C1C] dark:bg-[#EF4444] text-white'
+                      : 'bg-[#15803D]/12 dark:bg-[#22C55E]/15 text-[#15803D] dark:text-[#22C55E]'
+                  }`}
+                >
+                  {mistakesCount}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                {mistakesCount > 0
+                  ? 'تدرّب مجدداً على الأسئلة التي أخطأت فيها فقط، وتُحذف تلقائياً فور إتقانها.'
+                  : 'سجلك خالٍ من الأخطاء حالياً — واصل التميز!'}
+              </p>
+            </div>
+          </div>
+
+          {mistakesCount > 0 && (
+            <ArrowLeft className="w-5 h-5 text-[#B91C1C] dark:text-[#EF4444] shrink-0" />
+          )}
+        </button>
       </div>
 
       {/* شريط ملخص أداء الطالب */}

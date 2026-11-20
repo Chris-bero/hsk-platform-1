@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { AnalyticsView } from './components/AnalyticsView';
 import { ChapterHubView } from './components/ChapterHubView';
 import { ChaptersGridView } from './components/ChaptersGridView';
-import { DrillSessionRunner } from './components/drills/DrillSessionRunner';
+import { CustomQuizBuilderView } from './components/CustomQuizBuilderView';
+import { DrillSessionRunner, DrillSessionSource } from './components/drills/DrillSessionRunner';
 import { HomeView } from './components/HomeView';
 import { LoginGate } from './components/LoginGate';
 import { Navbar } from './components/Navbar';
 import { AppProvider, useApp } from './context/AppContext';
-import { AppView, ChapterData, QuizMode, SessionDrillKey } from './types';
+import { AppView, ChapterData, CustomQuizConfig, QuizMode, SessionDrillKey } from './types';
 
 function MainShell() {
   const { currentStudent } = useApp();
   const [view, setView] = useState<AppView>('home');
   const [activeChapter, setActiveChapter] = useState<ChapterData | null>(null);
-  const [activeDrillKey, setActiveDrillKey] = useState<SessionDrillKey>('hanzi-to-arabic');
   const [quizMode, setQuizMode] = useState<QuizMode>('practice');
+  const [sessionSource, setSessionSource] = useState<DrillSessionSource | null>(null);
+  const [sessionReturnView, setSessionReturnView] = useState<AppView>('home');
 
   if (!currentStudent) {
     return <LoginGate />;
@@ -31,8 +33,32 @@ function MainShell() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStartDrill = (drillKey: SessionDrillKey) => {
-    setActiveDrillKey(drillKey);
+  const handleStartChapterDrill = (drillKey: SessionDrillKey) => {
+    if (!activeChapter) return;
+    setSessionSource({
+      kind: 'chapter',
+      chapter: activeChapter,
+      drillKey,
+      mode: quizMode,
+    });
+    setSessionReturnView('chapter-hub');
+    setView('drill');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStartCustomQuiz = (config: CustomQuizConfig) => {
+    setSessionSource({
+      kind: 'custom',
+      config,
+    });
+    setSessionReturnView('custom-builder');
+    setView('drill');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleStartMistakeReview = () => {
+    setSessionSource({ kind: 'mistakes' });
+    setSessionReturnView(view === 'analytics' ? 'analytics' : 'home');
     setView('drill');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -42,7 +68,12 @@ function MainShell() {
       <Navbar currentView={view} onNavigate={handleNavigate} />
 
       <main className="flex-1">
-        {view === 'home' && <HomeView onNavigate={handleNavigate} />}
+        {view === 'home' && (
+          <HomeView
+            onNavigate={handleNavigate}
+            onStartMistakeReview={handleStartMistakeReview}
+          />
+        )}
 
         {view === 'chapters' && <ChaptersGridView onSelectChapter={handleSelectChapter} />}
 
@@ -51,27 +82,34 @@ function MainShell() {
             chapter={activeChapter}
             selectedMode={quizMode}
             onModeChange={setQuizMode}
-            onStartDrill={handleStartDrill}
+            onStartDrill={handleStartChapterDrill}
             onBack={() => handleNavigate('chapters')}
           />
         )}
 
-        {view === 'drill' && activeChapter && (
-          <DrillSessionRunner
-            chapter={activeChapter}
-            drillKey={activeDrillKey}
-            mode={quizMode}
-            onExit={() => handleNavigate('chapter-hub')}
+        {view === 'custom-builder' && (
+          <CustomQuizBuilderView
+            onStartCustomQuiz={handleStartCustomQuiz}
+            onBack={() => handleNavigate('home')}
           />
         )}
 
-        {view === 'analytics' && <AnalyticsView />}
+        {view === 'drill' && sessionSource && (
+          <DrillSessionRunner
+            source={sessionSource}
+            onExit={() => handleNavigate(sessionReturnView)}
+          />
+        )}
+
+        {view === 'analytics' && (
+          <AnalyticsView onStartMistakeReview={handleStartMistakeReview} />
+        )}
       </main>
 
       <footer className="border-t border-[#1C1917]/10 dark:border-[#F5F2EB]/10 py-6 mt-12">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#57534E] dark:text-[#A8A29E]">
           <span>بوابة اللغة الصينية - المستوى الأول</span>
-          <span>منصة تدريب تفاعلية · ١٥ فصلاً · ٩ أنماط تدريبية</span>
+          <span>منصة تدريب تفاعلية · ١٥ فصلاً · ١٠ أنماط تدريبية</span>
         </div>
       </footer>
     </div>

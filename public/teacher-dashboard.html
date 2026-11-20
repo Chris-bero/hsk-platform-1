@@ -700,11 +700,11 @@
 
       .modal-stats-strip {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 12px;
       }
 
-      @media (max-width: 720px) {
+      @media (max-width: 840px) {
         .modal-stats-strip {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -830,6 +830,117 @@
         color: var(--ink-muted);
       }
 
+      /* تبويبات اللوحة الرئيسية */
+      .dashboard-tabs {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 5px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background-color: var(--surface-muted);
+        align-self: flex-start;
+      }
+
+      .tab-btn {
+        min-height: 40px;
+        padding: 8px 18px;
+        border-radius: 7px;
+        border: none;
+        background: transparent;
+        color: var(--ink-muted);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color 150ms ease, color 150ms ease;
+      }
+
+      .tab-btn:hover {
+        color: var(--ink);
+      }
+
+      .tab-btn.active {
+        background-color: var(--surface);
+        color: var(--cinnabar);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      .tab-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .tab-panel.hidden {
+        display: none;
+      }
+
+      /* شبكة بنك الأسئلة حسب الأنماط العشرة */
+      .bank-section-card {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 22px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .bank-drills-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      @media (max-width: 1024px) {
+        .bank-drills-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 540px) {
+        .bank-drills-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .bank-drill-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background-color: var(--canvas);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .bank-drill-meta {
+        font-size: 11px;
+        color: var(--ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .bank-drill-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink);
+        line-height: 1.4;
+      }
+
+      .bank-drill-count {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--cinnabar);
+      }
+
+      .grade-label {
+        font-size: 13px;
+        font-weight: 700;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         * {
           transition: none !important;
@@ -864,13 +975,39 @@
             <span aria-hidden="true">·</span>
             <span>المستوى الأول</span>
             <span aria-hidden="true">·</span>
-            <span>تحليل الفصول الخمسة عشر</span>
+            <span>١٥ فصلاً · ١٠ أنماط تدريبية</span>
           </div>
-          <h1 class="page-title">تقارير أداء الطلاب</h1>
+          <h1 class="page-title">تقارير أداء الطلاب وبنك الأسئلة</h1>
         </div>
         <div class="meta-line tabular-nums" id="lastFetchLabel">آخر تحديث: —</div>
       </section>
 
+      <!-- شريط التبديل بين تقارير الطلاب وبنك أسئلة المنهج -->
+      <nav class="dashboard-tabs" role="tablist" aria-label="أقسام لوحة المعلم">
+        <button
+          type="button"
+          id="tabBtnStudents"
+          class="tab-btn active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tabPanelStudents"
+        >
+          تقارير وأداء الطلاب
+        </button>
+        <button
+          type="button"
+          id="tabBtnBank"
+          class="tab-btn"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tabPanelBank"
+        >
+          بنك أسئلة المنهج
+        </button>
+      </nav>
+
+      <!-- التبويب الأول: تقارير وأداء الطلاب -->
+      <div id="tabPanelStudents" class="tab-panel" role="tabpanel" aria-labelledby="tabBtnStudents">
       <!-- البطاقتان العلويتان: إضافة طالب وتوليد كود + إعداد رابط الشيت -->
       <div class="top-panels-grid">
         <!-- بطاقة إضافة طالب جديد وتوليد كود دخول -->
@@ -1007,8 +1144,9 @@
                 <th data-sort="correctCount">صحيح<span class="sort-arrow"></span></th>
                 <th data-sort="wrongCount">خطأ<span class="sort-arrow"></span></th>
                 <th data-sort="accuracyPercent">الدقة<span class="sort-arrow"></span></th>
+                <th data-sort="accuracyPercent">التقدير العام<span class="sort-arrow"></span></th>
                 <th data-sort="activeMinutes">الوقت (دقيقة)<span class="sort-arrow"></span></th>
-                <th data-sort="overallProgressPercent">التقدم العام<span class="sort-arrow"></span></th>
+                <th data-sort="overallProgressPercent">نسبة إنجاز المنهج (١٥ فصلاً)<span class="sort-arrow"></span></th>
                 <th data-sort="lastActive">آخر نشاط<span class="sort-arrow"></span></th>
               </tr>
             </thead>
@@ -1016,6 +1154,66 @@
           </table>
         </div>
       </section>
+      </div>
+
+      <!-- التبويب الثاني: بنك أسئلة المنهج -->
+      <div id="tabPanelBank" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabBtnBank">
+        <section class="kpi-grid" aria-label="ملخص بنك أسئلة المنهج">
+          <article class="kpi-card">
+            <span class="kpi-label">إجمالي المفردات في المنهج</span>
+            <span id="bankTotalVocab" class="kpi-value tabular-nums tone-cinnabar">0</span>
+            <span class="kpi-sub">كلمة صينية مُدرجة</span>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">إجمالي الجمل في المنهج</span>
+            <span id="bankTotalSentences" class="kpi-value tabular-nums tone-gold">0</span>
+            <span class="kpi-sub">جملة تدريبية مع نطق وتشكيل</span>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">إجمالي الأسئلة المتاحة (١٠ أنماط)</span>
+            <span id="bankTotalQuestions" class="kpi-value tabular-nums tone-jade">0</span>
+            <span class="kpi-sub">سؤال مولّد عبر جميع المحركات</span>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">الفصول الجاهزة للتدريب</span>
+            <span id="bankPopulatedChapters" class="kpi-value tabular-nums">0 / 15</span>
+            <span class="kpi-sub">من أصل ١٥ فصلاً للمستوى الأول</span>
+          </article>
+        </section>
+
+        <section class="bank-section-card" aria-label="توزيع الأسئلة حسب الأنماط العشرة">
+          <div class="config-header">
+            <h2 class="config-title">توزيع الأسئلة المتاحة حسب الأنماط التدريبية (١٠ أنماط)</h2>
+            <span class="table-meta">محسوبة تلقائياً وفق محركات التدريب الفعلية</span>
+          </div>
+          <div id="bankDrillsGrid" class="bank-drills-grid"></div>
+        </section>
+
+        <section class="table-section" aria-label="تفصيل بنك الأسئلة حسب الفصول الخمسة عشر">
+          <div class="table-toolbar">
+            <h2 class="config-title">تفصيل محتوى وبنك أسئلة الفصول (١ إلى ١٥)</h2>
+            <span class="table-meta">يعرض الفصول المكتملة والفصول قيد الإضافة</span>
+          </div>
+          <div class="table-scroll">
+            <table class="chapters-table">
+              <thead>
+                <tr>
+                  <th>الفصل</th>
+                  <th>موضوع الفصل</th>
+                  <th>المفردات</th>
+                  <th>الجمل</th>
+                  <th>إجمالي الأسئلة (١٠ أنماط)</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="bankChaptersTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </main>
 
     <!-- نافذة بروفايل الطالب التفصيلي (تحليل الفصول الـ 15) -->
@@ -1048,16 +1246,20 @@
         <div class="modal-body">
           <div class="modal-stats-strip">
             <div class="mini-stat">
-              <span class="mini-stat-label">إجمالي ساعات الدراسة</span>
-              <span id="modalTotalHours" class="mini-stat-value tabular-nums tone-gold">0.0 ساعة</span>
+              <span class="mini-stat-label">التقدير العام</span>
+              <span id="modalOverallGrade" class="mini-stat-value">—</span>
             </div>
             <div class="mini-stat">
               <span class="mini-stat-label">نسبة الدقة العامة</span>
               <span id="modalAccuracy" class="mini-stat-value tabular-nums tone-jade">0%</span>
             </div>
             <div class="mini-stat">
-              <span class="mini-stat-label">التقدم في المنهج</span>
+              <span class="mini-stat-label">نسبة إنجاز المنهج (١٥ فصلاً)</span>
               <span id="modalProgress" class="mini-stat-value tabular-nums">0%</span>
+            </div>
+            <div class="mini-stat">
+              <span class="mini-stat-label">إجمالي ساعات الدراسة</span>
+              <span id="modalTotalHours" class="mini-stat-value tabular-nums tone-gold">0.0 ساعة</span>
             </div>
             <div class="mini-stat">
               <span class="mini-stat-label">إجمالي المحلول والأخطاء</span>
@@ -1113,21 +1315,34 @@
         var LOCAL_REGISTERED_STUDENTS_KEY = 'chinese_portal_registered_students_v1';
 
         var CHAPTERS_META = [
-          { id: 1, zh: '一', ar: 'الفصل الأول' },
-          { id: 2, zh: '二', ar: 'الفصل الثاني' },
-          { id: 3, zh: '三', ar: 'الفصل الثالث' },
-          { id: 4, zh: '四', ar: 'الفصل الرابع' },
-          { id: 5, zh: '五', ar: 'الفصل الخامس' },
-          { id: 6, zh: '六', ar: 'الفصل السادس' },
-          { id: 7, zh: '七', ar: 'الفصل السابع' },
-          { id: 8, zh: '八', ar: 'الفصل الثامن' },
-          { id: 9, zh: '九', ar: 'الفصل التاسع' },
-          { id: 10, zh: '十', ar: 'الفصل العاشر' },
-          { id: 11, zh: '十一', ar: 'الفصل الحادي عشر' },
-          { id: 12, zh: '十二', ar: 'الفصل الثاني عشر' },
-          { id: 13, zh: '十三', ar: 'الفصل الثالث عشر' },
-          { id: 14, zh: '十四', ar: 'الفصل الرابع عشر' },
-          { id: 15, zh: '十五', ar: 'الفصل الخامس عشر' }
+          { id: 1, zh: '一', ar: 'الفصل الأول', subtitle: 'التحية والتعارف', vocabCount: 13, sentenceCount: 10 },
+          { id: 2, zh: '二', ar: 'الفصل الثاني', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 3, zh: '三', ar: 'الفصل الثالث', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 4, zh: '四', ar: 'الفصل الرابع', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 5, zh: '五', ar: 'الفصل الخامس', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 6, zh: '六', ar: 'الفصل السادس', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 7, zh: '七', ar: 'الفصل السابع', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 8, zh: '八', ar: 'الفصل الثامن', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 9, zh: '九', ar: 'الفصل التاسع', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 10, zh: '十', ar: 'الفصل العاشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 11, zh: '十一', ar: 'الفصل الحادي عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 12, zh: '十二', ar: 'الفصل الثاني عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 13, zh: '十三', ar: 'الفصل الثالث عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 14, zh: '十四', ar: 'الفصل الرابع عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
+          { id: 15, zh: '十五', ar: 'الفصل الخامس عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 }
+        ];
+
+        var DRILL_TYPES_BANK = [
+          { key: 'hanzi-to-arabic', titleAr: 'قراءة الرموز الصينية', requires: 'vocab' },
+          { key: 'arabic-to-hanzi', titleAr: 'اختيار الرمز الصيني', requires: 'vocab' },
+          { key: 'hanzi-to-pinyin', titleAr: 'النطق والنغمات (بينين)', requires: 'vocab' },
+          { key: 'match-2-col', titleAr: 'التوصيل الثنائي', requires: 'vocab' },
+          { key: 'match-3-col', titleAr: 'التوصيل الثلاثي', requires: 'vocab' },
+          { key: 'listening', titleAr: 'مهارة الاستماع', requires: 'vocab' },
+          { key: 'sentence-hanzi-to-arabic', titleAr: 'ترجمة الجمل (صيني إلى عربي)', requires: 'sentences' },
+          { key: 'sentence-arabic-to-hanzi', titleAr: 'ترجمة الجمل (عربي إلى صيني)', requires: 'sentences' },
+          { key: 'sentence-builder', titleAr: 'تكوين وبناء الجمل', requires: 'sentences' },
+          { key: 'fill-in-blank', titleAr: 'إكمال الفراغ', requires: 'sentences' }
         ];
 
         function makeMockBreakdown(overrides) {
@@ -1278,14 +1493,27 @@
         var elModalName = document.getElementById('modalStudentName');
         var elModalCode = document.getElementById('modalStudentCode');
         var elModalLastActive = document.getElementById('modalStudentLastActive');
+        var elModalOverallGrade = document.getElementById('modalOverallGrade');
         var elModalHours = document.getElementById('modalTotalHours');
         var elModalAccuracy = document.getElementById('modalAccuracy');
         var elModalProgress = document.getElementById('modalProgress');
         var elModalSolvedSummary = document.getElementById('modalSolvedSummary');
         var elModalChaptersBody = document.getElementById('modalChaptersBody');
 
+        var elTabBtnStudents = document.getElementById('tabBtnStudents');
+        var elTabBtnBank = document.getElementById('tabBtnBank');
+        var elTabPanelStudents = document.getElementById('tabPanelStudents');
+        var elTabPanelBank = document.getElementById('tabPanelBank');
+
+        var elBankTotalVocab = document.getElementById('bankTotalVocab');
+        var elBankTotalSentences = document.getElementById('bankTotalSentences');
+        var elBankTotalQuestions = document.getElementById('bankTotalQuestions');
+        var elBankPopulatedChapters = document.getElementById('bankPopulatedChapters');
+        var elBankDrillsGrid = document.getElementById('bankDrillsGrid');
+        var elBankChaptersTableBody = document.getElementById('bankChaptersTableBody');
+
         var headerCells = Array.prototype.slice.call(
-          document.querySelectorAll('.table-section thead th[data-sort]')
+          document.querySelectorAll('#tabPanelStudents .table-section thead th[data-sort]')
         );
 
         var copyTimerId = null;
@@ -1418,6 +1646,124 @@
         function formatHours(minutes) {
           var hrs = minutes / 60;
           return hrs.toFixed(1) + ' ساعة';
+        }
+
+        // التقدير العام يُحسب حصراً بناءً على نسبة الدقة (accuracyPercent)
+        function getOverallGrade(accuracyPercent, totalSolved) {
+          if (!totalSolved || totalSolved <= 0) {
+            return { label: 'لم يبدأ', toneClass: '' };
+          }
+          if (accuracyPercent >= 90) {
+            return { label: 'ممتاز', toneClass: 'tone-jade' };
+          }
+          if (accuracyPercent >= 80) {
+            return { label: 'جيد جداً', toneClass: 'tone-jade' };
+          }
+          if (accuracyPercent >= 65) {
+            return { label: 'جيد', toneClass: 'tone-gold' };
+          }
+          return { label: 'يحتاج مراجعة', toneClass: 'tone-cinnabar' };
+        }
+
+        function countQuestionsForDrillInChapter(drillKey, vocabCount, sentenceCount) {
+          if (
+            drillKey === 'hanzi-to-arabic' ||
+            drillKey === 'arabic-to-hanzi' ||
+            drillKey === 'hanzi-to-pinyin' ||
+            drillKey === 'listening'
+          ) {
+            return vocabCount;
+          }
+          if (drillKey === 'match-2-col') {
+            return vocabCount > 0 ? Math.ceil(vocabCount / 5) : 0;
+          }
+          if (drillKey === 'match-3-col') {
+            return vocabCount > 0 ? Math.ceil(vocabCount / 4) : 0;
+          }
+          return sentenceCount;
+        }
+
+        function renderQuestionBank() {
+          var totalVocab = 0;
+          var totalSentences = 0;
+          var populatedCount = 0;
+          var grandTotalQuestions = 0;
+          var drillTotals = {};
+
+          DRILL_TYPES_BANK.forEach(function (d) {
+            drillTotals[d.key] = 0;
+          });
+
+          var chaptersRowsHtml = CHAPTERS_META.map(function (ch) {
+            totalVocab += ch.vocabCount;
+            totalSentences += ch.sentenceCount;
+            var isPopulated = ch.vocabCount > 0 || ch.sentenceCount > 0;
+            if (isPopulated) populatedCount += 1;
+
+            var chapterQuestionsTotal = 0;
+            DRILL_TYPES_BANK.forEach(function (d) {
+              var qCount = countQuestionsForDrillInChapter(d.key, ch.vocabCount, ch.sentenceCount);
+              drillTotals[d.key] += qCount;
+              chapterQuestionsTotal += qCount;
+            });
+            grandTotalQuestions += chapterQuestionsTotal;
+
+            var statusHtml = isPopulated
+              ? '<span class="status-text tone-jade">متاح للتدريب</span>'
+              : '<span class="status-text" style="color:var(--ink-muted)">قيد الإضافة</span>';
+
+            return (
+              '<tr>' +
+              '<td>' +
+              '<div class="chapter-name-wrap">' +
+              '<span class="chapter-numeral font-hanzi">' + escapeHtml(ch.zh) + '</span>' +
+              '<strong>' + escapeHtml(ch.ar) + '</strong>' +
+              '</div>' +
+              '</td>' +
+              '<td style="color:' + (isPopulated ? 'var(--ink)' : 'var(--ink-muted)') + '">' +
+              escapeHtml(ch.subtitle) +
+              '</td>' +
+              '<td class="tabular-nums"><strong>' + ch.vocabCount + '</strong></td>' +
+              '<td class="tabular-nums"><strong>' + ch.sentenceCount + '</strong></td>' +
+              '<td class="tabular-nums ' + (chapterQuestionsTotal > 0 ? 'tone-cinnabar' : '') + '"><strong>' + chapterQuestionsTotal + '</strong></td>' +
+              '<td>' + statusHtml + '</td>' +
+              '</tr>'
+            );
+          }).join('');
+
+          elBankTotalVocab.textContent = String(totalVocab);
+          elBankTotalSentences.textContent = String(totalSentences);
+          elBankTotalQuestions.textContent = String(grandTotalQuestions);
+          elBankPopulatedChapters.textContent = populatedCount + ' / ' + CHAPTERS_META.length;
+          elBankChaptersTableBody.innerHTML = chaptersRowsHtml;
+
+          var drillsHtml = DRILL_TYPES_BANK.map(function (d, idx) {
+            var numStr = (idx + 1 < 10 ? '0' : '') + (idx + 1);
+            var reqLabel = d.requires === 'vocab' ? 'مفردات' : 'جمل';
+            return (
+              '<div class="bank-drill-card">' +
+              '<div class="bank-drill-meta tabular-nums">' +
+              '<span>' + numStr + '</span>' +
+              '<span>' + reqLabel + '</span>' +
+              '</div>' +
+              '<div class="bank-drill-title">' + escapeHtml(d.titleAr) + '</div>' +
+              '<div class="bank-drill-count tabular-nums">' + drillTotals[d.key] + ' <span style="font-size:12px;font-weight:600;color:var(--ink-muted)">سؤال</span></div>' +
+              '</div>'
+            );
+          }).join('');
+
+          elBankDrillsGrid.innerHTML = drillsHtml;
+        }
+
+        function switchDashboardTab(tabName) {
+          var isBank = tabName === 'bank';
+          elTabBtnStudents.classList.toggle('active', !isBank);
+          elTabBtnStudents.setAttribute('aria-selected', String(!isBank));
+          elTabPanelStudents.classList.toggle('hidden', isBank);
+
+          elTabBtnBank.classList.toggle('active', isBank);
+          elTabBtnBank.setAttribute('aria-selected', String(isBank));
+          elTabPanelBank.classList.toggle('hidden', !isBank);
         }
 
         function generateUniqueStudentCode() {
@@ -1619,7 +1965,7 @@
 
           if (filtered.length === 0) {
             elTableBody.innerHTML =
-              '<tr><td colspan="9" class="empty-row">لا توجد نتائج مطابقة للبحث الحالي.</td></tr>';
+              '<tr><td colspan="10" class="empty-row">لا توجد نتائج مطابقة للبحث الحالي.</td></tr>';
             return;
           }
 
@@ -1628,9 +1974,10 @@
               var accTone =
                 s.accuracyPercent >= 80
                   ? 'tone-jade'
-                  : s.accuracyPercent >= 60
+                  : s.accuracyPercent >= 65
                     ? 'tone-gold'
                     : 'tone-cinnabar';
+              var grade = getOverallGrade(s.accuracyPercent, s.totalSolved);
               var fillCls =
                 s.overallProgressPercent >= 100 ? 'progress-fill good' : 'progress-fill';
 
@@ -1649,6 +1996,7 @@
                 '<td class="tabular-nums tone-jade"><strong>' + s.correctCount + '</strong></td>' +
                 '<td class="tabular-nums tone-cinnabar"><strong>' + s.wrongCount + '</strong></td>' +
                 '<td class="tabular-nums ' + accTone + '"><strong>' + s.accuracyPercent + '%</strong></td>' +
+                '<td><span class="grade-label ' + grade.toneClass + '" style="' + (grade.toneClass ? '' : 'color:var(--ink-muted)') + '">' + escapeHtml(grade.label) + '</span></td>' +
                 '<td class="tabular-nums">' + s.activeMinutes + '</td>' +
                 '<td>' +
                 '<div class="progress-cell tabular-nums">' +
@@ -1669,9 +2017,13 @@
           if (!student) return;
           state.selectedStudent = student;
 
+          var grade = getOverallGrade(student.accuracyPercent, student.totalSolved);
+
           elModalName.textContent = student.studentName;
           elModalCode.textContent = 'الرمز: ' + student.studentCode;
           elModalLastActive.textContent = 'آخر نشاط: ' + formatLastActive(student.lastActive);
+          elModalOverallGrade.textContent = grade.label;
+          elModalOverallGrade.className = 'mini-stat-value ' + grade.toneClass;
           elModalHours.textContent = formatHours(student.activeMinutes);
           elModalAccuracy.textContent = student.accuracyPercent + '%';
           elModalProgress.textContent = student.overallProgressPercent + '%';
@@ -2028,9 +2380,17 @@
           }
         });
 
+        elTabBtnStudents.addEventListener('click', function () {
+          switchDashboardTab('students');
+        });
+        elTabBtnBank.addEventListener('click', function () {
+          switchDashboardTab('bank');
+        });
+
         // التشغيل الابتدائي
         initTheme();
         elUrlInput.value = getSavedUrl();
+        renderQuestionBank();
         fetchStudentData();
       })();
     </script>

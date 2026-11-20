@@ -169,10 +169,10 @@ export function ChapterHubView({
             </button>
           </div>
 
-          {/* شبكة الأنماط التدريبية التسعة */}
+          {/* شبكة الأنماط التدريبية العشرة */}
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              الأنماط التدريبية الفردية (٩ محركات)
+              الأنماط التدريبية الفردية (١٠ محركات)
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

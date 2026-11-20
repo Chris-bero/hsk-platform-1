@@ -14,6 +14,7 @@ import {
   ChapterStatEntry,
   DrillStatEntry,
   DrillType,
+  MistakeItem,
   QuestionAnswerRecord,
   SheetsSyncPayload,
   Student,
@@ -37,10 +38,16 @@ function getTodayIsoDate(): string {
   return `${y}-${m}-${d}`;
 }
 
+function makeMistakeKey(chapterId: number, drillType: DrillType, sourceItemId: string): string {
+  return `${chapterId}::${drillType}::${sourceItemId}`;
+}
+
 function createEmptyProgress(studentId: string): StudentProgress {
   const drillStats = {} as Record<DrillType, DrillStatEntry>;
+  const drillTimeSeconds = {} as Record<DrillType, number>;
   for (const dt of ALL_DRILL_TYPES) {
     drillStats[dt] = { attempted: 0, correct: 0 };
+    drillTimeSeconds[dt] = 0;
   }
 
   const chapterStats = {} as Record<number, ChapterStatEntry>;
@@ -57,7 +64,9 @@ function createEmptyProgress(studentId: string): StudentProgress {
     studyDates: [getTodayIsoDate()],
     lastActive: new Date().toISOString(),
     drillStats,
+    drillTimeSeconds,
     chapterStats,
+    mistakes: [],
   };
 }
 
@@ -68,15 +77,42 @@ function loadStudentProgress(studentId: string): StudentProgress {
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as Partial<StudentProgress>;
 
-    const mergedDrillStats = { ...fallback.drillStats, ...(parsed.drillStats ?? {}) };
+    const mergedDrillStats = { ...fallback.drillStats };
+    if (parsed.drillStats) {
+      for (const dt of ALL_DRILL_TYPES) {
+        if (parsed.drillStats[dt]) {
+          mergedDrillStats[dt] = parsed.drillStats[dt];
+        }
+      }
+    }
+
+    const mergedDrillTime = { ...fallback.drillTimeSeconds };
+    if (parsed.drillTimeSeconds) {
+      for (const dt of ALL_DRILL_TYPES) {
+        const val = parsed.drillTimeSeconds[dt];
+        if (typeof val === 'number' && !Number.isNaN(val)) {
+          mergedDrillTime[dt] = val;
+        }
+      }
+    }
+
     const mergedChapterStats = { ...fallback.chapterStats, ...(parsed.chapterStats ?? {}) };
+    const validDrillSet = new Set<string>(ALL_DRILL_TYPES);
+    const cleanedMistakes: MistakeItem[] = Array.isArray(parsed.mistakes)
+      ? parsed.mistakes.filter(
+          (m): m is MistakeItem =>
+            Boolean(m && m.key && m.sourceItemId && validDrillSet.has(m.drillType))
+        )
+      : [];
 
     return {
       ...fallback,
       ...parsed,
       studentId,
       drillStats: mergedDrillStats,
+      drillTimeSeconds: mergedDrillTime,
       chapterStats: mergedChapterStats,
+      mistakes: cleanedMistakes,
       studyDates: Array.isArray(parsed.studyDates) ? parsed.studyDates : fallback.studyDates,
     };
   } catch {
@@ -134,7 +170,8 @@ function computeChapterCompletion(chapterId: number, stats: ChapterStatEntry | u
 
   const availableDrills = ALL_DRILL_TYPES.filter((dt) => {
     if (
-      dt === 'sentence-translation' ||
+      dt === 'sentence-hanzi-to-arabic' ||
+      dt === 'sentence-arabic-to-hanzi' ||
       dt === 'sentence-builder' ||
       dt === 'fill-in-blank'
     ) {
@@ -175,9 +212,11 @@ interface AppContextValue {
   progress: StudentProgress | null;
   analytics: ComputedAnalytics;
   lastSyncResult: SyncResult | null;
+  addDrillElapsedTime: (drillElapsedSeconds: Partial<Record<DrillType, number>>) => void;
   recordCompletedSession: (
-    chapterId: number,
-    records: QuestionAnswerRecord[]
+    records: QuestionAnswerRecord[],
+    drillElapsedSeconds?: Partial<Record<DrillType, number>>,
+    options?: { isMistakeReview?: boolean }
   ) => Promise<SyncResult | null>;
 }
 
@@ -307,10 +346,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const addDrillElapsedTime = useCallback(
+    (drillElapsedSeconds: Partial<Record<DrillType, number>>) => {
+      const entries = Object.entries(drillElapsedSeconds).filter(
+        ([, secs]) => typeof secs === 'number' && secs > 0
+      );
+      if (entries.length === 0) return;
+
+      setProgress((prev) => {
+        if (!prev) return prev;
+        const updatedTimes = { ...prev.drillTimeSeconds };
+        for (const [dt, secs] of entries) {
+          const drillKey = dt as DrillType;
+          updatedTimes[drillKey] = (updatedTimes[drillKey] ?? 0) + (secs ?? 0);
+        }
+        const updated: StudentProgress = {
+          ...prev,
+          drillTimeSeconds: updatedTimes,
+          lastActive: new Date().toISOString(),
+        };
+        saveStudentProgress(updated);
+        return updated;
+      });
+    },
+    []
+  );
+
   const recordCompletedSession = useCallback(
     async (
-      chapterId: number,
-      records: QuestionAnswerRecord[]
+      records: QuestionAnswerRecord[],
+      drillElapsedSeconds?: Partial<Record<DrillType, number>>,
+      options?: { isMistakeReview?: boolean }
     ): Promise<SyncResult | null> => {
       if (!currentStudent || !progress || records.length === 0) {
         return null;
@@ -326,41 +392,71 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const updatedDrillStats: Record<DrillType, DrillStatEntry> = {
         ...progress.drillStats,
       };
-      const drillsTouched = new Set<DrillType>();
-
-      for (const rec of answeredRecords) {
-        drillsTouched.add(rec.drillType);
-        const existing = updatedDrillStats[rec.drillType] ?? { attempted: 0, correct: 0 };
-        updatedDrillStats[rec.drillType] = {
-          attempted: existing.attempted + 1,
-          correct: existing.correct + (rec.isCorrect ? 1 : 0),
-        };
-      }
-
-      const prevChapter = progress.chapterStats[chapterId] ?? {
-        solved: 0,
-        correct: 0,
-        completedDrills: [],
+      const updatedDrillTimes: Record<DrillType, number> = {
+        ...progress.drillTimeSeconds,
       };
-      const completedDrills = Array.from(
-        new Set<DrillType>([...prevChapter.completedDrills, ...Array.from(drillsTouched)])
-      );
+      if (drillElapsedSeconds) {
+        for (const [dt, secs] of Object.entries(drillElapsedSeconds)) {
+          if (typeof secs === 'number' && secs > 0) {
+            const key = dt as DrillType;
+            updatedDrillTimes[key] = (updatedDrillTimes[key] ?? 0) + secs;
+          }
+        }
+      }
 
       const updatedChapterStats: Record<number, ChapterStatEntry> = {
         ...progress.chapterStats,
-        [chapterId]: {
-          solved: prevChapter.solved + addedSolved,
-          correct: prevChapter.correct + addedCorrect,
-          completedDrills,
-        },
       };
+
+      const mistakesMap = new Map<string, MistakeItem>(
+        progress.mistakes.map((m) => [m.key, m])
+      );
+      const nowIso = new Date().toISOString();
+
+      for (const rec of answeredRecords) {
+        const existingDrill = updatedDrillStats[rec.drillType] ?? { attempted: 0, correct: 0 };
+        updatedDrillStats[rec.drillType] = {
+          attempted: existingDrill.attempted + 1,
+          correct: existingDrill.correct + (rec.isCorrect ? 1 : 0),
+        };
+
+        const prevCh = updatedChapterStats[rec.chapterId] ?? {
+          solved: 0,
+          correct: 0,
+          completedDrills: [],
+        };
+        const completedDrills = prevCh.completedDrills.includes(rec.drillType)
+          ? prevCh.completedDrills
+          : [...prevCh.completedDrills, rec.drillType];
+
+        updatedChapterStats[rec.chapterId] = {
+          solved: prevCh.solved + 1,
+          correct: prevCh.correct + (rec.isCorrect ? 1 : 0),
+          completedDrills,
+        };
+
+        // تحديث قائمة الأخطاء (إضافة الخطأ أو إزالته عند الإجابة الصحيحة في وضع مراجعة الأخطاء)
+        if (rec.sourceItemId) {
+          const mKey = makeMistakeKey(rec.chapterId, rec.drillType, rec.sourceItemId);
+          if (!rec.isCorrect) {
+            mistakesMap.set(mKey, {
+              key: mKey,
+              chapterId: rec.chapterId,
+              drillType: rec.drillType,
+              sourceItemId: rec.sourceItemId,
+              recordedAt: nowIso,
+            });
+          } else if (options?.isMistakeReview) {
+            mistakesMap.delete(mKey);
+          }
+        }
+      }
 
       const today = getTodayIsoDate();
       const studyDates = progress.studyDates.includes(today)
         ? progress.studyDates
         : [...progress.studyDates, today];
 
-      const nowIso = new Date().toISOString();
       const updatedProgress: StudentProgress = {
         ...progress,
         totalSolved: progress.totalSolved + addedSolved,
@@ -369,7 +465,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         studyDates,
         lastActive: nowIso,
         drillStats: updatedDrillStats,
+        drillTimeSeconds: updatedDrillTimes,
         chapterStats: updatedChapterStats,
+        mistakes: Array.from(mistakesMap.values()),
       };
 
       saveStudentProgress(updatedProgress);
@@ -461,6 +559,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     progress,
     analytics,
     lastSyncResult,
+    addDrillElapsedTime,
     recordCompletedSession,
   };
 

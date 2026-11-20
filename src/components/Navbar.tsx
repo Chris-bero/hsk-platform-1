@@ -20,7 +20,12 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
 
   const isNavActive = (view: AppView) => {
     if (view === 'chapters') {
-      return currentView === 'chapters' || currentView === 'chapter-hub' || currentView === 'drill';
+      return (
+        currentView === 'chapters' ||
+        currentView === 'chapter-hub' ||
+        currentView === 'custom-builder' ||
+        currentView === 'drill'
+      );
     }
     return currentView === view;
   };

@@ -36,9 +36,14 @@ export const DRILL_METADATA: Record<
     descriptionAr: 'استمع إلى النطق الصيني بالسرعة العادية أو البطيئة واختر الرمز.',
     requires: 'vocab',
   },
-  'sentence-translation': {
-    titleAr: 'ترجمة الجمل',
-    descriptionAr: 'ترجم الجمل بين الصينية والعربية في الاتجاهين.',
+  'sentence-hanzi-to-arabic': {
+    titleAr: 'ترجمة الجمل (صيني إلى عربي)',
+    descriptionAr: 'اقرأ الجملة الصينية واختر الترجمة العربية الصحيحة.',
+    requires: 'sentences',
+  },
+  'sentence-arabic-to-hanzi': {
+    titleAr: 'ترجمة الجمل (عربي إلى صيني)',
+    descriptionAr: 'اقرأ الجملة العربية واختر الجملة الصينية المطابقة لها.',
     requires: 'sentences',
   },
   'sentence-builder': {
@@ -60,7 +65,8 @@ export const ALL_DRILL_TYPES: DrillType[] = [
   'match-2-col',
   'match-3-col',
   'listening',
-  'sentence-translation',
+  'sentence-hanzi-to-arabic',
+  'sentence-arabic-to-hanzi',
   'sentence-builder',
   'fill-in-blank',
 ];
@@ -190,7 +196,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'مرحباً يا شياو يو!',
         segments: ['AI', '小语', '，', '你好', '！'],
         targetBlank: '你好',
-        blankDistractors: ['再见', '谢谢', '大家'],
+        blankDistractors: ['同学们', '王老师', '学生'],
       },
       {
         id: 'c1-s2',
@@ -199,7 +205,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'مرحباً يا أستاذة وانغ!',
         segments: ['王老师', '，', '你好', '！'],
         targetBlank: '王老师',
-        blankDistractors: ['同学们', '学生', '大家'],
+        blankDistractors: ['谢谢', '不客气', '再见'],
       },
       {
         id: 'c1-s3',
@@ -208,7 +214,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'مرحباً بالجميع!',
         segments: ['大家', '好', '！'],
         targetBlank: '大家',
-        blankDistractors: ['你们', '老师', '同学'],
+        blankDistractors: ['谢谢', '不客气', '再见'],
       },
       {
         id: 'c1-s4',
@@ -217,7 +223,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'مرحباً بحضرتك يا أستاذة!',
         segments: ['老师', '，', '您好', '！'],
         targetBlank: '您好',
-        blankDistractors: ['你好', '你们好', '再见'],
+        blankDistractors: ['同学们', '王老师', '学生'],
       },
       {
         id: 'c1-s5',
@@ -226,7 +232,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'مرحباً بكم (أنتم)!',
         segments: ['你们', '好', '！'],
         targetBlank: '你们',
-        blankDistractors: ['您', '大家', '同学'],
+        blankDistractors: ['谢谢', '不客气', '再见'],
       },
       {
         id: 'c1-s6',
@@ -235,7 +241,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'مرحباً يا شياو يو!',
         segments: ['你好', '，', '小语', '！'],
         targetBlank: '你好',
-        blankDistractors: ['谢谢', '再见', '不客气'],
+        blankDistractors: ['同学们', '王老师', '学生'],
       },
       {
         id: 'c1-s7',
@@ -244,7 +250,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'شكراً!',
         segments: ['谢谢', '！'],
         targetBlank: '谢谢',
-        blankDistractors: ['再见', '你好', '不客气'],
+        blankDistractors: ['王老师', '同学们', '学生'],
       },
       {
         id: 'c1-s8',
@@ -253,7 +259,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'عفواً / على الرحب والسعة!',
         segments: ['不', '客气', '！'],
         targetBlank: '不客气',
-        blankDistractors: ['谢谢', '再见', '你好'],
+        blankDistractors: ['王老师', '同学们', '学生'],
       },
       {
         id: 'c1-s9',
@@ -262,7 +268,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'إلى اللقاء أيها الطلاب (الزملاء)!',
         segments: ['同学们', '，', '再见', '！'],
         targetBlank: '同学们',
-        blankDistractors: ['王老师', '大家', '您好'],
+        blankDistractors: ['谢谢', '不客气', '你好'],
       },
       {
         id: 'c1-s10',
@@ -271,7 +277,7 @@ export const CHAPTERS_DATA: ChapterData[] = [
         arabic: 'إلى اللقاء يا أستاذة!',
         segments: ['老师', '，', '再见', '！'],
         targetBlank: '再见',
-        blankDistractors: ['你好', '谢谢', '不客气'],
+        blankDistractors: ['同学们', '王老师', '学生'],
       },
     ],
   },

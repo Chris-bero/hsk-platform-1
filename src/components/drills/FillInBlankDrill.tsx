@@ -1,5 +1,6 @@
 import { CheckCircle2, XCircle } from 'lucide-react';
 import { DrillQuestion, QuizMode } from '../../types';
+import { SpeakChineseButton } from './SpeakChineseButton';
 
 interface FillInBlankProps {
   question: DrillQuestion;
@@ -19,11 +20,14 @@ export function FillInBlankDrill({
   onSelectOption,
 }: FillInBlankProps) {
   const showFeedback = mode === 'practice' && isLocked;
-  const selectedLabel = (question.options ?? []).find((o) => o.id === selectedOptionId)?.label;
+  const selectedOpt = (question.options ?? []).find((o) => o.id === selectedOptionId);
+  const selectedLabel = selectedOpt?.label;
+  const isCorrectSelected = selectedOptionId === question.correctOptionId;
 
-  const displaySentence = selectedLabel
-    ? (question.sentenceWithBlank ?? '').replace('____', selectedLabel)
-    : question.sentenceWithBlank ?? '';
+  const targetBlank = question.targetBlank ?? question.correctDisplay;
+  const blankTemplate = question.sentenceWithBlank ?? '';
+  const parts = blankTemplate.split('____');
+  const hasSplit = parts.length >= 2;
 
   return (
     <div className="space-y-8">
@@ -32,12 +36,44 @@ export function FillInBlankDrill({
           اختر الكلمة الصينية المناسبة لإكمال الفراغ في الجملة
         </p>
 
-        <div className="font-hanzi text-2xl sm:text-4xl font-bold text-[#1C1917] dark:text-[#F5F2EB] leading-relaxed">
-          {displaySentence}
+        {/* معاينة الجملة مع تمييز الإجابة الصحيحة بالأخضر وشطب الإجابة الخاطئة بالأحمر عند التصحيح */}
+        <div
+          dir="ltr"
+          className="font-hanzi text-2xl sm:text-4xl font-bold text-[#1C1917] dark:text-[#F5F2EB] leading-relaxed flex flex-wrap items-center justify-center gap-1"
+        >
+          {showFeedback && hasSplit ? (
+            <>
+              <span>{parts[0]}</span>
+              <span className="inline-flex items-center gap-1.5 mx-1">
+                {!isCorrectSelected && selectedLabel && (
+                  <span className="line-through decoration-2 text-[#B91C1C] dark:text-[#EF4444] bg-[#B91C1C]/10 dark:bg-[#EF4444]/15 px-2 py-0.5 rounded-md">
+                    {selectedLabel}
+                  </span>
+                )}
+                <span className="text-[#15803D] dark:text-[#22C55E] bg-[#15803D]/12 dark:bg-[#22C55E]/18 px-2.5 py-0.5 rounded-md border border-[#15803D]/30 dark:border-[#22C55E]/35">
+                  {targetBlank}
+                </span>
+              </span>
+              <span>{parts.slice(1).join('____')}</span>
+            </>
+          ) : hasSplit ? (
+            <>
+              <span>{parts[0]}</span>
+              <span className="mx-1 px-2.5 py-0.5 rounded-md border-b-2 border-[#B91C1C] dark:border-[#EF4444] text-[#B91C1C] dark:text-[#EF4444]">
+                {selectedLabel ?? '____'}
+              </span>
+              <span>{parts.slice(1).join('____')}</span>
+            </>
+          ) : (
+            <span>{selectedLabel ? blankTemplate.replace('____', selectedLabel) : blankTemplate}</span>
+          )}
         </div>
 
         <p className="text-base font-medium text-[#57534E] dark:text-[#A8A29E]">
-          المعنى: <span className="text-[#1C1917] dark:text-[#F5F2EB] font-semibold">{question.promptPrimary}</span>
+          المعنى:{' '}
+          <span className="text-[#1C1917] dark:text-[#F5F2EB] font-semibold">
+            {question.promptPrimary}
+          </span>
         </p>
 
         {showFeedback && showPinyin && question.sentenceFullPinyin && (
@@ -45,9 +81,15 @@ export function FillInBlankDrill({
             {question.sentenceFullPinyin}
           </p>
         )}
+
+        {showFeedback && question.sentenceFullHanzi && (
+          <div className="pt-1">
+            <SpeakChineseButton text={question.sentenceFullHanzi} />
+          </div>
+        )}
       </div>
 
-      {/* ٤ خيارات صينية */}
+      {/* ٤ خيارات صينية فقط من [targetBlank, ...blankDistractors] */}
       <div className="grid grid-cols-2 gap-3.5">
         {(question.options ?? []).map((opt) => {
           const isSelected = selectedOptionId === opt.id;
