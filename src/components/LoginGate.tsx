@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { AlertCircle, KeyRound, Moon, Sun, User } from 'lucide-react';
+import { AlertCircle, KeyRound, Loader2, Moon, Sun, User } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { ALLOWED_STUDENTS } from '../data/students';
+import { verifyStudentFromSheet } from '../services/sheetsSync';
 
 const LOGIN_SCROLL_ART = '/src/assets/images/neo_chinese_login_scroll_1795181947033.jpg';
 
@@ -11,10 +12,12 @@ export function LoginGate() {
   const [nameInput, setNameInput] = useState('');
   const [codeInput, setCodeInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isVerifying) return;
     setErrorMsg('');
 
     if (!nameInput.trim() || !codeInput.trim()) {
@@ -22,9 +25,20 @@ export function LoginGate() {
       return;
     }
 
-    const success = login(nameInput, codeInput);
-    if (!success) {
-      setErrorMsg('تعذر التحقق من البيانات. تأكد من مطابقة الاسم والرمز المسجل لدى المعلم.');
+    setIsVerifying(true);
+    try {
+      const verifiedStudent = await verifyStudentFromSheet(nameInput, codeInput);
+      if (!verifiedStudent) {
+        setErrorMsg('تعذر التحقق من البيانات. تأكد من مطابقة الاسم والرمز المسجل لدى المعلم.');
+        return;
+      }
+
+      const success = login(verifiedStudent.name, verifiedStudent.code);
+      if (!success) {
+        setErrorMsg('تعذر التحقق من البيانات. تأكد من مطابقة الاسم والرمز المسجل لدى المعلم.');
+      }
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -113,10 +127,11 @@ export function LoginGate() {
                       id="student-name"
                       type="text"
                       value={nameInput}
+                      disabled={isVerifying}
                       onChange={(e) => setNameInput(e.target.value)}
                       placeholder="مثال: أحمد محمد"
                       autoComplete="username"
-                      className="w-full pr-10 pl-4 py-3 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F9F6F0]/60 dark:bg-[#121110] text-[#1C1917] dark:text-[#F5F2EB] placeholder:text-[#57534E]/60 dark:placeholder:text-[#A8A29E]/50 text-sm focus:outline-none focus:border-[#B91C1C] dark:focus:border-[#EF4444] focus:ring-2 focus:ring-[#B91C1C]/15 dark:focus:ring-[#EF4444]/20 transition-colors"
+                      className="w-full pr-10 pl-4 py-3 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F9F6F0]/60 dark:bg-[#121110] text-[#1C1917] dark:text-[#F5F2EB] placeholder:text-[#57534E]/60 dark:placeholder:text-[#A8A29E]/50 text-sm focus:outline-none focus:border-[#B91C1C] dark:focus:border-[#EF4444] focus:ring-2 focus:ring-[#B91C1C]/15 dark:focus:ring-[#EF4444]/20 transition-colors disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -137,10 +152,11 @@ export function LoginGate() {
                       id="student-code"
                       type="password"
                       value={codeInput}
+                      disabled={isVerifying}
                       onChange={(e) => setCodeInput(e.target.value)}
                       placeholder="أدخل الرمز المخصص لك"
                       autoComplete="current-password"
-                      className="w-full pr-10 pl-4 py-3 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F9F6F0]/60 dark:bg-[#121110] text-[#1C1917] dark:text-[#F5F2EB] placeholder:text-[#57534E]/60 dark:placeholder:text-[#A8A29E]/50 text-sm tabular-nums focus:outline-none focus:border-[#B91C1C] dark:focus:border-[#EF4444] focus:ring-2 focus:ring-[#B91C1C]/15 dark:focus:ring-[#EF4444]/20 transition-colors"
+                      className="w-full pr-10 pl-4 py-3 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F9F6F0]/60 dark:bg-[#121110] text-[#1C1917] dark:text-[#F5F2EB] placeholder:text-[#57534E]/60 dark:placeholder:text-[#A8A29E]/50 text-sm tabular-nums focus:outline-none focus:border-[#B91C1C] dark:focus:border-[#EF4444] focus:ring-2 focus:ring-[#B91C1C]/15 dark:focus:ring-[#EF4444]/20 transition-colors disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -157,9 +173,17 @@ export function LoginGate() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 px-6 min-h-[46px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white font-bold text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B91C1C] dark:focus-visible:ring-[#EF4444]"
+                  disabled={isVerifying}
+                  className="w-full py-3 px-6 min-h-[46px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white font-bold text-sm inline-flex items-center justify-center gap-2 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B91C1C] dark:focus-visible:ring-[#EF4444] disabled:opacity-70 disabled:cursor-wait"
                 >
-                  دخول إلى المنصة
+                  {isVerifying ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>جارٍ التحقق من البيانات...</span>
+                    </>
+                  ) : (
+                    <span>دخول إلى المنصة</span>
+                  )}
                 </button>
               </form>
             </div>

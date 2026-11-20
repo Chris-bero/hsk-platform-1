@@ -212,6 +212,16 @@
         border-color: var(--cinnabar-hover);
       }
 
+      .btn-jade {
+        background-color: var(--jade);
+        border-color: var(--jade);
+        color: #FFFFFF;
+      }
+
+      .btn-jade:hover:not(:disabled) {
+        opacity: 0.92;
+      }
+
       .btn-ghost {
         background-color: transparent;
         color: var(--ink-muted);
@@ -281,12 +291,24 @@
         line-height: 1.3;
       }
 
-      /* لوحة إعداد رابط جدول البيانات */
+      /* شبكة البطاقات العلوية (مولد الطلاب + إعداد الرابط) */
+      .top-panels-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      @media (max-width: 960px) {
+        .top-panels-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
       .config-panel {
-        padding: 20px 24px;
+        padding: 22px 24px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 14px;
       }
 
       .config-header {
@@ -299,7 +321,7 @@
 
       .config-title {
         margin: 0;
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 700;
       }
 
@@ -328,13 +350,66 @@
       }
 
       .config-input-wrap {
-        flex: 1 1 320px;
+        flex: 1 1 220px;
       }
 
       .config-hint {
         margin: 0;
         font-size: 12px;
         color: var(--ink-muted);
+      }
+
+      /* صندوق نتيجة توليد الكود */
+      .generated-result {
+        display: none;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--jade);
+        background-color: var(--jade-soft);
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .generated-result.visible {
+        display: flex;
+      }
+
+      .generated-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .generated-line {
+        font-size: 14px;
+        color: var(--ink);
+      }
+
+      .generated-code {
+        direction: ltr;
+        unicode-bidi: isolate;
+        font-weight: 700;
+        color: var(--cinnabar);
+        letter-spacing: 0.04em;
+      }
+
+      .generated-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .copy-confirm {
+        display: none;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--jade);
+      }
+
+      .copy-confirm.visible {
+        display: inline-block;
       }
 
       /* بطاقات المؤشرات */
@@ -544,7 +619,7 @@
 
       .error-banner {
         display: none;
-        padding: 12px 16px;
+        padding: 10px 14px;
         border-radius: 8px;
         border: 1px solid var(--cinnabar);
         background-color: var(--cinnabar-soft);
@@ -785,7 +860,7 @@
       <section class="page-header">
         <div>
           <div class="meta-line">
-            <span>متابعة تقدم الطلاب</span>
+            <span>إدارة الطلاب والمتابعة</span>
             <span aria-hidden="true">·</span>
             <span>المستوى الأول</span>
             <span aria-hidden="true">·</span>
@@ -796,36 +871,89 @@
         <div class="meta-line tabular-nums" id="lastFetchLabel">آخر تحديث: —</div>
       </section>
 
-      <!-- إعداد رابط جدول المعلم -->
-      <section class="neo-frame config-panel" aria-label="إعداد رابط الربط مع جداول البيانات">
-        <div class="config-header">
-          <h2 class="config-title">رابط مزامنة جدول بيانات المعلم</h2>
-          <span id="connectionStatus" class="config-status status-preview">
-            وضع المعاينة التجريبية (لم يتم إدخال الرابط بعد)
-          </span>
-        </div>
-
-        <form id="urlConfigForm" class="config-form">
-          <div class="config-input-wrap">
-            <input
-              id="scriptUrlInput"
-              type="url"
-              class="input input-ltr"
-              placeholder="الصق رابط تطبيق الويب الخاص بجدول البيانات هنا..."
-              autocomplete="off"
-            />
+      <!-- البطاقتان العلويتان: إضافة طالب وتوليد كود + إعداد رابط الشيت -->
+      <div class="top-panels-grid">
+        <!-- بطاقة إضافة طالب جديد وتوليد كود دخول -->
+        <section class="neo-frame config-panel" aria-label="إضافة طالب جديد وتوليد كود دخول">
+          <div class="config-header">
+            <h2 class="config-title">إضافة طالب جديد وتوليد كود دخول</h2>
+            <span id="generatorStatus" class="config-status status-live"></span>
           </div>
-          <button type="submit" class="btn btn-primary">حفظ الرابط وجلب البيانات</button>
-          <button type="button" id="clearUrlBtn" class="btn btn-ghost">مسح الرابط</button>
-        </form>
 
-        <p class="config-hint">
-          يُحفظ الرابط محلياً في متصفح المعلم فقط. اضغط على اسم أي طالب في الجدول أدناه لفتح
-          بروفايل الطالب التفصيلي وتحليل الفصول الـ ١٥.
-        </p>
+          <form id="registerStudentForm" class="config-form">
+            <div class="config-input-wrap">
+              <input
+                id="newStudentNameInput"
+                type="text"
+                class="input"
+                placeholder="اسم الطالب (مثال: يوسف طارق)"
+                aria-label="اسم الطالب"
+                autocomplete="off"
+              />
+            </div>
+            <button type="submit" id="generateStudentBtn" class="btn btn-primary">
+              توليد الكود وربط بالشيت
+            </button>
+          </form>
 
-        <div id="errorBanner" class="error-banner" role="alert"></div>
-      </section>
+          <div id="generatorError" class="error-banner" role="alert"></div>
+
+          <!-- نتيجة التوليد مع زر النسخ السريع -->
+          <div id="generatedResultBox" class="generated-result" aria-live="polite">
+            <div class="generated-info">
+              <span class="generated-line">
+                الاسم: <strong id="generatedNameOut">—</strong>
+              </span>
+              <span class="generated-line">
+                كود الدخول: <span id="generatedCodeOut" class="generated-code tabular-nums">—</span>
+              </span>
+            </div>
+
+            <div class="generated-actions">
+              <span id="copyConfirmBadge" class="copy-confirm">تم النسخ!</span>
+              <button type="button" id="copyCredentialsBtn" class="btn btn-jade">
+                نسخ الاسم والكود
+              </button>
+            </div>
+          </div>
+
+          <p class="config-hint">
+            يولّد كوداً فريداً ويربط الطالب تلقائياً بجدول البيانات لتسجيل الدخول الفوري دون تعديل
+            الكود.
+          </p>
+        </section>
+
+        <!-- بطاقة إعداد رابط جدول البيانات -->
+        <section class="neo-frame config-panel" aria-label="إعداد رابط الربط مع جداول البيانات">
+          <div class="config-header">
+            <h2 class="config-title">رابط مزامنة جدول بيانات المعلم</h2>
+            <span id="connectionStatus" class="config-status status-preview">
+              وضع المعاينة التجريبية (لم يتم إدخال الرابط بعد)
+            </span>
+          </div>
+
+          <form id="urlConfigForm" class="config-form">
+            <div class="config-input-wrap">
+              <input
+                id="scriptUrlInput"
+                type="url"
+                class="input input-ltr"
+                placeholder="الصق رابط تطبيق الويب الخاص بجدول البيانات هنا..."
+                autocomplete="off"
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">حفظ الرابط وجلب البيانات</button>
+            <button type="button" id="clearUrlBtn" class="btn btn-ghost">مسح الرابط</button>
+          </form>
+
+          <p class="config-hint">
+            يُحفظ الرابط محلياً في متصفح المعلم فقط. اضغط على اسم أي طالب في الجدول أدناه لفتح
+            بروفايل الطالب التفصيلي وتحليل الفصول الـ ١٥.
+          </p>
+
+          <div id="errorBanner" class="error-banner" role="alert"></div>
+        </section>
+      </div>
 
       <!-- بطاقات مؤشرات الأداء العليا -->
       <section class="kpi-grid" aria-label="ملخص مؤشرات الصف">
@@ -981,6 +1109,7 @@
         var DEFAULT_SCRIPT_WEB_APP_URL = '';
         var STORAGE_URL_KEY = 'teacher_dashboard_sheets_url_v1';
         var STORAGE_THEME_KEY = 'teacher_dashboard_theme_v1';
+        var LOCAL_REGISTERED_STUDENTS_KEY = 'chinese_portal_registered_students_v1';
 
         var CHAPTERS_META = [
           { id: 1, zh: '一', ar: 'الفصل الأول' },
@@ -1104,7 +1233,8 @@
           sortField: 'accuracyPercent',
           sortDir: 'desc',
           isLoading: false,
-          selectedStudent: null
+          selectedStudent: null,
+          lastGenerated: null
         };
 
         var elHtml = document.documentElement;
@@ -1112,6 +1242,18 @@
         var elThemeLabel = document.getElementById('themeToggleLabel');
         var elRefreshBtn = document.getElementById('refreshBtn');
         var elRefreshLabel = document.getElementById('refreshBtnLabel');
+
+        var elRegisterForm = document.getElementById('registerStudentForm');
+        var elNewStudentName = document.getElementById('newStudentNameInput');
+        var elGenerateBtn = document.getElementById('generateStudentBtn');
+        var elGeneratorStatus = document.getElementById('generatorStatus');
+        var elGeneratorError = document.getElementById('generatorError');
+        var elGeneratedResultBox = document.getElementById('generatedResultBox');
+        var elGeneratedNameOut = document.getElementById('generatedNameOut');
+        var elGeneratedCodeOut = document.getElementById('generatedCodeOut');
+        var elCopyCredentialsBtn = document.getElementById('copyCredentialsBtn');
+        var elCopyConfirmBadge = document.getElementById('copyConfirmBadge');
+
         var elUrlForm = document.getElementById('urlConfigForm');
         var elUrlInput = document.getElementById('scriptUrlInput');
         var elClearUrlBtn = document.getElementById('clearUrlBtn');
@@ -1145,6 +1287,8 @@
           document.querySelectorAll('.table-section thead th[data-sort]')
         );
 
+        var copyTimerId = null;
+
         function getSavedUrl() {
           try {
             var stored = localStorage.getItem(STORAGE_URL_KEY);
@@ -1157,6 +1301,32 @@
         function saveUrl(url) {
           try {
             localStorage.setItem(STORAGE_URL_KEY, url.trim());
+          } catch (e) {
+            // تجاهل
+          }
+        }
+
+        function loadLocallyRegisteredStudents() {
+          try {
+            var raw = localStorage.getItem(LOCAL_REGISTERED_STUDENTS_KEY);
+            if (!raw) return [];
+            var parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (e) {
+            return [];
+          }
+        }
+
+        function saveLocallyRegisteredStudent(studentObj) {
+          try {
+            var list = loadLocallyRegisteredStudents();
+            var exists = list.some(function (s) {
+              return String(s.studentCode || '').toLowerCase() === studentObj.studentCode.toLowerCase();
+            });
+            if (!exists) {
+              list.push(studentObj);
+              localStorage.setItem(LOCAL_REGISTERED_STUDENTS_KEY, JSON.stringify(list));
+            }
           } catch (e) {
             // تجاهل
           }
@@ -1197,6 +1367,16 @@
           elErrorBanner.classList.add('visible');
         }
 
+        function showGeneratorError(msg) {
+          if (!msg) {
+            elGeneratorError.textContent = '';
+            elGeneratorError.classList.remove('visible');
+            return;
+          }
+          elGeneratorError.textContent = msg;
+          elGeneratorError.classList.add('visible');
+        }
+
         function escapeHtml(text) {
           return String(text)
             .replace(/&/g, '&amp;')
@@ -1234,6 +1414,27 @@
         function formatHours(minutes) {
           var hrs = minutes / 60;
           return hrs.toFixed(1) + ' ساعة';
+        }
+
+        function generateUniqueStudentCode() {
+          var existingCodes = {};
+          state.students.forEach(function (s) {
+            existingCodes[String(s.studentCode || '').toUpperCase()] = true;
+          });
+          loadLocallyRegisteredStudents().forEach(function (s) {
+            existingCodes[String(s.studentCode || '').toUpperCase()] = true;
+          });
+
+          var code = '';
+          for (var attempt = 0; attempt < 200; attempt++) {
+            var digits = String(Math.floor(1000 + Math.random() * 9000));
+            var candidate = 'HSK-' + digits;
+            if (!existingCodes[candidate]) {
+              code = candidate;
+              break;
+            }
+          }
+          return code || 'HSK-' + String(Date.now()).slice(-4);
         }
 
         function parseChaptersBreakdown(raw) {
@@ -1315,6 +1516,20 @@
             lastActive: row.lastActive ? String(row.lastActive) : '',
             chaptersBreakdown: parseChaptersBreakdown(row.chaptersBreakdown)
           };
+        }
+
+        function mergeUniqueStudents(baseList, extraList) {
+          var map = {};
+          var merged = [];
+          baseList.concat(extraList).forEach(function (item, idx) {
+            var norm = normalizeStudentRow(item, idx);
+            var key = norm.studentCode.toLowerCase();
+            if (!map[key]) {
+              map[key] = true;
+              merged.push(norm);
+            }
+          });
+          return merged;
         }
 
         function renderKPIs(students) {
@@ -1425,7 +1640,7 @@
                 '<span class="row-drilldown-hint">اضغط لعرض تحليل الفصول الـ ١٥</span>' +
                 '</div>' +
                 '</td>' +
-                '<td class="tabular-nums">' + escapeHtml(s.studentCode) + '</td>' +
+                '<td class="tabular-nums" dir="ltr" style="text-align:right"><strong>' + escapeHtml(s.studentCode) + '</strong></td>' +
                 '<td class="tabular-nums"><strong>' + s.totalSolved + '</strong></td>' +
                 '<td class="tabular-nums tone-jade"><strong>' + s.correctCount + '</strong></td>' +
                 '<td class="tabular-nums tone-cinnabar"><strong>' + s.wrongCount + '</strong></td>' +
@@ -1541,12 +1756,118 @@
           elConnectionStatus.textContent = text;
         }
 
+        function copyTextSafe(text, onSuccess) {
+          if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard
+              .writeText(text)
+              .then(onSuccess)
+              .catch(function () {
+                fallbackCopy(text, onSuccess);
+              });
+          } else {
+            fallbackCopy(text, onSuccess);
+          }
+        }
+
+        function fallbackCopy(text, onSuccess) {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          try {
+            document.execCommand('copy');
+            onSuccess();
+          } catch (e) {
+            // تجاهل
+          }
+          document.body.removeChild(ta);
+        }
+
+        function handleRegisterStudent(e) {
+          e.preventDefault();
+          showGeneratorError('');
+
+          var studentName = elNewStudentName.value.trim();
+          if (!studentName) {
+            showGeneratorError('يرجى كتابة اسم الطالب أولاً قبل توليد الكود.');
+            elNewStudentName.focus();
+            return;
+          }
+
+          var studentCode = generateUniqueStudentCode();
+          var studentId = studentCode;
+          var nowIso = new Date().toISOString();
+
+          var newStudentRecord = {
+            studentId: studentId,
+            studentName: studentName,
+            studentCode: studentCode,
+            totalSolved: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            accuracyPercent: 0,
+            activeMinutes: 0,
+            overallProgressPercent: 0,
+            lastActive: nowIso,
+            chaptersBreakdown: makeMockBreakdown([])
+          };
+
+          // حفظ فوري محلياً وتحديث الجدول والمؤشرات مباشرة
+          saveLocallyRegisteredStudent(newStudentRecord);
+          state.students = [normalizeStudentRow(newStudentRecord, state.students.length)].concat(
+            state.students
+          );
+          renderKPIs(state.students);
+          renderTable();
+
+          // إظهار بطاقة النتيجة وزر النسخ
+          state.lastGenerated = { name: studentName, code: studentCode };
+          elGeneratedNameOut.textContent = studentName;
+          elGeneratedCodeOut.textContent = studentCode;
+          elCopyConfirmBadge.classList.remove('visible');
+          elGeneratedResultBox.classList.add('visible');
+          elNewStudentName.value = '';
+
+          // إرسال الطلب الفوري إلى Google Sheets عند وجود رابط محفوظ
+          var url = getSavedUrl();
+          if (url) {
+            elGenerateBtn.disabled = true;
+            elGeneratorStatus.textContent = 'جارٍ الربط بالشيت...';
+            fetch(url, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({
+                action: 'registerStudent',
+                studentId: studentId,
+                studentName: studentName,
+                studentCode: studentCode
+              })
+            })
+              .then(function () {
+                elGeneratorStatus.textContent = 'تم التسجيل والربط بالشيت';
+              })
+              .catch(function () {
+                elGeneratorStatus.textContent = 'حُفظ محلياً (تعذر الاتصال بالشيت)';
+              })
+              .finally(function () {
+                elGenerateBtn.disabled = false;
+              });
+          } else {
+            elGeneratorStatus.textContent = 'تم التوليد والحفظ محلياً';
+          }
+        }
+
         function fetchStudentData() {
           showError('');
           var url = getSavedUrl();
+          var localRegistered = loadLocallyRegisteredStudents();
 
           if (!url) {
-            state.students = SAMPLE_STUDENTS.map(normalizeStudentRow);
+            state.students = mergeUniqueStudents(localRegistered, SAMPLE_STUDENTS);
             updateConnectionStatus(
               'status-preview',
               'وضع المعاينة التجريبية (أضف رابط الجدول لعرض البيانات الفعلية)'
@@ -1576,7 +1897,7 @@
                     ? data.rows
                     : [];
 
-              state.students = rawList.map(normalizeStudentRow);
+              state.students = mergeUniqueStudents(rawList, localRegistered);
               updateConnectionStatus('status-live', 'متصل بجدول بيانات المعلم');
               elLastFetch.textContent =
                 'آخر تحديث: ' +
@@ -1590,7 +1911,7 @@
                 'تعذر قراءة البيانات من رابط تطبيق الويب. تأكد من نشر سكربت الجلب بصلاحية الوصول للجميع، وسيتم عرض البيانات الحالية مؤقتاً.'
               );
               if (state.students.length === 0) {
-                state.students = SAMPLE_STUDENTS.map(normalizeStudentRow);
+                state.students = mergeUniqueStudents(localRegistered, SAMPLE_STUDENTS);
                 renderKPIs(state.students);
                 renderTable();
               }
@@ -1608,6 +1929,25 @@
 
         elRefreshBtn.addEventListener('click', function () {
           fetchStudentData();
+        });
+
+        elRegisterForm.addEventListener('submit', handleRegisterStudent);
+
+        elCopyCredentialsBtn.addEventListener('click', function () {
+          if (!state.lastGenerated) return;
+          var message =
+            'الاسم: ' +
+            state.lastGenerated.name +
+            ' | كود الدخول: ' +
+            state.lastGenerated.code;
+
+          copyTextSafe(message, function () {
+            elCopyConfirmBadge.classList.add('visible');
+            if (copyTimerId) clearTimeout(copyTimerId);
+            copyTimerId = setTimeout(function () {
+              elCopyConfirmBadge.classList.remove('visible');
+            }, 2500);
+          });
         });
 
         elUrlForm.addEventListener('submit', function (e) {
