@@ -768,7 +768,8 @@ export function DrillSessionRunner({ source, onExit }: DrillSessionRunnerProps) 
       {/* بطاقة التغذية الراجعة الفورية في وضع التدريب للأسئلة الاختيارية */}
       {mode === 'practice' &&
         isCurrentLocked &&
-        currentQuestion.drillType !== 'sentence-builder' && (
+        currentQuestion.drillType !== 'sentence-builder' &&
+        currentQuestion.drillType !== 'fill-in-blank' && (
           <div
             className={`rounded-xl border p-4 flex items-start justify-between gap-3 ${
               currentRecord?.isCorrect

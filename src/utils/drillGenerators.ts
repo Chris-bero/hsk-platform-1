@@ -80,6 +80,7 @@ const EXTRA_PINYIN_LOOKUP: Record<string, string> = {
   您好: 'nín hǎo',
   大家: 'dàjiā',
   你们: 'nǐmen',
+  他们: 'tāmen',
 };
 
 export function shuffleArray<T>(items: T[]): T[] {
