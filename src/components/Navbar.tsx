@@ -15,6 +15,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
   const navItems: { view: AppView; label: string }[] = [
     { view: 'home', label: 'الرئيسية' },
     { view: 'chapters', label: 'الفصول الخمسة عشر' },
+    { view: 'mock-exam', label: 'محاكي امتحان HSK' },
     { view: 'analytics', label: 'صفحتي والإحصائيات' },
   ];
 

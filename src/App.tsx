@@ -6,6 +6,7 @@ import { CustomQuizBuilderView } from './components/CustomQuizBuilderView';
 import { DrillSessionRunner, DrillSessionSource } from './components/drills/DrillSessionRunner';
 import { HomeView } from './components/HomeView';
 import { LoginGate } from './components/LoginGate';
+import { MockExamView } from './components/MockExamView';
 import { Navbar } from './components/Navbar';
 import { AppProvider, useApp } from './context/AppContext';
 import { AppView, ChapterData, CustomQuizConfig, QuizMode, SessionDrillKey } from './types';
@@ -94,6 +95,8 @@ function MainShell() {
           />
         )}
 
+        {view === 'mock-exam' && <MockExamView onBack={() => handleNavigate('home')} />}
+
         {view === 'drill' && sessionSource && (
           <DrillSessionRunner
             source={sessionSource}
@@ -102,7 +105,10 @@ function MainShell() {
         )}
 
         {view === 'analytics' && (
-          <AnalyticsView onStartMistakeReview={handleStartMistakeReview} />
+          <AnalyticsView
+            onStartMistakeReview={handleStartMistakeReview}
+            onOpenMockExam={() => handleNavigate('mock-exam')}
+          />
         )}
       </main>
 

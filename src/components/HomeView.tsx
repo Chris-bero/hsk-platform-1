@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   ArrowLeft,
+  Award,
   BarChart3,
   BookOpen,
   CheckCircle2,
@@ -130,6 +131,38 @@ export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
           </div>
         </div>
       </div>
+
+      {/* بطاقة محاكي امتحان HSK الدولي */}
+      <button
+        type="button"
+        onClick={() => onNavigate('mock-exam')}
+        className="w-full text-right neo-frame rounded-xl p-6 sm:p-7 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C]/50 dark:hover:border-[#EF4444]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-5 transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C]"
+      >
+        <div className="flex items-start gap-4">
+          <span className="cinnabar-seal w-13 h-13 rounded-lg bg-[#B91C1C]/6 dark:bg-[#EF4444]/12 flex items-center justify-center shrink-0">
+            <Award className="w-6 h-6 text-[#B91C1C] dark:text-[#EF4444]" />
+          </span>
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#D97706] dark:text-[#F59E0B]">
+              <span>٤٠ سؤالاً · ٢٠٠ درجة</span>
+              <span aria-hidden="true">·</span>
+              <span>الاستماع ١٥ دقيقة + القراءة والقواعد ١٧ دقيقة</span>
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+              محاكي امتحان HSK الدولي
+            </h2>
+            <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+              خُض تجربة الامتحان الرسمي الكاملة بقسمَين مؤقّتَين وحوارات صوتية بين متحدثَين وتقرير
+              درجات فوري من ٢٠٠ درجة (درجة النجاح ١٢٠).
+            </p>
+          </div>
+        </div>
+
+        <span className="inline-flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] rounded-lg bg-[#B91C1C] dark:bg-[#EF4444] text-white text-sm font-bold shrink-0 self-start sm:self-center">
+          <span>دخول المحاكي</span>
+          <ArrowLeft className="w-4 h-4" />
+        </span>
+      </button>
 
       {/* بطاقتا الأدوات السريعة: تدريب واختبار مخصص + مراجعة أخطائي */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

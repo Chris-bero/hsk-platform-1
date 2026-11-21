@@ -4,11 +4,19 @@ export interface Student {
   code: string;
 }
 
+export interface VocabSyllable {
+  hanzi: string;
+  pinyin: string;
+  tone: number;
+}
+
 export interface VocabItem {
   id: string;
   hanzi: string;
   pinyin: string;
   arabic: string;
+  syllables?: VocabSyllable[];
+  partOfSpeech?: string;
   /** Optional custom tone variants for Hanzi -> Pinyin drill */
   toneVariants?: [string, string];
   /** Optional custom similar-syllable distractors for Hanzi -> Pinyin drill */
@@ -58,6 +66,7 @@ export type AppView =
   | 'chapters'
   | 'chapter-hub'
   | 'custom-builder'
+  | 'mock-exam'
   | 'drill'
   | 'analytics';
 
@@ -147,6 +156,21 @@ export interface ChapterStatEntry {
   completedDrills: DrillType[];
 }
 
+export interface MockExamAttempt {
+  id: string;
+  completedAt: string;
+  listeningCorrect: number;
+  listeningTotal: number;
+  listeningScore: number;
+  readingCorrect: number;
+  readingTotal: number;
+  readingScore: number;
+  totalScore: number;
+  maxScore: number;
+  passed: boolean;
+  elapsedSeconds: number;
+}
+
 export interface StudentProgress {
   studentId: string;
   totalSolved: number;
@@ -159,6 +183,7 @@ export interface StudentProgress {
   drillTimeSeconds: Record<DrillType, number>;
   chapterStats: Record<number, ChapterStatEntry>;
   mistakes: MistakeItem[];
+  mockExamHistory?: MockExamAttempt[];
 }
 
 export interface SheetsSyncPayload {

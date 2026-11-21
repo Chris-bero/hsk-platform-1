@@ -15,6 +15,7 @@ import {
   DrillStatEntry,
   DrillType,
   MistakeItem,
+  MockExamAttempt,
   QuestionAnswerRecord,
   SheetsSyncPayload,
   Student,
@@ -67,6 +68,7 @@ function createEmptyProgress(studentId: string): StudentProgress {
     drillTimeSeconds,
     chapterStats,
     mistakes: [],
+    mockExamHistory: [],
   };
 }
 
@@ -113,6 +115,7 @@ function loadStudentProgress(studentId: string): StudentProgress {
       drillTimeSeconds: mergedDrillTime,
       chapterStats: mergedChapterStats,
       mistakes: cleanedMistakes,
+      mockExamHistory: Array.isArray(parsed.mockExamHistory) ? parsed.mockExamHistory : [],
       studyDates: Array.isArray(parsed.studyDates) ? parsed.studyDates : fallback.studyDates,
     };
   } catch {
@@ -217,6 +220,10 @@ interface AppContextValue {
     records: QuestionAnswerRecord[],
     drillElapsedSeconds?: Partial<Record<DrillType, number>>,
     options?: { isMistakeReview?: boolean }
+  ) => Promise<SyncResult | null>;
+  recordMockExamAttempt: (
+    attempt: MockExamAttempt,
+    records: QuestionAnswerRecord[]
   ) => Promise<SyncResult | null>;
 }
 
@@ -500,6 +507,92 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [currentStudent, progress]
   );
 
+  const recordMockExamAttempt = useCallback(
+    async (
+      attempt: MockExamAttempt,
+      records: QuestionAnswerRecord[]
+    ): Promise<SyncResult | null> => {
+      if (!currentStudent || !progress) return null;
+
+      const addedSolved = records.length;
+      const addedCorrect = records.filter((r) => r.isCorrect).length;
+      const addedWrong = addedSolved - addedCorrect;
+
+      const updatedChapterStats: Record<number, ChapterStatEntry> = {
+        ...progress.chapterStats,
+      };
+      const updatedDrillStats: Record<DrillType, DrillStatEntry> = {
+        ...progress.drillStats,
+      };
+
+      for (const rec of records) {
+        const existingDrill = updatedDrillStats[rec.drillType] ?? { attempted: 0, correct: 0 };
+        updatedDrillStats[rec.drillType] = {
+          attempted: existingDrill.attempted + 1,
+          correct: existingDrill.correct + (rec.isCorrect ? 1 : 0),
+        };
+
+        const prevCh = updatedChapterStats[rec.chapterId] ?? {
+          solved: 0,
+          correct: 0,
+          completedDrills: [],
+        };
+        updatedChapterStats[rec.chapterId] = {
+          solved: prevCh.solved + 1,
+          correct: prevCh.correct + (rec.isCorrect ? 1 : 0),
+          completedDrills: prevCh.completedDrills,
+        };
+      }
+
+      const nowIso = attempt.completedAt || new Date().toISOString();
+      const today = getTodayIsoDate();
+      const studyDates = progress.studyDates.includes(today)
+        ? progress.studyDates
+        : [...progress.studyDates, today];
+
+      const prevHistory = progress.mockExamHistory ?? [];
+      const updatedProgress: StudentProgress = {
+        ...progress,
+        totalSolved: progress.totalSolved + addedSolved,
+        correctCount: progress.correctCount + addedCorrect,
+        wrongCount: progress.wrongCount + addedWrong,
+        studyDates,
+        lastActive: nowIso,
+        drillStats: updatedDrillStats,
+        chapterStats: updatedChapterStats,
+        mockExamHistory: [attempt, ...prevHistory].slice(0, 25),
+      };
+
+      saveStudentProgress(updatedProgress);
+      setProgress(updatedProgress);
+
+      const accuracyPercent =
+        updatedProgress.totalSolved > 0
+          ? Math.round((updatedProgress.correctCount / updatedProgress.totalSolved) * 100)
+          : 0;
+      const overallProgressPercent = computeOverallProgress(updatedProgress);
+      const activeMinutes = Math.round(updatedProgress.activeSeconds / 60);
+
+      const payload: SheetsSyncPayload = {
+        studentId: currentStudent.id,
+        studentName: currentStudent.name,
+        studentCode: currentStudent.code,
+        totalSolved: updatedProgress.totalSolved,
+        correctCount: updatedProgress.correctCount,
+        wrongCount: updatedProgress.wrongCount,
+        accuracyPercent,
+        activeMinutes,
+        overallProgressPercent,
+        lastActive: nowIso,
+      };
+
+      const result = await syncStudentStatsToSheets(payload);
+      setLastSyncResult(result);
+      return result;
+    },
+    [currentStudent, progress]
+  );
+
   const analytics = useMemo<ComputedAnalytics>(() => {
     if (!progress) {
       return {
@@ -561,6 +654,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     lastSyncResult,
     addDrillElapsedTime,
     recordCompletedSession,
+    recordMockExamAttempt,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
