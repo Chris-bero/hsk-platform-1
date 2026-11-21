@@ -7,6 +7,8 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
+  Eye,
+  EyeOff,
   Headphones,
   Lock,
   RotateCcw,
@@ -44,7 +46,7 @@ function formatTimer(seconds: number): string {
 }
 
 export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunnerProps) {
-  const { recordHskFixedMockExam } = useApp();
+  const { showPinyin, togglePinyin, recordHskFixedMockExam } = useApp();
 
   const listeningQuestions = useMemo(
     () => paper.questions.filter((q) => q.section === 'listening'),
@@ -60,6 +62,9 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
   const [remainingSeconds, setRemainingSeconds] = useState(paper.listeningDurationSeconds);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [playsUsed, setPlaysUsed] = useState<Record<number, number>>({});
+  const [showListeningQuestionText, setShowListeningQuestionText] = useState<
+    Record<number, boolean>
+  >({});
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [activeSpeaker, setActiveSpeaker] = useState<'A' | 'B' | null>(null);
   const [reviewFilter, setReviewFilter] = useState<ReviewFilter>('all');
@@ -180,6 +185,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
     startedAtRef.current = Date.now();
     setAnswers({});
     setPlaysUsed({});
+    setShowListeningQuestionText({});
     setSectionIndex(0);
     setRemainingSeconds(paper.listeningDurationSeconds);
     setPhase('listening');
@@ -541,6 +547,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                           <RubyChinese
                             hanzi={q.audioSingle.hanzi}
                             pinyin={q.audioSingle.pinyin}
+                            showPinyin={showPinyin}
                             className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                           />
                           <p className="text-xs text-[#57534E] dark:text-[#A8A29E] mt-1">
@@ -560,6 +567,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                                 <RubyChinese
                                   hanzi={t.hanzi}
                                   pinyin={t.pinyin}
+                                  showPinyin={showPinyin}
                                   className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                                 />
                               </div>
@@ -576,6 +584,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                           <RubyChinese
                             hanzi={q.questionZh}
                             pinyin={q.questionPinyin}
+                            showPinyin={showPinyin}
                             className="text-sm font-bold text-[#B91C1C] dark:text-[#EF4444]"
                           />
                         </div>
@@ -595,6 +604,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                         <RubyChinese
                           hanzi={q.promptZh}
                           pinyin={q.promptPinyin}
+                          showPinyin={showPinyin}
                           className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                         />
                       )}
@@ -603,6 +613,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                           <RubyChinese
                             hanzi={q.questionZh}
                             pinyin={q.questionPinyin}
+                            showPinyin={showPinyin}
                             className="text-sm font-bold text-[#B91C1C] dark:text-[#EF4444]"
                           />
                         </div>
@@ -714,7 +725,21 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={togglePinyin}
+            aria-pressed={showPinyin}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${
+              showPinyin
+                ? 'border-[#D97706]/40 bg-[#D97706]/10 text-[#92400E] dark:text-[#F59E0B]'
+                : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-[#F9F6F0] dark:bg-[#121110] text-[#57534E] dark:text-[#A8A29E]'
+            }`}
+          >
+            {showPinyin ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            <span>{showPinyin ? 'إخفاء البينين (Pinyin)' : 'إظهار البينين (Pinyin)'}</span>
+          </button>
+
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border font-bold text-sm tabular-nums ${
               isLowTime
@@ -806,12 +831,18 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
       {/* بطاقة السؤال الحالية */}
       <div className="neo-frame rounded-xl p-6 sm:p-8 bg-white dark:bg-[#1E1C1A] space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="font-hanzi font-bold text-[#D97706] dark:text-[#F59E0B]">
+          <span
+            dir={isInternational ? 'ltr' : 'rtl'}
+            className="font-hanzi font-bold text-[#D97706] dark:text-[#F59E0B]"
+          >
             {isInternational
               ? `${currentQ.partLabelZh} · 第 ${currentQ.number} 题`
               : `السؤال ${currentQ.number} · ${currentQ.partLabelAr}`}
           </span>
-          <span className="tabular-nums font-semibold text-[#57534E] dark:text-[#A8A29E]">
+          <span
+            dir={isInternational ? 'ltr' : 'rtl'}
+            className="tabular-nums font-semibold text-[#57534E] dark:text-[#A8A29E]"
+          >
             {isInternational ? `${currentQ.points} 分` : `${currentQ.points} درجات`}
           </span>
         </div>
@@ -865,21 +896,49 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                 : `مرات الاستماع المتبقية: ${remainingPlays} / ${MAX_LISTENING_PLAYS}`}
             </span>
 
-            {isInternational && currentQ.questionZh && (
-              <div className="pt-2 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 w-full flex justify-center">
-                <RubyChinese
-                  hanzi={currentQ.questionZh}
-                  pinyin={currentQ.questionPinyin}
-                  className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
-                />
-              </div>
-            )}
+            {/* إخفاء نص السؤال (问：...) افتراضياً في 听力第四部分 مع زر إظهار اختياري */}
+            {currentQ.partId === 'listening-p4' && (currentQ.questionZh || currentQ.questionAr) && (
+              <div className="pt-3 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 w-full flex flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowListeningQuestionText((prev) => ({
+                      ...prev,
+                      [currentQ.number]: !prev[currentQ.number],
+                    }))
+                  }
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-xs font-bold text-[#57534E] dark:text-[#A8A29E] hover:border-[#B91C1C]/45 hover:text-[#B91C1C] dark:hover:text-[#EF4444] transition-colors"
+                >
+                  {showListeningQuestionText[currentQ.number] ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5" />
+                      <span>إخفاء نص السؤال / 隐藏问题</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>إظهار نص السؤال / 显示问题</span>
+                    </>
+                  )}
+                </button>
 
-            {!isInternational && currentQ.questionAr && (
-              <div className="pt-2 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 w-full">
-                <p className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-                  {currentQ.questionAr}
-                </p>
+                {showListeningQuestionText[currentQ.number] && (
+                  <div className="w-full flex flex-col items-center gap-1.5">
+                    {isInternational && currentQ.questionZh && (
+                      <RubyChinese
+                        hanzi={currentQ.questionZh}
+                        pinyin={currentQ.questionPinyin}
+                        showPinyin={showPinyin}
+                        className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
+                      />
+                    )}
+                    {!isInternational && currentQ.questionAr && (
+                      <p className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                        {currentQ.questionAr}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -893,6 +952,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                 <RubyChinese
                   hanzi={currentQ.promptZh}
                   pinyin={currentQ.promptPinyin}
+                  showPinyin={showPinyin}
                   className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                 />
               </div>
@@ -909,6 +969,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                 <RubyChinese
                   hanzi={currentQ.questionZh}
                   pinyin={currentQ.questionPinyin}
+                  showPinyin={showPinyin}
                   className="text-lg sm:text-xl font-bold text-[#B91C1C] dark:text-[#EF4444]"
                 />
               </div>
@@ -958,7 +1019,9 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                   >
                     {opt.letter}
                   </span>
-                  {opt.sceneId && <SceneCardVisual sceneId={opt.sceneId} className="w-full h-24" />}
+                  {opt.sceneId && (
+                    <SceneCardVisual sceneId={opt.sceneId} className="w-full h-32 sm:h-36" />
+                  )}
                 </button>
               );
             })}
@@ -1002,6 +1065,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                         <RubyChinese
                           hanzi={opt.hanzi}
                           pinyin={opt.pinyin}
+                          showPinyin={showPinyin}
                           className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                         />
                       )
@@ -1009,6 +1073,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
                       <RubyChinese
                         hanzi={opt.hanzi}
                         pinyin={opt.pinyin}
+                        showPinyin={showPinyin}
                         className="text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                       />
                     ) : (

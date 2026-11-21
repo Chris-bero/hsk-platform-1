@@ -3,6 +3,8 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  Eye,
+  EyeOff,
   Headphones,
   RotateCcw,
   Volume2,
@@ -26,10 +28,13 @@ interface HskPatternPracticeRunnerProps {
 }
 
 export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeRunnerProps) {
-  const { recordHskPatternPractice } = useApp();
+  const { showPinyin, togglePinyin, recordHskPatternPractice } = useApp();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
+  const [showListeningQuestionText, setShowListeningQuestionText] = useState<
+    Record<number, boolean>
+  >({});
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [activeSpeaker, setActiveSpeaker] = useState<'A' | 'B' | null>(null);
   const [slowMode, setSlowMode] = useState(false);
@@ -119,6 +124,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
     stopChineseSpeech();
     setCurrentIndex(0);
     setSelectedAnswers({});
+    setShowListeningQuestionText({});
     setFinished(false);
     setRecorded(false);
   };
@@ -210,7 +216,21 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
           <span>العودة إلى بوابة الامتحانات الدولية</span>
         </button>
 
-        <div className="flex items-center gap-3 text-xs tabular-nums">
+        <div className="flex flex-wrap items-center gap-3 text-xs tabular-nums">
+          <button
+            type="button"
+            onClick={togglePinyin}
+            aria-pressed={showPinyin}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors ${
+              showPinyin
+                ? 'border-[#D97706]/40 bg-[#D97706]/10 text-[#92400E] dark:text-[#F59E0B]'
+                : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] text-[#57534E] dark:text-[#A8A29E]'
+            }`}
+          >
+            {showPinyin ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            <span>{showPinyin ? 'إخفاء البينين (Pinyin)' : 'إظهار البينين (Pinyin)'}</span>
+          </button>
+
           <span className="font-hanzi font-bold text-[#B91C1C] dark:text-[#EF4444]">
             {module.codeZh}
           </span>
@@ -226,7 +246,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
       {/* بطاقة السؤال بنمط HSK 3.0 الدولي الخالص (بدون أي نص عربي داخل السؤال والخيارات قبل الإجابة) */}
       <div className="neo-frame rounded-xl p-6 sm:p-8 bg-white dark:bg-[#1E1C1A] space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="font-hanzi text-sm font-bold text-[#D97706] dark:text-[#F59E0B]">
+          <span dir="ltr" className="font-hanzi text-sm font-bold text-[#D97706] dark:text-[#F59E0B]">
             {currentQ.partLabelZh} · 第 {currentIndex + 1} 题
           </span>
           <span className="text-xs font-semibold text-[#57534E] dark:text-[#A8A29E]">
@@ -289,13 +309,40 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
               </div>
             )}
 
-            {currentQ.questionZh && (
-              <div className="pt-2 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 w-full flex justify-center">
-                <RubyChinese
-                  hanzi={currentQ.questionZh}
-                  pinyin={currentQ.questionPinyin}
-                  className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
-                />
+            {/* إخفاء نص السؤال (问：...) افتراضياً في 听力第四部分 مع زر إظهار اختياري */}
+            {currentQ.partId === 'listening-p4' && currentQ.questionZh && (
+              <div className="pt-3 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 w-full flex flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowListeningQuestionText((prev) => ({
+                      ...prev,
+                      [currentQ.number]: !prev[currentQ.number],
+                    }))
+                  }
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-xs font-bold text-[#57534E] dark:text-[#A8A29E] hover:border-[#B91C1C]/45 hover:text-[#B91C1C] dark:hover:text-[#EF4444] transition-colors"
+                >
+                  {showListeningQuestionText[currentQ.number] ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5" />
+                      <span>إخفاء نص السؤال / 隐藏问题</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>إظهار نص السؤال / 显示问题</span>
+                    </>
+                  )}
+                </button>
+
+                {showListeningQuestionText[currentQ.number] && (
+                  <RubyChinese
+                    hanzi={currentQ.questionZh}
+                    pinyin={currentQ.questionPinyin}
+                    showPinyin={showPinyin}
+                    className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
+                  />
+                )}
               </div>
             )}
           </div>
@@ -308,6 +355,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
               <RubyChinese
                 hanzi={currentQ.promptZh}
                 pinyin={currentQ.promptPinyin}
+                showPinyin={showPinyin}
                 className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
               />
             </div>
@@ -316,6 +364,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
                 <RubyChinese
                   hanzi={currentQ.questionZh}
                   pinyin={currentQ.questionPinyin}
+                  showPinyin={showPinyin}
                   className="text-lg sm:text-xl font-bold text-[#B91C1C] dark:text-[#EF4444]"
                 />
               </div>
@@ -363,7 +412,9 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
                   <span className="w-7 h-7 rounded-md bg-[#1C1917]/8 dark:bg-[#F5F2EB]/10 text-xs font-bold flex items-center justify-center text-[#1C1917] dark:text-[#F5F2EB]">
                     {opt.letter}
                   </span>
-                  {opt.sceneId && <SceneCardVisual sceneId={opt.sceneId} className="w-full h-24" />}
+                  {opt.sceneId && (
+                    <SceneCardVisual sceneId={opt.sceneId} className="w-full h-32 sm:h-36" />
+                  )}
                 </button>
               );
             })}
@@ -409,6 +460,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
                       <RubyChinese
                         hanzi={opt.hanzi}
                         pinyin={opt.pinyin}
+                        showPinyin={showPinyin}
                         className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                       />
                     )}
@@ -455,6 +507,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
                 <RubyChinese
                   hanzi={currentQ.audioSingle.hanzi}
                   pinyin={currentQ.audioSingle.pinyin}
+                  showPinyin={showPinyin}
                   className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                 />
               </div>
@@ -473,10 +526,21 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
                     <RubyChinese
                       hanzi={turn.hanzi}
                       pinyin={turn.pinyin}
+                      showPinyin={showPinyin}
                       className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]"
                     />
                   </div>
                 ))}
+                {currentQ.questionZh && (
+                  <div className="pt-2 border-t border-[#1C1917]/10 dark:border-[#F5F2EB]/10">
+                    <RubyChinese
+                      hanzi={currentQ.questionZh}
+                      pinyin={currentQ.questionPinyin}
+                      showPinyin={showPinyin}
+                      className="text-sm font-bold text-[#B91C1C] dark:text-[#EF4444]"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
