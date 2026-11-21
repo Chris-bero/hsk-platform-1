@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { ALL_DRILL_TYPES, CHAPTERS_DATA } from '../data/chaptersData';
+import { ALL_HSK_PATTERN_IDS } from '../data/mockExamsData';
 import { authenticateStudent } from '../data/students';
 import { useActiveStudyTimer } from '../hooks/useActiveStudyTimer';
 import { syncStudentStatsToSheets, SyncResult } from '../services/sheetsSync';
@@ -14,6 +15,9 @@ import {
   ChapterStatEntry,
   DrillStatEntry,
   DrillType,
+  HskMockExamResult,
+  HskPatternId,
+  HskPatternStatEntry,
   MistakeItem,
   MockExamAttempt,
   QuestionAnswerRecord,
@@ -56,6 +60,11 @@ function createEmptyProgress(studentId: string): StudentProgress {
     chapterStats[ch.id] = { solved: 0, correct: 0, completedDrills: [] };
   }
 
+  const hskPatternStats = {} as Record<HskPatternId, HskPatternStatEntry>;
+  for (const pid of ALL_HSK_PATTERN_IDS) {
+    hskPatternStats[pid] = { attempted: 0, correct: 0 };
+  }
+
   return {
     studentId,
     totalSolved: 0,
@@ -69,6 +78,8 @@ function createEmptyProgress(studentId: string): StudentProgress {
     chapterStats,
     mistakes: [],
     mockExamHistory: [],
+    hskPatternStats,
+    hskMockResults: [],
   };
 }
 
@@ -107,6 +118,15 @@ function loadStudentProgress(studentId: string): StudentProgress {
         )
       : [];
 
+    const mergedHskPatternStats = { ...fallback.hskPatternStats! };
+    if (parsed.hskPatternStats) {
+      for (const pid of ALL_HSK_PATTERN_IDS) {
+        if (parsed.hskPatternStats[pid]) {
+          mergedHskPatternStats[pid] = parsed.hskPatternStats[pid];
+        }
+      }
+    }
+
     return {
       ...fallback,
       ...parsed,
@@ -116,6 +136,8 @@ function loadStudentProgress(studentId: string): StudentProgress {
       chapterStats: mergedChapterStats,
       mistakes: cleanedMistakes,
       mockExamHistory: Array.isArray(parsed.mockExamHistory) ? parsed.mockExamHistory : [],
+      hskPatternStats: mergedHskPatternStats,
+      hskMockResults: Array.isArray(parsed.hskMockResults) ? parsed.hskMockResults : [],
       studyDates: Array.isArray(parsed.studyDates) ? parsed.studyDates : fallback.studyDates,
     };
   } catch {
@@ -225,6 +247,12 @@ interface AppContextValue {
     attempt: MockExamAttempt,
     records: QuestionAnswerRecord[]
   ) => Promise<SyncResult | null>;
+  recordHskPatternPractice: (
+    patternId: HskPatternId,
+    attempted: number,
+    correct: number
+  ) => Promise<SyncResult | null>;
+  recordHskFixedMockExam: (result: HskMockExamResult) => Promise<SyncResult | null>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -593,6 +621,127 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [currentStudent, progress]
   );
 
+  // تسجيل نتائج تدريبات أنماط HSK 3.0 بشكل مستقل تماماً عن إحصائيات تدريبات الفصول اليومية
+  const recordHskPatternPractice = useCallback(
+    async (
+      patternId: HskPatternId,
+      attempted: number,
+      correct: number
+    ): Promise<SyncResult | null> => {
+      if (!currentStudent || !progress || attempted <= 0) return null;
+
+      const nowIso = new Date().toISOString();
+      const today = getTodayIsoDate();
+      const studyDates = progress.studyDates.includes(today)
+        ? progress.studyDates
+        : [...progress.studyDates, today];
+
+      const currentPatternStats = { ...(progress.hskPatternStats ?? {}) } as Record<
+        HskPatternId,
+        HskPatternStatEntry
+      >;
+      for (const pid of ALL_HSK_PATTERN_IDS) {
+        if (!currentPatternStats[pid]) {
+          currentPatternStats[pid] = { attempted: 0, correct: 0 };
+        }
+      }
+      currentPatternStats[patternId] = {
+        attempted: currentPatternStats[patternId].attempted + attempted,
+        correct: currentPatternStats[patternId].correct + correct,
+      };
+
+      const updatedProgress: StudentProgress = {
+        ...progress,
+        studyDates,
+        lastActive: nowIso,
+        hskPatternStats: currentPatternStats,
+      };
+
+      saveStudentProgress(updatedProgress);
+      setProgress(updatedProgress);
+
+      const accuracyPercent =
+        updatedProgress.totalSolved > 0
+          ? Math.round((updatedProgress.correctCount / updatedProgress.totalSolved) * 100)
+          : 0;
+      const overallProgressPercent = computeOverallProgress(updatedProgress);
+      const activeMinutes = Math.round(updatedProgress.activeSeconds / 60);
+
+      const payload: SheetsSyncPayload = {
+        studentId: currentStudent.id,
+        studentName: currentStudent.name,
+        studentCode: currentStudent.code,
+        totalSolved: updatedProgress.totalSolved,
+        correctCount: updatedProgress.correctCount,
+        wrongCount: updatedProgress.wrongCount,
+        accuracyPercent,
+        activeMinutes,
+        overallProgressPercent,
+        lastActive: nowIso,
+        hskMockResults: updatedProgress.hskMockResults ?? [],
+        hskPatternStats: currentPatternStats,
+      };
+
+      const result = await syncStudentStatsToSheets(payload);
+      setLastSyncResult(result);
+      return result;
+    },
+    [currentStudent, progress]
+  );
+
+  // تسجيل نتيجة الامتحان التجريبي الموحّد بشكل مستقل تماماً عن تدريبات الفصول اليومية
+  const recordHskFixedMockExam = useCallback(
+    async (examResult: HskMockExamResult): Promise<SyncResult | null> => {
+      if (!currentStudent || !progress) return null;
+
+      const nowIso = examResult.completedAt || new Date().toISOString();
+      const today = getTodayIsoDate();
+      const studyDates = progress.studyDates.includes(today)
+        ? progress.studyDates
+        : [...progress.studyDates, today];
+
+      const prevResults = progress.hskMockResults ?? [];
+      const updatedHskResults = [examResult, ...prevResults].slice(0, 40);
+
+      const updatedProgress: StudentProgress = {
+        ...progress,
+        studyDates,
+        lastActive: nowIso,
+        hskMockResults: updatedHskResults,
+      };
+
+      saveStudentProgress(updatedProgress);
+      setProgress(updatedProgress);
+
+      const accuracyPercent =
+        updatedProgress.totalSolved > 0
+          ? Math.round((updatedProgress.correctCount / updatedProgress.totalSolved) * 100)
+          : 0;
+      const overallProgressPercent = computeOverallProgress(updatedProgress);
+      const activeMinutes = Math.round(updatedProgress.activeSeconds / 60);
+
+      const payload: SheetsSyncPayload = {
+        studentId: currentStudent.id,
+        studentName: currentStudent.name,
+        studentCode: currentStudent.code,
+        totalSolved: updatedProgress.totalSolved,
+        correctCount: updatedProgress.correctCount,
+        wrongCount: updatedProgress.wrongCount,
+        accuracyPercent,
+        activeMinutes,
+        overallProgressPercent,
+        lastActive: nowIso,
+        hskMockResults: updatedHskResults,
+        hskPatternStats: updatedProgress.hskPatternStats ?? ({} as Record<HskPatternId, HskPatternStatEntry>),
+      };
+
+      const syncRes = await syncStudentStatsToSheets(payload);
+      setLastSyncResult(syncRes);
+      return syncRes;
+    },
+    [currentStudent, progress]
+  );
+
   const analytics = useMemo<ComputedAnalytics>(() => {
     if (!progress) {
       return {
@@ -655,6 +804,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addDrillElapsedTime,
     recordCompletedSession,
     recordMockExamAttempt,
+    recordHskPatternPractice,
+    recordHskFixedMockExam,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

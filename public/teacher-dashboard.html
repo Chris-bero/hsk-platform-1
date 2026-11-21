@@ -941,6 +941,123 @@
         font-weight: 700;
       }
 
+      /* بوابة HSK الدولية للمعلم */
+      .hsk-viewer-controls {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .hsk-filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .hsk-select {
+        min-height: 40px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background-color: var(--canvas);
+        color: var(--ink);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .hsk-questions-list {
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hsk-q-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background-color: var(--canvas);
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .hsk-q-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .hsk-transcript-box {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background-color: var(--surface);
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .hsk-options-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      @media (max-width: 760px) {
+        .hsk-options-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .hsk-opt-item {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background-color: var(--surface);
+        padding: 10px 12px;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .hsk-opt-item.correct {
+        border-color: var(--jade);
+        background-color: var(--jade-soft);
+      }
+
+      .hsk-pattern-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+
+      .hsk-model-attempt {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        padding: 4px 0;
+        border-bottom: 1px dashed var(--border-subtle);
+      }
+
+      .hsk-model-attempt:last-child {
+        border-bottom: none;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         * {
           transition: none !important;
@@ -1003,6 +1120,16 @@
           aria-controls="tabPanelBank"
         >
           بنك أسئلة المنهج
+        </button>
+        <button
+          type="button"
+          id="tabBtnHsk"
+          class="tab-btn"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tabPanelHsk"
+        >
+          بوابة HSK الدولية والإحصائيات
         </button>
       </nav>
 
@@ -1214,6 +1341,100 @@
           </div>
         </section>
       </div>
+
+      <!-- التبويب الثالث: بوابة HSK الدولية والإحصائيات (منفصل تماماً عن إحصائيات تدريبات الفصول اليومية) -->
+      <div id="tabPanelHsk" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabBtnHsk">
+        <!-- مؤشرات بوابة HSK الدولية -->
+        <section class="kpi-grid" aria-label="ملخص أداء الطلاب في بوابة HSK 3.0 الدولية">
+          <article class="kpi-card">
+            <span class="kpi-label">إجمالي الامتحانات التجريبية المنجزة</span>
+            <span id="hskKpiTotalExams" class="kpi-value tabular-nums tone-cinnabar">0</span>
+            <span id="hskKpiStudentsAttempted" class="kpi-sub tabular-nums">عبر 0 طالب</span>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">نسبة النجاح الدولية (١٢٠+ / ٢٠٠)</span>
+            <span id="hskKpiPassRate" class="kpi-value tabular-nums tone-jade">0%</span>
+            <span id="hskKpiPassCountSub" class="kpi-sub tabular-nums">0 ناجح · 0 لم يجتز</span>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">متوسط الدرجة الإجمالية (من ٢٠٠)</span>
+            <span id="hskKpiAvgScore" class="kpi-value tabular-nums tone-gold">0 / 200</span>
+            <span class="kpi-sub">متوسط الاستماع + القراءة</span>
+          </article>
+
+          <article class="kpi-card">
+            <span class="kpi-label">متوسط دقة تدريبات أنماط HSK 3.0</span>
+            <span id="hskKpiPatternAvg" class="kpi-value tabular-nums">0%</span>
+            <span class="kpi-sub">عبر الأنماط السبعة المعتمدة</span>
+          </article>
+        </section>
+
+        <!-- جدول تحليلات الطلاب في الامتحانات الدولية وأنماط HSK 3.0 -->
+        <section class="table-section" aria-label="جدول تحليلات الطلاب في بوابة HSK 3.0">
+          <div class="table-toolbar">
+            <div>
+              <h2 class="config-title">تحليلات الطلاب في الامتحانات الدولية وتدريبات HSK 3.0</h2>
+              <span class="table-meta">إحصائيات مستقلة بالكامل عن تدريبات الفصول اليومية</span>
+            </div>
+            <div class="hsk-filter-group">
+              <input
+                id="hskSearchInput"
+                type="search"
+                class="input"
+                style="width:230px; min-height:38px"
+                placeholder="بحث باسم الطالب أو الكود..."
+                aria-label="بحث في طلاب HSK"
+              />
+              <select id="hskTrackFilter" class="hsk-select" aria-label="تصفية المسار">
+                <option value="all">جميع المسارات (دولي + عربي)</option>
+                <option value="international">النماذج الدولية HSK 3.0</option>
+                <option value="arabic">النماذج التطبيقية العربية</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>الطالب والرمز</th>
+                  <th>نتائج النماذج (الاستماع /100 · القراءة /100 · المجموع /200 · الحالة)</th>
+                  <th>دقة أنماط HSK 3.0 السبعة (听力1–4 · 阅读1–4)</th>
+                  <th>متوسط الأنماط</th>
+                </tr>
+              </thead>
+              <tbody id="hskStudentsTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- مستعرض نماذج الامتحانات ونصوص الاستماع ومفتاح الإجابة -->
+        <section class="table-section" aria-label="مستعرض نماذج الامتحانات ونصوص الاستماع ومفتاح الإجابة">
+          <div class="hsk-viewer-controls">
+            <div>
+              <h2 class="config-title">مستعرض نماذج الامتحانات ونصوص الاستماع ومفتاح الإجابة</h2>
+              <span class="table-meta">استعرض جميع الأسئلة الـ ٤٠ ونصوص الاستماع المخفية والإجابات الصحيحة والترجمة العربية</span>
+            </div>
+
+            <div class="hsk-filter-group">
+              <select id="hskViewerTrackSelect" class="hsk-select" aria-label="اختيار المسار">
+                <option value="international">النماذج الدولية المعتمدة (١–١٠)</option>
+                <option value="arabic">النماذج التطبيقية العربية (١–٥)</option>
+              </select>
+              <select id="hskViewerModelSelect" class="hsk-select" aria-label="اختيار النموذج"></select>
+              <select id="hskViewerSectionSelect" class="hsk-select" aria-label="تصفية القسم">
+                <option value="all">الكل (٤٠ سؤالاً)</option>
+                <option value="listening">الاستماع (١–٢٠)</option>
+                <option value="reading">القراءة (٢١–٤٠)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="hskViewerContainer" class="hsk-questions-list"></div>
+        </section>
+      </div>
     </main>
 
     <!-- نافذة بروفايل الطالب التفصيلي (تحليل الفصول الـ 15) -->
@@ -1383,7 +1604,31 @@
               { chapterId: 3, solved: 18, correct: 11, wrong: 7 },
               { chapterId: 4, solved: 16, correct: 14, wrong: 2 },
               { chapterId: 5, solved: 14, correct: 11, wrong: 3 }
-            ])
+            ]),
+            hskMockResults: [
+              {
+                id: 'demo-hsk-1',
+                examId: 'intl-model-1',
+                examTitle: 'النموذج الدولي ١ — HSK 3.0 المعتمد',
+                examTrack: 'international',
+                modelNumber: 1,
+                completedAt: todayIso,
+                listeningScore: 80,
+                readingScore: 75,
+                totalScore: 155,
+                maxScore: 200,
+                passed: true
+              }
+            ],
+            hskPatternStats: {
+              'listening-p1': { attempted: 10, correct: 9 },
+              'listening-p2': { attempted: 10, correct: 8 },
+              'listening-p3': { attempted: 5, correct: 4 },
+              'listening-p4': { attempted: 5, correct: 4 },
+              'reading-p1': { attempted: 10, correct: 9 },
+              'reading-p2': { attempted: 5, correct: 4 },
+              'reading-p3-4': { attempted: 10, correct: 7 }
+            }
           },
           {
             studentId: 'ST02',
@@ -1404,7 +1649,44 @@
               { chapterId: 5, solved: 18, correct: 16, wrong: 2 },
               { chapterId: 6, solved: 16, correct: 15, wrong: 1 },
               { chapterId: 7, solved: 14, correct: 11, wrong: 3 }
-            ])
+            ]),
+            hskMockResults: [
+              {
+                id: 'demo-hsk-2',
+                examId: 'intl-model-1',
+                examTitle: 'النموذج الدولي ١ — HSK 3.0 المعتمد',
+                examTrack: 'international',
+                modelNumber: 1,
+                completedAt: todayIso,
+                listeningScore: 95,
+                readingScore: 90,
+                totalScore: 185,
+                maxScore: 200,
+                passed: true
+              },
+              {
+                id: 'demo-hsk-2b',
+                examId: 'ar-model-1',
+                examTitle: 'النموذج التطبيقي العربي ١',
+                examTrack: 'arabic',
+                modelNumber: 1,
+                completedAt: yesterdayIso,
+                listeningScore: 90,
+                readingScore: 95,
+                totalScore: 185,
+                maxScore: 200,
+                passed: true
+              }
+            ],
+            hskPatternStats: {
+              'listening-p1': { attempted: 10, correct: 10 },
+              'listening-p2': { attempted: 10, correct: 9 },
+              'listening-p3': { attempted: 10, correct: 9 },
+              'listening-p4': { attempted: 10, correct: 9 },
+              'reading-p1': { attempted: 10, correct: 10 },
+              'reading-p2': { attempted: 10, correct: 9 },
+              'reading-p3-4': { attempted: 10, correct: 9 }
+            }
           },
           {
             studentId: 'ST03',
@@ -1421,7 +1703,27 @@
               { chapterId: 1, solved: 20, correct: 16, wrong: 4 },
               { chapterId: 2, solved: 18, correct: 10, wrong: 8 },
               { chapterId: 3, solved: 16, correct: 10, wrong: 6 }
-            ])
+            ]),
+            hskMockResults: [
+              {
+                id: 'demo-hsk-3',
+                examId: 'intl-model-1',
+                examTitle: 'النموذج الدولي ١ — HSK 3.0 المعتمد',
+                examTrack: 'international',
+                modelNumber: 1,
+                completedAt: yesterdayIso,
+                listeningScore: 55,
+                readingScore: 50,
+                totalScore: 105,
+                maxScore: 200,
+                passed: false
+              }
+            ],
+            hskPatternStats: {
+              'listening-p1': { attempted: 5, correct: 3 },
+              'listening-p2': { attempted: 5, correct: 3 },
+              'reading-p1': { attempted: 5, correct: 4 }
+            }
           },
           {
             studentId: 'ST04',
@@ -1502,8 +1804,10 @@
 
         var elTabBtnStudents = document.getElementById('tabBtnStudents');
         var elTabBtnBank = document.getElementById('tabBtnBank');
+        var elTabBtnHsk = document.getElementById('tabBtnHsk');
         var elTabPanelStudents = document.getElementById('tabPanelStudents');
         var elTabPanelBank = document.getElementById('tabPanelBank');
+        var elTabPanelHsk = document.getElementById('tabPanelHsk');
 
         var elBankTotalVocab = document.getElementById('bankTotalVocab');
         var elBankTotalSentences = document.getElementById('bankTotalSentences');
@@ -1511,6 +1815,31 @@
         var elBankPopulatedChapters = document.getElementById('bankPopulatedChapters');
         var elBankDrillsGrid = document.getElementById('bankDrillsGrid');
         var elBankChaptersTableBody = document.getElementById('bankChaptersTableBody');
+
+        var elHskKpiTotalExams = document.getElementById('hskKpiTotalExams');
+        var elHskKpiStudentsAttempted = document.getElementById('hskKpiStudentsAttempted');
+        var elHskKpiPassRate = document.getElementById('hskKpiPassRate');
+        var elHskKpiPassCountSub = document.getElementById('hskKpiPassCountSub');
+        var elHskKpiAvgScore = document.getElementById('hskKpiAvgScore');
+        var elHskKpiPatternAvg = document.getElementById('hskKpiPatternAvg');
+        var elHskSearchInput = document.getElementById('hskSearchInput');
+        var elHskTrackFilter = document.getElementById('hskTrackFilter');
+        var elHskStudentsTableBody = document.getElementById('hskStudentsTableBody');
+        var elHskViewerTrackSelect = document.getElementById('hskViewerTrackSelect');
+        var elHskViewerModelSelect = document.getElementById('hskViewerModelSelect');
+        var elHskViewerSectionSelect = document.getElementById('hskViewerSectionSelect');
+        var elHskViewerContainer = document.getElementById('hskViewerContainer');
+
+        var hskExamBankCache = [];
+        var HSK_PATTERN_LABELS = [
+          { id: 'listening-p1', short: '听1' },
+          { id: 'listening-p2', short: '听2' },
+          { id: 'listening-p3', short: '听3' },
+          { id: 'listening-p4', short: '听4' },
+          { id: 'reading-p1', short: '阅1' },
+          { id: 'reading-p2', short: '阅2' },
+          { id: 'reading-p3-4', short: '阅3-4' }
+        ];
 
         var headerCells = Array.prototype.slice.call(
           document.querySelectorAll('#tabPanelStudents .table-section thead th[data-sort]')
@@ -1756,14 +2085,323 @@
         }
 
         function switchDashboardTab(tabName) {
+          var isStudents = tabName === 'students';
           var isBank = tabName === 'bank';
-          elTabBtnStudents.classList.toggle('active', !isBank);
-          elTabBtnStudents.setAttribute('aria-selected', String(!isBank));
-          elTabPanelStudents.classList.toggle('hidden', isBank);
+          var isHsk = tabName === 'hsk';
+
+          elTabBtnStudents.classList.toggle('active', isStudents);
+          elTabBtnStudents.setAttribute('aria-selected', String(isStudents));
+          elTabPanelStudents.classList.toggle('hidden', !isStudents);
 
           elTabBtnBank.classList.toggle('active', isBank);
           elTabBtnBank.setAttribute('aria-selected', String(isBank));
           elTabPanelBank.classList.toggle('hidden', !isBank);
+
+          elTabBtnHsk.classList.toggle('active', isHsk);
+          elTabBtnHsk.setAttribute('aria-selected', String(isHsk));
+          elTabPanelHsk.classList.toggle('hidden', !isHsk);
+
+          if (isHsk) {
+            renderHskPortalAnalytics();
+            if (hskExamBankCache.length === 0) {
+              loadHskExamBank();
+            }
+          }
+        }
+
+        function parseJsonSafe(raw, fallback) {
+          if (!raw) return fallback;
+          if (typeof raw === 'object') return raw;
+          if (typeof raw === 'string' && raw.trim()) {
+            try {
+              return JSON.parse(raw);
+            } catch (e) {
+              return fallback;
+            }
+          }
+          return fallback;
+        }
+
+        function readLocalStudentHskData(studentId) {
+          try {
+            var raw = localStorage.getItem('chinese_portal_progress_v1_' + studentId);
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            return {
+              hskMockResults: Array.isArray(parsed.hskMockResults) ? parsed.hskMockResults : [],
+              hskPatternStats: parsed.hskPatternStats && typeof parsed.hskPatternStats === 'object' ? parsed.hskPatternStats : {}
+            };
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function speakTeacherChinese(text) {
+          if (!window.speechSynthesis || !text) return;
+          try {
+            window.speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = 'zh-CN';
+            u.rate = 0.94;
+            var voices = window.speechSynthesis.getVoices() || [];
+            var best = voices.find(function (v) {
+              var n = v.name.toLowerCase();
+              return v.lang.toLowerCase().indexOf('zh') === 0 && (n.indexOf('xiaoxiao') !== -1 || n.indexOf('natural') !== -1 || n.indexOf('google') !== -1);
+            }) || voices.find(function (v) {
+              return v.lang.toLowerCase().indexOf('zh') === 0;
+            });
+            if (best) u.voice = best;
+            window.speechSynthesis.speak(u);
+          } catch (e) {
+            // تجاهل
+          }
+        }
+
+        function renderHskPortalAnalytics() {
+          var q = (elHskSearchInput.value || '').trim().toLowerCase();
+          var trackFilter = elHskTrackFilter.value || 'all';
+
+          var totalExams = 0;
+          var passedExams = 0;
+          var scoreSum = 0;
+          var studentsWithHsk = 0;
+          var patternAttemptedAll = 0;
+          var patternCorrectAll = 0;
+
+          var rows = [];
+
+          state.students.forEach(function (s) {
+            var localHsk = readLocalStudentHskData(s.studentId) || readLocalStudentHskData(s.studentCode);
+            var mockList = Array.isArray(s.hskMockResults) && s.hskMockResults.length > 0
+              ? s.hskMockResults
+              : (localHsk && localHsk.hskMockResults ? localHsk.hskMockResults : []);
+            var patternObj = s.hskPatternStats && Object.keys(s.hskPatternStats).length > 0
+              ? s.hskPatternStats
+              : (localHsk && localHsk.hskPatternStats ? localHsk.hskPatternStats : {});
+
+            var filteredMocks = mockList.filter(function (m) {
+              if (trackFilter === 'all') return true;
+              return m.examTrack === trackFilter;
+            });
+
+            if (filteredMocks.length > 0) studentsWithHsk += 1;
+
+            filteredMocks.forEach(function (m) {
+              totalExams += 1;
+              scoreSum += Number(m.totalScore || 0);
+              if (m.passed || Number(m.totalScore || 0) >= 120) passedExams += 1;
+            });
+
+            var sAtt = 0;
+            var sCor = 0;
+            HSK_PATTERN_LABELS.forEach(function (p) {
+              var st = patternObj[p.id];
+              if (st && st.attempted > 0) {
+                sAtt += Number(st.attempted || 0);
+                sCor += Number(st.correct || 0);
+              }
+            });
+            patternAttemptedAll += sAtt;
+            patternCorrectAll += sCor;
+
+            var matchesQuery =
+              !q ||
+              s.studentName.toLowerCase().indexOf(q) !== -1 ||
+              s.studentCode.toLowerCase().indexOf(q) !== -1;
+
+            if (matchesQuery) {
+              rows.push({
+                student: s,
+                mocks: filteredMocks,
+                patterns: patternObj,
+                patternAttempted: sAtt,
+                patternCorrect: sCor
+              });
+            }
+          });
+
+          var passRate = totalExams > 0 ? Math.round((passedExams / totalExams) * 100) : 0;
+          var avgScore = totalExams > 0 ? Math.round(scoreSum / totalExams) : 0;
+          var avgPatternAcc = patternAttemptedAll > 0 ? Math.round((patternCorrectAll / patternAttemptedAll) * 100) : 0;
+
+          elHskKpiTotalExams.textContent = String(totalExams);
+          elHskKpiStudentsAttempted.textContent = 'عبر ' + studentsWithHsk + ' طالب';
+          elHskKpiPassRate.textContent = passRate + '%';
+          elHskKpiPassCountSub.textContent = passedExams + ' ناجح · ' + (totalExams - passedExams) + ' لم يجتز';
+          elHskKpiAvgScore.textContent = avgScore + ' / 200';
+          elHskKpiPatternAvg.textContent = avgPatternAcc + '%';
+
+          if (rows.length === 0) {
+            elHskStudentsTableBody.innerHTML =
+              '<tr><td colspan="4" class="empty-row">لا توجد بيانات طلاب مطابقة للبحث الحالي.</td></tr>';
+            return;
+          }
+
+          elHskStudentsTableBody.innerHTML = rows.map(function (r) {
+            var mocksHtml = r.mocks.length === 0
+              ? '<span style="color:var(--ink-muted);font-size:12px">لم يُجرِ امتحاناً موحداً بعد</span>'
+              : r.mocks.slice(0, 5).map(function (m) {
+                  var ok = m.passed || Number(m.totalScore || 0) >= 120;
+                  return (
+                    '<div class="hsk-model-attempt tabular-nums">' +
+                    '<strong>' + escapeHtml(m.examTitle || ('نموذج ' + (m.modelNumber || 1))) + '</strong>' +
+                    '<span>· الاستماع ' + Number(m.listeningScore || 0) + '/100</span>' +
+                    '<span>· القراءة ' + Number(m.readingScore || 0) + '/100</span>' +
+                    '<span>· المجموع <strong>' + Number(m.totalScore || 0) + '/200</strong></span>' +
+                    '<span class="status-text ' + (ok ? 'tone-jade' : 'tone-cinnabar') + '">' + (ok ? 'ناجح' : 'لم يجتز') + '</span>' +
+                    '</div>'
+                  );
+                }).join('');
+
+            var patternPartsHtml = HSK_PATTERN_LABELS.map(function (p) {
+              var st = r.patterns[p.id];
+              var pct = st && st.attempted > 0 ? Math.round((st.correct / st.attempted) * 100) + '%' : '—';
+              return '<span class="tabular-nums"><strong>' + p.short + ':</strong> ' + pct + '</span>';
+            }).join(' · ');
+
+            var sPct = r.patternAttempted > 0 ? Math.round((r.patternCorrect / r.patternAttempted) * 100) : null;
+            var sTone = sPct === null ? '' : sPct >= 80 ? 'tone-jade' : sPct >= 65 ? 'tone-gold' : 'tone-cinnabar';
+
+            return (
+              '<tr>' +
+              '<td><strong>' + escapeHtml(r.student.studentName) + '</strong><br><span class="tabular-nums" style="font-size:11px;color:var(--ink-muted)" dir="ltr">' + escapeHtml(r.student.studentCode) + '</span></td>' +
+              '<td style="white-space:normal;min-width:340px">' + mocksHtml + '</td>' +
+              '<td style="white-space:normal;min-width:250px"><div class="hsk-pattern-pills">' + patternPartsHtml + '</div></td>' +
+              '<td class="tabular-nums ' + sTone + '"><strong>' + (sPct !== null ? sPct + '%' : '—') + '</strong></td>' +
+              '</tr>'
+            );
+          }).join('');
+        }
+
+        function populateViewerModelOptions() {
+          var track = elHskViewerTrackSelect.value || 'international';
+          var filtered = hskExamBankCache.filter(function (p) { return p.track === track; });
+          elHskViewerModelSelect.innerHTML = filtered.map(function (p) {
+            var suffix = p.status === 'ready' ? ' (متاح · ٤٠ سؤالاً)' : ' (مهيّأ للإدراج)';
+            return '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.titleAr + suffix) + '</option>';
+          }).join('');
+          renderHskAnswerKeyViewer();
+        }
+
+        function renderHskAnswerKeyViewer() {
+          var selectedId = elHskViewerModelSelect.value;
+          var secFilter = elHskViewerSectionSelect.value || 'all';
+          var paper = hskExamBankCache.find(function (p) { return p.id === selectedId; });
+
+          if (!paper) {
+            elHskViewerContainer.innerHTML = '<div class="empty-row">جارٍ تحميل نماذج الامتحانات...</div>';
+            return;
+          }
+
+          if (paper.status !== 'ready' || !Array.isArray(paper.questions) || paper.questions.length === 0) {
+            elHskViewerContainer.innerHTML =
+              '<div class="hsk-q-card" style="text-align:center;padding:32px">' +
+              '<strong style="font-size:16px">' + escapeHtml(paper.titleAr) + '</strong>' +
+              '<p class="config-hint">' + escapeHtml(paper.subtitleAr) + ' — هذا النموذج مهيّأ في البنية وجاهز لإدراج الأسئلة الـ ٤٠ لاحقاً.</p>' +
+              '</div>';
+            return;
+          }
+
+          var list = paper.questions.filter(function (q) {
+            if (secFilter === 'all') return true;
+            return q.section === secFilter;
+          });
+
+          elHskViewerContainer.innerHTML = list.map(function (q) {
+            var audioPlayText = '';
+            var transcriptHtml = '';
+
+            if (q.section === 'listening') {
+              if (q.audioSingle) {
+                audioPlayText = q.audioSingle.hanzi;
+                transcriptHtml =
+                  '<div class="hsk-transcript-box">' +
+                  '<div class="hsk-q-head"><strong class="tone-gold">نص الاستماع المخفي (Audio Transcript)</strong>' +
+                  '<button type="button" class="btn" style="min-height:30px;padding:4px 10px;font-size:11px" data-speak-text="' + escapeHtml(audioPlayText) + '">استماع للنص</button></div>' +
+                  '<div class="font-hanzi" dir="ltr" style="font-size:17px;font-weight:700;text-align:left">' + escapeHtml(q.audioSingle.hanzi) + '</div>' +
+                  '<div dir="ltr" style="font-size:12px;color:var(--ink-muted);text-align:left">' + escapeHtml(q.audioSingle.pinyin || '') + '</div>' +
+                  '<div style="font-size:12px">' + escapeHtml(q.audioSingle.arabic || '') + '</div>' +
+                  '</div>';
+              } else if (Array.isArray(q.audioDialogue)) {
+                audioPlayText = q.audioDialogue.map(function (t) { return t.hanzi; }).join('。') + (q.questionZh ? '。' + q.questionZh.replace(/^问：/, '') : '');
+                transcriptHtml =
+                  '<div class="hsk-transcript-box">' +
+                  '<div class="hsk-q-head"><strong class="tone-gold">نص الحوار الصوتي المخفي (Dialogue Transcript)</strong>' +
+                  '<button type="button" class="btn" style="min-height:30px;padding:4px 10px;font-size:11px" data-speak-text="' + escapeHtml(audioPlayText) + '">استماع للحوار</button></div>' +
+                  q.audioDialogue.map(function (t) {
+                    return (
+                      '<div style="padding:4px 0;border-bottom:1px dashed var(--border-subtle)">' +
+                      '<div class="font-hanzi" dir="ltr" style="font-size:15px;font-weight:700;text-align:left">' + escapeHtml(t.roleLabelZh + '：' + t.hanzi) + '</div>' +
+                      '<div dir="ltr" style="font-size:11px;color:var(--ink-muted);text-align:left">' + escapeHtml(t.pinyin || '') + '</div>' +
+                      '<div style="font-size:12px">' + escapeHtml(t.arabic || '') + '</div>' +
+                      '</div>'
+                    );
+                  }).join('') +
+                  (q.questionZh ? '<div class="font-hanzi tone-cinnabar" dir="ltr" style="font-size:15px;font-weight:700;text-align:left;padding-top:4px">' + escapeHtml(q.questionZh) + ' <span style="font-size:11px;color:var(--ink-muted)">(' + escapeHtml(q.questionPinyin || '') + ')</span></div>' : '') +
+                  (q.questionAr ? '<div style="font-size:12px;font-weight:700">' + escapeHtml(q.questionAr) + '</div>' : '') +
+                  '</div>';
+              }
+            } else {
+              transcriptHtml =
+                '<div class="hsk-transcript-box">' +
+                (q.promptZh ? '<div class="font-hanzi" dir="ltr" style="font-size:17px;font-weight:700;text-align:left">' + escapeHtml(q.promptZh) + '</div>' : '') +
+                (q.promptPinyin ? '<div dir="ltr" style="font-size:12px;color:var(--ink-muted);text-align:left">' + escapeHtml(q.promptPinyin) + '</div>' : '') +
+                (q.promptAr ? '<div style="font-size:13px;font-weight:700">' + escapeHtml(q.promptAr) + '</div>' : '') +
+                (q.questionZh ? '<div class="font-hanzi tone-cinnabar" dir="ltr" style="font-size:15px;font-weight:700;text-align:left">' + escapeHtml(q.questionZh) + ' <span style="font-size:11px;color:var(--ink-muted)">(' + escapeHtml(q.questionPinyin || '') + ')</span></div>' : '') +
+                (q.questionAr ? '<div class="tone-cinnabar" style="font-size:13px;font-weight:700">' + escapeHtml(q.questionAr) + '</div>' : '') +
+                '</div>';
+            }
+
+            var optsHtml = (q.options || []).map(function (o) {
+              var isRight = o.letter === q.correctLetter;
+              var primaryText = o.hanzi
+                ? '<span class="font-hanzi" dir="ltr" style="font-size:15px;font-weight:700">' + escapeHtml(o.hanzi) + '</span>' +
+                  (o.pinyin ? '<span dir="ltr" style="font-size:11px;color:var(--ink-muted)">' + escapeHtml(o.pinyin) + '</span>' : '') +
+                  (o.arabic ? '<span style="font-size:11px">' + escapeHtml(o.arabic) + '</span>' : '')
+                : o.sceneCaptionAr
+                  ? '<span style="font-weight:700">' + escapeHtml(o.sceneCaptionAr) + '</span>'
+                  : '<span style="font-weight:700">' + escapeHtml(o.arabic || '') + '</span>';
+
+              return (
+                '<div class="hsk-opt-item ' + (isRight ? 'correct' : '') + '">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                '<strong>' + escapeHtml(o.letter) + '</strong>' +
+                (isRight ? '<span class="status-text tone-jade">✓ الإجابة الصحيحة</span>' : '') +
+                '</div>' +
+                primaryText +
+                '</div>'
+              );
+            }).join('');
+
+            return (
+              '<article class="hsk-q-card">' +
+              '<div class="hsk-q-head">' +
+              '<span class="tabular-nums"><strong>سؤال ' + q.number + '</strong> · ' + escapeHtml(q.partLabelZh) + ' (' + escapeHtml(q.partLabelAr) + ')</span>' +
+              '<span class="tabular-nums status-text tone-jade">الإجابة الصحيحة: ' + escapeHtml(q.correctLetter) + ' · ' + q.points + ' درجات</span>' +
+              '</div>' +
+              transcriptHtml +
+              '<div class="hsk-options-grid">' + optsHtml + '</div>' +
+              '<div style="font-size:12px;color:var(--ink-muted)"><strong>الترجمة والملاحظة:</strong> ' + escapeHtml(q.translationAr || '') + (q.noteAr ? ' — ' + escapeHtml(q.noteAr) : '') + '</div>' +
+              '</article>'
+            );
+          }).join('');
+        }
+
+        function loadHskExamBank() {
+          elHskViewerContainer.innerHTML = '<div class="empty-row">جارٍ تحميل بنك نماذج HSK 3.0...</div>';
+          fetch('./hsk-mock-exams-bank.json', { cache: 'no-store' })
+            .then(function (res) {
+              if (!res.ok) throw new Error('failed');
+              return res.json();
+            })
+            .then(function (data) {
+              hskExamBankCache = Array.isArray(data) ? data : [];
+              populateViewerModelOptions();
+            })
+            .catch(function () {
+              elHskViewerContainer.innerHTML =
+                '<div class="empty-row">تعذر تحميل ملف نماذج الامتحانات (hsk-mock-exams-bank.json). افتح لوحة المعلم عبر رابط الخادم المحلي أو رابط المنصة المنشور.</div>';
+            });
         }
 
         function generateUniqueStudentCode() {
@@ -1864,7 +2502,9 @@
               Math.min(100, Math.round(Number(row.overallProgressPercent || 0)))
             ),
             lastActive: row.lastActive ? String(row.lastActive) : '',
-            chaptersBreakdown: parseChaptersBreakdown(row.chaptersBreakdown)
+            chaptersBreakdown: parseChaptersBreakdown(row.chaptersBreakdown),
+            hskMockResults: parseJsonSafe(row.hskMockResults, []),
+            hskPatternStats: parseJsonSafe(row.hskPatternStats, {})
           };
         }
 
@@ -2237,6 +2877,7 @@
               new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
             renderKPIs(state.students);
             renderTable();
+            renderHskPortalAnalytics();
             return;
           }
 
@@ -2264,6 +2905,7 @@
                 new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
               renderKPIs(state.students);
               renderTable();
+              renderHskPortalAnalytics();
             })
             .catch(function () {
               updateConnectionStatus('status-error', 'تعذر جلب البيانات من الرابط');
@@ -2385,6 +3027,22 @@
         });
         elTabBtnBank.addEventListener('click', function () {
           switchDashboardTab('bank');
+        });
+        elTabBtnHsk.addEventListener('click', function () {
+          switchDashboardTab('hsk');
+        });
+
+        elHskSearchInput.addEventListener('input', renderHskPortalAnalytics);
+        elHskTrackFilter.addEventListener('change', renderHskPortalAnalytics);
+        elHskViewerTrackSelect.addEventListener('change', populateViewerModelOptions);
+        elHskViewerModelSelect.addEventListener('change', renderHskAnswerKeyViewer);
+        elHskViewerSectionSelect.addEventListener('change', renderHskAnswerKeyViewer);
+
+        elHskViewerContainer.addEventListener('click', function (e) {
+          var btn = e.target && e.target.closest ? e.target.closest('[data-speak-text]') : null;
+          if (!btn) return;
+          var txt = btn.getAttribute('data-speak-text');
+          if (txt) speakTeacherChinese(txt);
         });
 
         // التشغيل الابتدائي

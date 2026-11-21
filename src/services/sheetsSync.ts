@@ -26,7 +26,9 @@ function doPost(e) {
       'activeMinutes',
       'overallProgressPercent',
       'lastActive',
-      'chaptersBreakdown'
+      'chaptersBreakdown',
+      'hskMockResults',
+      'hskPatternStats'
     ];
 
     if (sheet.getLastRow() === 0) {
@@ -60,7 +62,9 @@ function doPost(e) {
         0,
         0,
         new Date().toISOString(),
-        '[]'
+        '[]',
+        '[]',
+        '{}'
       ];
       sheet.appendRow(newRow);
 
@@ -73,6 +77,14 @@ function doPost(e) {
       typeof data.chaptersBreakdown === 'string'
         ? data.chaptersBreakdown
         : JSON.stringify(data.chaptersBreakdown || []);
+    var hskMockStr =
+      typeof data.hskMockResults === 'string'
+        ? data.hskMockResults
+        : JSON.stringify(data.hskMockResults || []);
+    var hskPatternStr =
+      typeof data.hskPatternStats === 'string'
+        ? data.hskPatternStats
+        : JSON.stringify(data.hskPatternStats || {});
 
     var rowValues = [
       String(data.studentId || ''),
@@ -85,7 +97,9 @@ function doPost(e) {
       Number(data.activeMinutes || 0),
       Number(data.overallProgressPercent || 0),
       data.lastActive || new Date().toISOString(),
-      breakdownStr
+      breakdownStr,
+      hskMockStr,
+      hskPatternStr
     ];
 
     var targetRowIndex = -1;
@@ -149,6 +163,22 @@ function doGet(e) {
         parsedBreakdown = rawBreakdown;
       }
 
+      var rawHskMock = item.hskMockResults !== undefined ? item.hskMockResults : row[11];
+      var parsedHskMock = [];
+      if (typeof rawHskMock === 'string' && rawHskMock.trim()) {
+        try { parsedHskMock = JSON.parse(rawHskMock); } catch (e1) { parsedHskMock = []; }
+      } else if (Array.isArray(rawHskMock)) {
+        parsedHskMock = rawHskMock;
+      }
+
+      var rawHskPattern = item.hskPatternStats !== undefined ? item.hskPatternStats : row[12];
+      var parsedHskPattern = {};
+      if (typeof rawHskPattern === 'string' && rawHskPattern.trim()) {
+        try { parsedHskPattern = JSON.parse(rawHskPattern); } catch (e2) { parsedHskPattern = {}; }
+      } else if (rawHskPattern && typeof rawHskPattern === 'object') {
+        parsedHskPattern = rawHskPattern;
+      }
+
       students.push({
         studentId: String(item.studentId || row[0] || ''),
         studentName: String(item.studentName || row[1] || ''),
@@ -160,7 +190,9 @@ function doGet(e) {
         activeMinutes: Number(item.activeMinutes || row[7] || 0),
         overallProgressPercent: Number(item.overallProgressPercent || row[8] || 0),
         lastActive: item.lastActive ? String(item.lastActive) : '',
-        chaptersBreakdown: parsedBreakdown
+        chaptersBreakdown: parsedBreakdown,
+        hskMockResults: parsedHskMock,
+        hskPatternStats: parsedHskPattern
       });
     }
 
@@ -203,6 +235,8 @@ export interface ChapterBreakdownEntry {
 
 export interface EnrichedSheetsSyncPayload extends SheetsSyncPayload {
   chaptersBreakdown: string;
+  hskMockResults: string;
+  hskPatternStats: string;
 }
 
 export interface SyncResult {
@@ -406,6 +440,32 @@ function resolveChaptersBreakdownJson(
   return JSON.stringify(buildChaptersBreakdownFromStorage(payload.studentId));
 }
 
+function resolveHskDataFromStorage(studentId: string): {
+  hskMockResults: string;
+  hskPatternStats: string;
+} {
+  try {
+    const raw = localStorage.getItem(`${STUDENT_PROGRESS_PREFIX}${studentId}`);
+    if (raw) {
+      const parsed = JSON.parse(raw) as {
+        hskMockResults?: unknown;
+        hskPatternStats?: unknown;
+      };
+      return {
+        hskMockResults: JSON.stringify(Array.isArray(parsed.hskMockResults) ? parsed.hskMockResults : []),
+        hskPatternStats: JSON.stringify(
+          parsed.hskPatternStats && typeof parsed.hskPatternStats === 'object'
+            ? parsed.hskPatternStats
+            : {}
+        ),
+      };
+    }
+  } catch {
+    // تجاهل
+  }
+  return { hskMockResults: '[]', hskPatternStats: '{}' };
+}
+
 function saveLocalBackup(payload: EnrichedSheetsSyncPayload): void {
   try {
     const existingRaw = localStorage.getItem(LOCAL_SYNC_BACKUP_KEY);
@@ -434,9 +494,25 @@ export async function syncStudentStatsToSheets(
   payload: SheetsSyncPayload & { chaptersBreakdown?: string | ChapterBreakdownEntry[] }
 ): Promise<SyncResult> {
   const timestamp = new Date().toISOString();
+  const storedHsk = resolveHskDataFromStorage(payload.studentId);
+  const hskMockResultsStr =
+    typeof payload.hskMockResults === 'string'
+      ? payload.hskMockResults
+      : Array.isArray(payload.hskMockResults)
+        ? JSON.stringify(payload.hskMockResults)
+        : storedHsk.hskMockResults;
+  const hskPatternStatsStr =
+    typeof payload.hskPatternStats === 'string'
+      ? payload.hskPatternStats
+      : payload.hskPatternStats && typeof payload.hskPatternStats === 'object'
+        ? JSON.stringify(payload.hskPatternStats)
+        : storedHsk.hskPatternStats;
+
   const enrichedPayload: EnrichedSheetsSyncPayload = {
     ...payload,
     chaptersBreakdown: resolveChaptersBreakdownJson(payload),
+    hskMockResults: hskMockResultsStr,
+    hskPatternStats: hskPatternStatsStr,
   };
 
   saveLocalBackup(enrichedPayload);

@@ -1,0 +1,1747 @@
+import { HskSceneId } from '../components/SceneCardVisual';
+import { HskPatternId } from '../types';
+
+export type HskExamPartId =
+  | 'listening-p1'
+  | 'listening-p2'
+  | 'listening-p3'
+  | 'listening-p4'
+  | 'reading-p1'
+  | 'reading-p2'
+  | 'reading-p3'
+  | 'reading-p4';
+
+export interface HskDialogueTurn {
+  speaker: 'A' | 'B';
+  roleLabelZh: '女' | '男';
+  hanzi: string;
+  pinyin: string;
+  arabic: string;
+}
+
+export interface HskChoiceOption {
+  letter: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+  hanzi?: string;
+  pinyin?: string;
+  arabic?: string;
+  sceneId?: HskSceneId;
+  sceneCaptionAr?: string;
+}
+
+export interface FixedMockExamQuestion {
+  number: number; // 1..40
+  section: 'listening' | 'reading';
+  partId: HskExamPartId;
+  partLabelZh: string;
+  partLabelAr: string;
+  points: number;
+  /** Audio script for listening items (hidden during exam, revealed in review & teacher key) */
+  audioSingle?: {
+    hanzi: string;
+    pinyin: string;
+    arabic: string;
+  };
+  audioDialogue?: HskDialogueTurn[];
+  /** Question asked after audio (听力第四部分: 问：...) or reading passage (阅读第四部分: ★ ...) */
+  questionZh?: string;
+  questionPinyin?: string;
+  questionAr?: string;
+  /** Prompt sentence/passage for reading items */
+  promptZh?: string;
+  promptPinyin?: string;
+  promptAr?: string;
+  /** Shared bank identifier for grouped A–F matching sets (Q11–15, Q21–25, Q26–30, Q31–35) */
+  sharedBankId?: string;
+  /** Direct options (A/B/C) or reference to shared A–F bank */
+  options: HskChoiceOption[];
+  correctLetter: 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+  /** Full Arabic explanation/translation shown post-exam & in teacher dashboard */
+  translationAr: string;
+  noteAr?: string;
+}
+
+export interface FixedMockExamPaper {
+  id: string;
+  track: 'international' | 'arabic';
+  modelNumber: number;
+  titleAr: string;
+  titleZh: string;
+  subtitleAr: string;
+  status: 'ready' | 'coming-soon';
+  listeningDurationSeconds: number;
+  readingDurationSeconds: number;
+  maxScore: number;
+  passScore: number;
+  questions: FixedMockExamQuestion[];
+}
+
+export interface HskPatternModule {
+  id: HskPatternId;
+  numberLabel: string;
+  codeZh: string;
+  titleAr: string;
+  formatLabel: string;
+  difficultyLabel: string;
+  difficultyTone: 'jade' | 'gold' | 'cinnabar';
+  section: 'listening' | 'reading';
+  descriptionAr: string;
+  questions: FixedMockExamQuestion[];
+}
+
+// =============================================================================
+// بنوك المشاهد والردود والكلمات المشتركة للنموذج الدولي الأول (HSK 3.0 Model 1)
+// =============================================================================
+
+const INTL_M1_L3_SCENES: HskChoiceOption[] = [
+  { letter: 'A', sceneId: 'teacher-classroom', sceneCaptionAr: 'المعلمة تشرح في الفصل' },
+  { letter: 'B', sceneId: 'cooking-noodles', sceneCaptionAr: 'إعداد طبق النودلز الصينية' },
+  { letter: 'C', sceneId: 'family-four', sceneCaptionAr: 'أسرة مكونة من أربعة أفراد' },
+  { letter: 'D', sceneId: 'laptop-new', sceneCaptionAr: 'حاسوب محمول جديد' },
+  { letter: 'E', sceneId: 'calendar-sunday-rest', sceneCaptionAr: 'الراحة والاسترخاء يوم الأحد' },
+  { letter: 'F', sceneId: 'doctor-hospital', sceneCaptionAr: 'طبيب يعمل في المستشفى' },
+];
+
+const INTL_M1_R1_SCENES: HskChoiceOption[] = [
+  { letter: 'A', sceneId: 'greeting-wave', sceneCaptionAr: 'التحية والترحيب باليد' },
+  { letter: 'B', sceneId: 'cooking-dumplings', sceneCaptionAr: 'طبق جياوتسي (الزلابية الصينية)' },
+  { letter: 'C', sceneId: 'calendar-sep8', sceneCaptionAr: 'تقويم يشير إلى ٨ سبتمبر' },
+  { letter: 'D', sceneId: 'china-landmark', sceneCaptionAr: 'معلم صيني تقليدي' },
+  { letter: 'E', sceneId: 'student-desk', sceneCaptionAr: 'طالب يدرس على المكتب' },
+  { letter: 'F', sceneId: 'drinking-tea', sceneCaptionAr: 'احتساء الشاي الساخن' },
+];
+
+const INTL_M1_R2_REPLIES: HskChoiceOption[] = [
+  { letter: 'A', hanzi: '我叫李文。', pinyin: 'Wǒ jiào Lǐ Wén.', arabic: 'اسمي لي ون.' },
+  { letter: 'B', hanzi: '她是中国人。', pinyin: 'Tā shì Zhōngguórén.', arabic: 'هي صينية الجنسية.' },
+  { letter: 'C', hanzi: '我家有四口人。', pinyin: 'Wǒ jiā yǒu sì kǒu rén.', arabic: 'في أسرتي أربعة أفراد.' },
+  { letter: 'D', hanzi: '今天星期日。', pinyin: 'Jīntiān xīngqīrì.', arabic: 'اليوم يوم الأحد.' },
+  { letter: 'E', hanzi: '我会说中文。', pinyin: 'Wǒ huì shuō Zhōngwén.', arabic: 'أستطيع التحدث بالصينية.' },
+  { letter: 'F', hanzi: '谢谢，不客气！', pinyin: 'Xièxie, bú kèqi!', arabic: 'شكراً، على الرحب والسعة!' },
+];
+
+const INTL_M1_R3_WORDBANK: HskChoiceOption[] = [
+  { letter: 'A', hanzi: '认识', pinyin: 'rènshi', arabic: 'يعرف / يتعرّف على' },
+  { letter: 'B', hanzi: '休息', pinyin: 'xiūxi', arabic: 'يستريح / في إجازة' },
+  { letter: 'C', hanzi: '工作', pinyin: 'gōngzuò', arabic: 'عمل / يعمل' },
+  { letter: 'D', hanzi: '孩子', pinyin: 'háizi', arabic: 'أطفال / أبناء' },
+  { letter: 'E', hanzi: '老师', pinyin: 'lǎoshī', arabic: 'معلم / أستاذ' },
+  { letter: 'F', hanzi: '电脑', pinyin: 'diànnǎo', arabic: 'حاسوب / كمبيوتر' },
+];
+
+const INTERNATIONAL_MODEL_1_QUESTIONS: FixedMockExamQuestion[] = [
+  // ---------------- 听力第一部分 (Q1–Q5): Audio -> 3 Visual Cards A/B/C ----------------
+  {
+    number: 1,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (مطابقة المشاهد)',
+    points: 5,
+    audioSingle: {
+      hanzi: '你好！很高兴认识你。',
+      pinyin: 'Nǐ hǎo! Hěn gāoxìng rènshi nǐ.',
+      arabic: 'مرحباً! يسعدني جداً التعرف إليك.',
+    },
+    options: [
+      { letter: 'A', sceneId: 'greeting-wave', sceneCaptionAr: 'شخصان يتبادلان التحية' },
+      { letter: 'B', sceneId: 'cooking-noodles', sceneCaptionAr: 'وعاء نودلز' },
+      { letter: 'C', sceneId: 'calendar-sep8', sceneCaptionAr: 'تقويم ٨ سبتمبر' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'مرحباً! يسعدني جداً التعرف إليك.',
+    noteAr: 'المشهد A يُظهر شخصين يتبادلان التحية والترحيب.',
+  },
+  {
+    number: 2,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (مطابقة المشاهد)',
+    points: 5,
+    audioSingle: {
+      hanzi: '她是我的中文老师。',
+      pinyin: 'Tā shì wǒ de Zhōngwén lǎoshī.',
+      arabic: 'هي معلمة اللغة الصينية الخاصة بي.',
+    },
+    options: [
+      { letter: 'A', sceneId: 'laptop-new', sceneCaptionAr: 'حاسوب محمول' },
+      { letter: 'B', sceneId: 'teacher-classroom', sceneCaptionAr: 'معلمة أمام السبورة' },
+      { letter: 'C', sceneId: 'birthday-cake', sceneCaptionAr: 'كعكة عيد ميلاد' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'هي معلمة اللغة الصينية الخاصة بي.',
+    noteAr: 'المشهد B يُظهر المعلمة تشرح أمام السبورة في الفصل.',
+  },
+  {
+    number: 3,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (مطابقة المشاهد)',
+    points: 5,
+    audioSingle: {
+      hanzi: '我有两个孩子。',
+      pinyin: 'Wǒ yǒu liǎng gè háizi.',
+      arabic: 'لديّ طفلان.',
+    },
+    options: [
+      { letter: 'A', sceneId: 'doctor-hospital', sceneCaptionAr: 'مستشفى' },
+      { letter: 'B', sceneId: 'reading-book', sceneCaptionAr: 'قراءة كتاب' },
+      { letter: 'C', sceneId: 'two-children', sceneCaptionAr: 'طفلان' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'لديّ طفلان.',
+    noteAr: 'المشهد C يطابق عبارة «两个孩子» (طفلان).',
+  },
+  {
+    number: 4,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (مطابقة المشاهد)',
+    points: 5,
+    audioSingle: {
+      hanzi: '这是我的新电脑。',
+      pinyin: 'Zhè shì wǒ de xīn diànnǎo.',
+      arabic: 'هذا هو حاسوبي الجديد.',
+    },
+    options: [
+      { letter: 'A', sceneId: 'laptop-new', sceneCaptionAr: 'حاسوب جديد' },
+      { letter: 'B', sceneId: 'speaking-phone', sceneCaptionAr: 'هاتف محمول' },
+      { letter: 'C', sceneId: 'drinking-tea', sceneCaptionAr: 'كوب شاي' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'هذا هو حاسوبي الجديد.',
+    noteAr: 'المشهد A يُظهر حاسوباً محمولاً جديداً.',
+  },
+  {
+    number: 5,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (مطابقة المشاهد)',
+    points: 5,
+    audioSingle: {
+      hanzi: '我会做饺子。',
+      pinyin: 'Wǒ huì zuò jiǎozi.',
+      arabic: 'أعرف كيف أعدّ الجياوتسي (الزلابية).',
+    },
+    options: [
+      { letter: 'A', sceneId: 'tennis-sport', sceneCaptionAr: 'مضرب وكرة تنس' },
+      { letter: 'B', sceneId: 'cooking-dumplings', sceneCaptionAr: 'طبق جياوتسي ساخن' },
+      { letter: 'C', sceneId: 'writing-hanzi', sceneCaptionAr: 'كتابة الرموز الصينية' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'أعرف كيف أعدّ الجياوتسي (الزلابية الصينية).',
+    noteAr: 'المشهد B يمثّل طبق الجياوتسي «饺子».',
+  },
+
+  // ---------------- 听力第二部分 (Q6–Q10): Audio -> 3 Chinese/Pinyin Replies ----------------
+  {
+    number: 6,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (اختيار الرد المناسب)',
+    points: 5,
+    audioSingle: {
+      hanzi: '请问，你叫什么名字？',
+      pinyin: 'Qǐngwèn, nǐ jiào shénme míngzi?',
+      arabic: 'لو سمحت، ما اسمك؟',
+    },
+    options: [
+      { letter: 'A', hanzi: '我叫李文。', pinyin: 'Wǒ jiào Lǐ Wén.', arabic: 'اسمي لي ون.' },
+      { letter: 'B', hanzi: '今天九月八号。', pinyin: 'Jīntiān jiǔ yuè bā hào.', arabic: 'اليوم ٨ سبتمبر.' },
+      { letter: 'C', hanzi: '我工作很忙。', pinyin: 'Wǒ gōngzuò hěn máng.', arabic: 'عملي مشغول جداً.' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'لو سمحت، ما اسمك؟ ← الرد: اسمي لي ون.',
+  },
+  {
+    number: 7,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (اختيار الرد المناسب)',
+    points: 5,
+    audioSingle: {
+      hanzi: '你是哪国人？',
+      pinyin: 'Nǐ shì nǎ guó rén?',
+      arabic: 'ما هي جنسيتك؟',
+    },
+    options: [
+      { letter: 'A', hanzi: '他今年五岁。', pinyin: 'Tā jīnnián wǔ suì.', arabic: 'عمره خمس سنوات.' },
+      { letter: 'B', hanzi: '我是中国人。', pinyin: 'Wǒ shì Zhōngguórén.', arabic: 'أنا صيني الجنسية.' },
+      { letter: 'C', hanzi: '我会做面条儿。', pinyin: 'Wǒ huì zuò miàntiáor.', arabic: 'أعرف طبخ النودلز.' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'ما هي جنسيتك؟ ← الرد: أنا صيني الجنسية.',
+  },
+  {
+    number: 8,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (اختيار الرد المناسب)',
+    points: 5,
+    audioSingle: {
+      hanzi: '你家有几口人？',
+      pinyin: 'Nǐ jiā yǒu jǐ kǒu rén?',
+      arabic: 'كم عدد أفراد أسرتك؟',
+    },
+    options: [
+      { letter: 'A', hanzi: '认识你很高兴。', pinyin: 'Rènshi nǐ hěn gāoxìng.', arabic: 'سعيد بمعرفتك.' },
+      { letter: 'B', hanzi: '今天星期日。', pinyin: 'Jīntiān xīngqīrì.', arabic: 'اليوم الأحد.' },
+      { letter: 'C', hanzi: '我家有四口人。', pinyin: 'Wǒ jiā yǒu sì kǒu rén.', arabic: 'في أسرتي أربعة أفراد.' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'كم عدد أفراد أسرتك؟ ← الرد: في أسرتي أربعة أفراد.',
+  },
+  {
+    number: 9,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (اختيار الرد المناسب)',
+    points: 5,
+    audioSingle: {
+      hanzi: '你认识李老师吗？',
+      pinyin: 'Nǐ rènshi Lǐ lǎoshī ma?',
+      arabic: 'هل تعرف الأستاذ لي؟',
+    },
+    options: [
+      { letter: 'A', hanzi: '认识，他是我的老师。', pinyin: 'Rènshi, tā shì wǒ de lǎoshī.', arabic: 'نعم أعرفه، إنه معلمي.' },
+      { letter: 'B', hanzi: '今天九月八号。', pinyin: 'Jīntiān jiǔ yuè bā hào.', arabic: 'اليوم الثامن من سبتمبر.' },
+      { letter: 'C', hanzi: '我有两个孩子。', pinyin: 'Wǒ yǒu liǎng gè háizi.', arabic: 'لديّ طفلان.' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'هل تعرف الأستاذ لي؟ ← الرد: نعم أعرفه، إنه معلمي.',
+  },
+  {
+    number: 10,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (اختيار الرد المناسب)',
+    points: 5,
+    audioSingle: {
+      hanzi: '你会做饭吗？',
+      pinyin: 'Nǐ huì zuò fàn ma?',
+      arabic: 'هل تعرف كيف تطبخ؟',
+    },
+    options: [
+      { letter: 'A', hanzi: '她是我的朋友。', pinyin: 'Tā shì wǒ de péngyou.', arabic: 'هي صديقتي.' },
+      { letter: 'B', hanzi: '我会做面条儿和饺子。', pinyin: 'Wǒ huì zuò miàntiáor hé jiǎozi.', arabic: 'أعرف إعداد النودلز والجياوتسي.' },
+      { letter: 'C', hanzi: '我们三月一号上课。', pinyin: 'Wǒmen sān yuè yī hào shàng kè.', arabic: 'تبدأ دروسنا في ١ مارس.' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'هل تعرف كيف تطبخ؟ ← الرد: أعرف إعداد النودلز والجياوتسي.',
+  },
+
+  // ---------------- 听力第三部分 (Q11–Q15): Dialogue -> 6 Visual Cards A–F ----------------
+  {
+    number: 11,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (الحوارات والمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你今天工作忙吗？', pinyin: 'Nǐ jīntiān gōngzuò máng ma?', arabic: 'هل عملك مزدحم اليوم؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '不忙，今天星期日，我休息。', pinyin: 'Bù máng, jīntiān xīngqīrì, wǒ xiūxi.', arabic: 'ليس مزدحماً، اليوم الأحد وأنا في إجازة.' },
+    ],
+    options: INTL_M1_L3_SCENES,
+    correctLetter: 'E',
+    translationAr: 'المرأة: هل عملك مزدحم اليوم؟ الرجل: لا، اليوم الأحد وأنا أستريح.',
+    noteAr: 'المشهد E يعبّر عن الراحة والإجازة يوم الأحد.',
+  },
+  {
+    number: 12,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (الحوارات والمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '这是你的新电脑吗？', pinyin: 'Zhè shì nǐ de xīn diànnǎo ma?', arabic: 'هل هذا حاسوبك الجديد؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '是，是我昨天买的。', pinyin: 'Shì, shì wǒ zuótiān mǎi de.', arabic: 'نعم، اشتريته أمس.' },
+    ],
+    options: INTL_M1_L3_SCENES,
+    correctLetter: 'D',
+    translationAr: 'المرأة: هل هذا حاسوبك الجديد؟ الرجل: نعم.',
+    noteAr: 'المشهد D يُظهر الحاسوب المحمول الجديد.',
+  },
+  {
+    number: 13,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (الحوارات والمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你家有几口人？', pinyin: 'Nǐ jiā yǒu jǐ kǒu rén?', arabic: 'كم فرداً في أسرتك؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '四口人：爸爸、妈妈和两个孩子。', pinyin: 'Sì kǒu rén: bàba, māma hé liǎng gè háizi.', arabic: 'أربعة أفراد: أبي وأمي وطفلان.' },
+    ],
+    options: INTL_M1_L3_SCENES,
+    correctLetter: 'C',
+    translationAr: 'المرأة: كم فرداً في أسرتك؟ الرجل: أربعة أفراد: الأب والأم وطفلان.',
+    noteAr: 'المشهد C يمثّل أسرة من أربعة أفراد.',
+  },
+  {
+    number: 14,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (الحوارات والمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你会做中国菜吗？', pinyin: 'Nǐ huì zuò Zhōngguó cài ma?', arabic: 'هل تجيد طبخ الأكل الصيني؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我会做面条儿，很好吃。', pinyin: 'Wǒ huì zuò miàntiáor, hěn hǎochī.', arabic: 'أجيد إعداد النودلز، إنها لذيذة جداً.' },
+    ],
+    options: INTL_M1_L3_SCENES,
+    correctLetter: 'B',
+    translationAr: 'المرأة: هل تجيد الطبخ الصيني؟ الرجل: أجيد إعداد النودلز.',
+    noteAr: 'المشهد B يُظهر طبق النودلز الصينية.',
+  },
+  {
+    number: 15,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (الحوارات والمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '王老师有很多学生吗？', pinyin: 'Wáng lǎoshī yǒu hěn duō xuésheng ma?', arabic: 'هل لدى المعلمة وانغ طلاب كثيرون؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '是的，她有二十个学生。', pinyin: 'Shì de, tā yǒu èrshí gè xuésheng.', arabic: 'نعم، لديها عشرون طالباً.' },
+    ],
+    options: INTL_M1_L3_SCENES,
+    correctLetter: 'A',
+    translationAr: 'المرأة: هل لدى المعلمة وانغ طلاب كثيرون؟ الرجل: نعم، لديها عشرون طالباً.',
+    noteAr: 'المشهد A يُظهر المعلمة في الفصل.',
+  },
+
+  // ---------------- 听力第四部分 (Q16–Q20): Dialogue + 问： -> 3 Choices ----------------
+  {
+    number: 16,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الفهم والاستنتاج)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '李文，你的中文老师是哪国人？', pinyin: 'Lǐ Wén, nǐ de Zhōngwén lǎoshī shì nǎ guó rén?', arabic: 'يا لي ون، ما جنسية معلم اللغة الصينية الخاص بك؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我的中文老师也是中国人。', pinyin: 'Wǒ de Zhōngwén lǎoshī yě shì Zhōngguórén.', arabic: 'معلمي للغة الصينية صيني الجنسية أيضاً.' },
+    ],
+    questionZh: '问：李文的中文老师是哪国人？',
+    questionPinyin: 'Wèn: Lǐ Wén de Zhōngwén lǎoshī shì nǎ guó rén?',
+    questionAr: 'السؤال: ما جنسية معلم الصينية الخاص بـ لي ون؟',
+    options: [
+      { letter: 'A', hanzi: '中国人', pinyin: 'Zhōngguórén', arabic: 'صيني' },
+      { letter: 'B', hanzi: '美国人', pinyin: 'Měiguórén', arabic: 'أمريكي' },
+      { letter: 'C', hanzi: '英国人', pinyin: 'Yīngguórén', arabic: 'بريطاني' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'السؤال: ما جنسية معلم الصينية؟ الإجابة: صيني (中国人).',
+  },
+  {
+    number: 17,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الفهم والاستنتاج)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你的儿子今年几岁了？', pinyin: 'Nǐ de érzi jīnnián jǐ suì le?', arabic: 'كم عمر ابنك هذه السنة؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '他今年五岁，我女儿三岁。', pinyin: 'Tā jīnnián wǔ suì, wǒ nǚér sān suì.', arabic: 'عمره خمس سنوات، وابنتي عمرها ثلاث سنوات.' },
+    ],
+    questionZh: '问：男的儿子今年几岁？',
+    questionPinyin: 'Wèn: Nán de érzi jīnnián jǐ suì?',
+    questionAr: 'السؤال: كم عمر ابن الرجل هذه السنة؟',
+    options: [
+      { letter: 'A', hanzi: '三岁', pinyin: 'sān suì', arabic: '٣ سنوات' },
+      { letter: 'B', hanzi: '五岁', pinyin: 'wǔ suì', arabic: '٥ سنوات' },
+      { letter: 'C', hanzi: '八岁', pinyin: 'bā suì', arabic: '٨ سنوات' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'فخ منطقي: الابنة ٣ سنوات، أما الابن فعمره ٥ سنوات (五岁).',
+  },
+  {
+    number: 18,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الفهم والاستنتاج)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '今天九月八号，我们什么时候上课？', pinyin: 'Jīntiān jiǔ yuè bā hào, wǒmen shénme shíhou shàng kè?', arabic: 'اليوم ٨ سبتمبر، متى تبدأ دروسنا؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '明天九月九号上课。', pinyin: 'Míngtiān jiǔ yuè jiǔ hào shàng kè.', arabic: 'تبدأ الدروس غداً في ٩ سبتمبر.' },
+    ],
+    questionZh: '问：他们哪天上课？',
+    questionPinyin: 'Wèn: Tāmen nǎ tiān shàng kè?',
+    questionAr: 'السؤال: في أي يوم تبدأ دروسهم؟',
+    options: [
+      { letter: 'A', hanzi: '九月八号', pinyin: 'jiǔ yuè bā hào', arabic: '٨ سبتمبر' },
+      { letter: 'B', hanzi: '三月一号', pinyin: 'sān yuè yī hào', arabic: '١ مارس' },
+      { letter: 'C', hanzi: '九月九号', pinyin: 'jiǔ yuè jiǔ hào', arabic: '٩ سبتمبر' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'اليوم ٨ سبتمبر، والدروس تبدأ غداً في ٩ سبتمبر (九月九号).',
+  },
+  {
+    number: 19,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الفهم والاستنتاج)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '大卫，你会说中文吗？', pinyin: 'Dàwèi, nǐ huì shuō Zhōngwén ma?', arabic: 'يا ديفيد، هل تجيد التحدث بالصينية؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我会说一点儿中文，但是不会写汉字。', pinyin: 'Wǒ huì shuō yìdiǎnr Zhōngwén, dànshì bú huì xiě Hànzì.', arabic: 'أجيد التحدث بقليل من الصينية، لكني لا أجيد كتابة الرموز.' },
+    ],
+    questionZh: '问：大卫不会做什么？',
+    questionPinyin: 'Wèn: Dàwèi bú huì zuò shénme?',
+    questionAr: 'السؤال: ما الذي لا يجيده ديفيد؟',
+    options: [
+      { letter: 'A', hanzi: '写汉字', pinyin: 'xiě Hànzì', arabic: 'كتابة الرموز الصينية' },
+      { letter: 'B', hanzi: '说中文', pinyin: 'shuō Zhōngwén', arabic: 'التحدث بالصينية' },
+      { letter: 'C', hanzi: '做面条儿', pinyin: 'zuò miàntiáor', arabic: 'إعداد النودلز' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'ديفيد يتحدث قليلاً من الصينية لكنه لا يجيد كتابة الرموز (写汉字).',
+  },
+  {
+    number: 20,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الفهم والاستنتاج)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你星期六工作吗？', pinyin: 'Nǐ xīngqīliù gōngzuò ma?', arabic: 'هل تعمل يوم السبت؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '星期六工作，星期日休息。', pinyin: 'Xīngqīliù gōngzuò, xīngqīrì xiūxi.', arabic: 'أعمل يوم السبت، وأستريح يوم الأحد.' },
+    ],
+    questionZh: '问：男的哪天休息？',
+    questionPinyin: 'Wèn: Nán de nǎ tiān xiūxi?',
+    questionAr: 'السؤال: في أي يوم يستريح الرجل؟',
+    options: [
+      { letter: 'A', hanzi: '星期一', pinyin: 'xīngqīyī', arabic: 'يوم الإثنين' },
+      { letter: 'B', hanzi: '星期六', pinyin: 'xīngqīliù', arabic: 'يوم السبت' },
+      { letter: 'C', hanzi: '星期日', pinyin: 'xīngqīrì', arabic: 'يوم الأحد' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'يعمل السبت ويستريح يوم الأحد (星期日).',
+  },
+
+  // ---------------- 阅读第一部分 (Q21–Q25): 5 Sentences -> 6 Visual Cards A–F ----------------
+  {
+    number: 21,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r1',
+    promptZh: '今天九月八号。',
+    promptPinyin: 'Jīntiān jiǔ yuè bā hào.',
+    promptAr: 'اليوم الثامن من سبتمبر.',
+    options: INTL_M1_R1_SCENES,
+    correctLetter: 'C',
+    translationAr: 'اليوم الثامن من سبتمبر ← يطابق التقويم C.',
+  },
+  {
+    number: 22,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r1',
+    promptZh: '他是李老师的学生。',
+    promptPinyin: 'Tā shì Lǐ lǎoshī de xuésheng.',
+    promptAr: 'هو طالب الأستاذ لي.',
+    options: INTL_M1_R1_SCENES,
+    correctLetter: 'E',
+    translationAr: 'هو طالب الأستاذ لي ← يطابق مشهد الطالب E.',
+  },
+  {
+    number: 23,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r1',
+    promptZh: '我会做饺子。',
+    promptPinyin: 'Wǒ huì zuò jiǎozi.',
+    promptAr: 'أعرف كيف أعدّ الجياوتسي.',
+    options: INTL_M1_R1_SCENES,
+    correctLetter: 'B',
+    translationAr: 'أعرف إعداد الجياوتسي ← يطابق مشهد طبق الجياوتسي B.',
+  },
+  {
+    number: 24,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r1',
+    promptZh: '你们好！很高兴认识你们。',
+    promptPinyin: 'Nǐmen hǎo! Hěn gāoxìng rènshi nǐmen.',
+    promptAr: 'مرحباً بكم! يسعدني التعرف إليكم.',
+    options: INTL_M1_R1_SCENES,
+    correctLetter: 'A',
+    translationAr: 'مرحباً بكم! يسعدني التعرف إليكم ← يطابق مشهد التحية A.',
+  },
+  {
+    number: 25,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالمشاهد A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r1',
+    promptZh: '我是中国人，我爱中国。',
+    promptPinyin: 'Wǒ shì Zhōngguórén, wǒ ài Zhōngguó.',
+    promptAr: 'أنا صيني، وأحب الصين.',
+    options: INTL_M1_R1_SCENES,
+    correctLetter: 'D',
+    translationAr: 'أنا صيني، وأحب الصين ← يطابق المعلم الصيني D.',
+  },
+
+  // ---------------- 阅读第二部分 (Q26–Q30): 5×5 Dialogue Matching A–F ----------------
+  {
+    number: 26,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة الجمل والردود A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r2',
+    promptZh: '请问，你叫什么名字？',
+    promptPinyin: 'Qǐngwèn, nǐ jiào shénme míngzi?',
+    promptAr: 'لو سمحت، ما اسمك؟',
+    options: INTL_M1_R2_REPLIES,
+    correctLetter: 'A',
+    translationAr: 'لو سمحت، ما اسمك؟ ← A: اسمي لي ون.',
+  },
+  {
+    number: 27,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة الجمل والردود A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r2',
+    promptZh: '你家有几口人？',
+    promptPinyin: 'Nǐ jiā yǒu jǐ kǒu rén?',
+    promptAr: 'كم عدد أفراد أسرتك؟',
+    options: INTL_M1_R2_REPLIES,
+    correctLetter: 'C',
+    translationAr: 'كم عدد أفراد أسرتك؟ ← C: في أسرتي أربعة أفراد.',
+  },
+  {
+    number: 28,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة الجمل والردود A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r2',
+    promptZh: '你会说中文吗？',
+    promptPinyin: 'Nǐ huì shuō Zhōngwén ma?',
+    promptAr: 'هل تجيد التحدث بالصينية؟',
+    options: INTL_M1_R2_REPLIES,
+    correctLetter: 'E',
+    translationAr: 'هل تجيد التحدث بالصينية؟ ← E: أجيد التحدث بالصينية.',
+  },
+  {
+    number: 29,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة الجمل والردود A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r2',
+    promptZh: '今天星期几？',
+    promptPinyin: 'Jīntiān xīngqī jǐ?',
+    promptAr: 'ما هو يوم الأسبوع اليوم؟',
+    options: INTL_M1_R2_REPLIES,
+    correctLetter: 'D',
+    translationAr: 'ما هو يوم الأسبوع اليوم؟ ← D: اليوم يوم الأحد.',
+  },
+  {
+    number: 30,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة الجمل والردود A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r2',
+    promptZh: '你的女朋友是哪国人？',
+    promptPinyin: 'Nǐ de nǚpéngyou shì nǎ guó rén?',
+    promptAr: 'ما جنسية خطيبتك/صديقتك؟',
+    options: INTL_M1_R2_REPLIES,
+    correctLetter: 'B',
+    translationAr: 'ما جنسيتها؟ ← B: هي صينية الجنسية.',
+  },
+
+  // ---------------- 阅读第三部分 (Q31–Q35): Word Bank Cloze (选词填空 A–F) ----------------
+  {
+    number: 31,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r3',
+    promptZh: '很高兴____你。',
+    promptPinyin: 'Hěn gāoxìng nǐ.',
+    promptAr: 'يسعدني جداً التعرف إليك.',
+    options: INTL_M1_R3_WORDBANK,
+    correctLetter: 'A',
+    translationAr: '很高兴认识你 — يسعدني جداً التعرف إليك.',
+  },
+  {
+    number: 32,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r3',
+    promptZh: '她是我的中文____。',
+    promptPinyin: 'Tā shì wǒ de Zhōngwén.',
+    promptAr: 'هي معلمتي للغة الصينية.',
+    options: INTL_M1_R3_WORDBANK,
+    correctLetter: 'E',
+    translationAr: '她是我的中文老师 — هي معلمتي للغة الصينية.',
+  },
+  {
+    number: 33,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r3',
+    promptZh: '你最近____还忙吗？',
+    promptPinyin: 'Nǐ zuìjìn hái máng ma?',
+    promptAr: 'هل لا يزال عملك مزدحماً مؤخراً؟',
+    options: INTL_M1_R3_WORDBANK,
+    correctLetter: 'C',
+    translationAr: '你最近工作还忙吗？ — هل لا يزال عملك مزدحماً؟',
+  },
+  {
+    number: 34,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r3',
+    promptZh: '姐姐有两个____。',
+    promptPinyin: 'Jiějie yǒu liǎng gè.',
+    promptAr: 'أختي الكبرى لديها طفلان.',
+    options: INTL_M1_R3_WORDBANK,
+    correctLetter: 'D',
+    translationAr: '姐姐有两个孩子 — أختي الكبرى لديها طفلان.',
+  },
+  {
+    number: 35,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)',
+    points: 5,
+    sharedBankId: 'intl-m1-r3',
+    promptZh: '今天星期日，我在家____。',
+    promptPinyin: 'Jīntiān xīngqīrì, wǒ zài jiā.',
+    promptAr: 'اليوم الأحد، وأنا أستريح في البيت.',
+    options: INTL_M1_R3_WORDBANK,
+    correctLetter: 'B',
+    translationAr: '今天星期日，我在家休息 — اليوم الأحد، أستريح في البيت.',
+  },
+
+  // ---------------- 阅读第四部分 (Q36–Q40): Short Passage + Inference ★ ----------------
+  {
+    number: 36,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم ★)',
+    points: 5,
+    promptZh: '我叫李文，是中国人。我是王老师的学生，现在学习中文。',
+    promptPinyin: 'Wǒ jiào Lǐ Wén, shì Zhōngguórén. Wǒ shì Wáng lǎoshī de xuésheng, xiànzài xuéxí Zhōngwén.',
+    promptAr: 'اسمي لي ون، وأنا صيني. أنا طالب لدى الأستاذ وانغ وأدرس الصينية الآن.',
+    questionZh: '★ 李文是：',
+    questionPinyin: 'Lǐ Wén shì:',
+    questionAr: '★ من هو لي ون؟',
+    options: [
+      { letter: 'A', hanzi: '学生', pinyin: 'xuésheng', arabic: 'طالب' },
+      { letter: 'B', hanzi: '老师', pinyin: 'lǎoshī', arabic: 'معلم' },
+      { letter: 'C', hanzi: '医生', pinyin: 'yīshēng', arabic: 'طبيب' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'النص يذكر أن لي ون هو طالب لدى الأستاذ وانغ (学生).',
+  },
+  {
+    number: 37,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم ★)',
+    points: 5,
+    promptZh: '王老师家有四口人：王老师、他太太和两个儿子。大儿子八岁，小儿子五岁。',
+    promptPinyin: 'Wáng lǎoshī jiā yǒu sì kǒu rén: Wáng lǎoshī, tā tàitai hé liǎng gè érzi. Dà érzi bā suì, xiǎo érzi wǔ suì.',
+    promptAr: 'أسرة الأستاذ وانغ تتكون من ٤ أفراد: الأستاذ وانغ وزوجته وابنين. الأكبر ٨ سنوات والأصغر ٥ سنوات.',
+    questionZh: '★ 王老师的小儿子今年几岁？',
+    questionPinyin: 'Wáng lǎoshī de xiǎo érzi jīnnián jǐ suì?',
+    questionAr: '★ كم عمر الابن الأصغر للأستاذ وانغ؟',
+    options: [
+      { letter: 'A', hanzi: '四岁', pinyin: 'sì suì', arabic: '٤ سنوات' },
+      { letter: 'B', hanzi: '五岁', pinyin: 'wǔ suì', arabic: '٥ سنوات' },
+      { letter: 'C', hanzi: '八岁', pinyin: 'bā suì', arabic: '٨ سنوات' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'الابن الأكبر ٨ سنوات، والابن الأصغر ٥ سنوات (五岁).',
+  },
+  {
+    number: 38,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم ★)',
+    points: 5,
+    promptZh: '今天是三月一号，星期一。我们今天开始上中文课，星期日休息。',
+    promptPinyin: 'Jīntiān shì sān yuè yī hào, xīngqīyī. Wǒmen jīntiān kāishǐ shàng Zhōngwén kè, xīngqīrì xiūxi.',
+    promptAr: 'اليوم ١ مارس، يوم الإثنين. نبدأ دروس اللغة الصينية اليوم، ونستريح يوم الأحد.',
+    questionZh: '★ 他们哪天休息？',
+    questionPinyin: 'Tāmen nǎ tiān xiūxi?',
+    questionAr: '★ في أي يوم يستريحون؟',
+    options: [
+      { letter: 'A', hanzi: '星期一', pinyin: 'xīngqīyī', arabic: 'الإثنين' },
+      { letter: 'B', hanzi: '三月一号', pinyin: 'sān yuè yī hào', arabic: '١ مارس' },
+      { letter: 'C', hanzi: '星期日', pinyin: 'xīngqīrì', arabic: 'الأحد' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'تبدأ الدروس يوم الإثنين، والراحة يوم الأحد (星期日).',
+  },
+  {
+    number: 39,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم ★)',
+    points: 5,
+    promptZh: '妈妈很会做饭，她会做面条儿、饺子，也会做很多中国菜。',
+    promptPinyin: 'Māma hěn huì zuò fàn, tā huì zuò miàntiáor, jiǎozi, yě huì zuò hěn duō Zhōngguó cài.',
+    promptAr: 'أمي ماهرة جداً في الطبخ، تجيد إعداد النودلز والجياوتسي وكثيراً من الأطباق الصينية.',
+    questionZh: '★ 关于妈妈，可以知道什么？',
+    questionPinyin: 'Guānyú māma, kěyǐ zhīdào shénme?',
+    questionAr: '★ ماذا يمكن أن نستنتج عن الأم؟',
+    options: [
+      { letter: 'A', hanzi: '她会做中国菜', pinyin: 'Tā huì zuò Zhōngguó cài', arabic: 'إنها تجيد طبخ الأطباق الصينية' },
+      { letter: 'B', hanzi: '她不会做饭', pinyin: 'Tā bú huì zuò fàn', arabic: 'إنها لا تجيد الطبخ' },
+      { letter: 'C', hanzi: '她是中文老师', pinyin: 'Tā shì Zhōngwén lǎoshī', arabic: 'إنها معلمة صينية' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'نستنتج أن الأم تجيد الطبخ الصيني (她会做中国菜).',
+  },
+  {
+    number: 40,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم ★)',
+    points: 5,
+    promptZh: '这是我的朋友安娜。她会说中文，但是最近工作很忙，没有时间看书。',
+    promptPinyin: 'Zhè shì wǒ de péngyou Ānnà. Tā huì shuō Zhōngwén, dànshì zuìjìn gōngzuò hěn máng, méiyǒu shíjiān kàn shū.',
+    promptAr: 'هذه صديقتي آنا. تتحدث الصينية، لكن عملها مزدحم جداً مؤخراً وليس لديها وقت للقراءة.',
+    questionZh: '★ 安娜最近怎么样？',
+    questionPinyin: 'Ānnà zuìjìn zěnmeyàng?',
+    questionAr: '★ كيف حال آنا مؤخراً؟',
+    options: [
+      { letter: 'A', hanzi: '每天休息', pinyin: 'měitiān xiūxi', arabic: 'تستريح كل يوم' },
+      { letter: 'B', hanzi: '工作很忙', pinyin: 'gōngzuò hěn máng', arabic: 'عملها مزدحم جداً' },
+      { letter: 'C', hanzi: '不会说中文', pinyin: 'bú huì shuō Zhōngwén', arabic: 'لا تتحدث الصينية' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'آنا مشغولة جداً في العمل مؤخراً (工作很忙).',
+  },
+];
+
+// =============================================================================
+// النموذج التطبيقي العربي الأول (Arabic Applied Model 1 — 40 Deterministic Questions)
+// =============================================================================
+
+const AR_M1_L3_BANK: HskChoiceOption[] = [
+  { letter: 'A', arabic: 'الشخص في إجازة يوم الأحد ولا يعمل اليوم' },
+  { letter: 'B', arabic: 'الحديث عن حاسوب محمول جديد' },
+  { letter: 'C', arabic: 'أسرة تتكوّن من أربعة أفراد' },
+  { letter: 'D', arabic: 'المعلمة لديها عشرون طالباً في الفصل' },
+  { letter: 'E', arabic: 'التحدث عن مهارة إعداد النودلز الصينية' },
+  { letter: 'F', arabic: 'التعارف بين زميلين في أول يوم دراسي' },
+];
+
+const AR_M1_R1_BANK: HskChoiceOption[] = [
+  { letter: 'A', arabic: 'اليوم هو الثامن من سبتمبر.' },
+  { letter: 'B', arabic: 'هي معلمتي للغة الصينية.' },
+  { letter: 'C', arabic: 'أعرف كيف أعدّ الجياوتسي وبعض الأطباق.' },
+  { letter: 'D', arabic: 'لديّ طفلان في البيت.' },
+  { letter: 'E', arabic: 'أهلاً وسهلاً، يسعدني جداً التعرف إليك.' },
+  { letter: 'F', arabic: 'نبدأ الدروس في الأول من مارس.' },
+];
+
+const AR_M1_R2_BANK: HskChoiceOption[] = [
+  { letter: 'A', hanzi: '请问，你叫什么名字？', pinyin: 'Qǐngwèn, nǐ jiào shénme míngzi?', arabic: 'لو سمحت، ما اسمك؟' },
+  { letter: 'B', hanzi: '你是哪国人？', pinyin: 'Nǐ shì nǎ guó rén?', arabic: 'ما هي جنسيتك؟' },
+  { letter: 'C', hanzi: '你家有几口人？', pinyin: 'Nǐ jiā yǒu jǐ kǒu rén?', arabic: 'كم فرداً في أسرتك؟' },
+  { letter: 'D', hanzi: '你会说中文吗？', pinyin: 'Nǐ huì shuō Zhōngwén ma?', arabic: 'هل تتحدث الصينية؟' },
+  { letter: 'E', hanzi: '你工作还忙吗？', pinyin: 'Nǐ gōngzuò hái máng ma?', arabic: 'هل لا يزال عملك مزدحماً؟' },
+  { letter: 'F', hanzi: '今天星期日，我休息。', pinyin: 'Jīntiān xīngqīrì, wǒ xiūxi.', arabic: 'اليوم الأحد، أنا في إجازة.' },
+];
+
+const AR_M1_R3_WORDBANK: HskChoiceOption[] = [
+  { letter: 'A', hanzi: '名字', pinyin: 'míngzi', arabic: 'اسم' },
+  { letter: 'B', hanzi: '老师', pinyin: 'lǎoshī', arabic: 'معلم' },
+  { letter: 'C', hanzi: '电脑', pinyin: 'diànnǎo', arabic: 'حاسوب' },
+  { letter: 'D', hanzi: '学生', pinyin: 'xuésheng', arabic: 'طالب' },
+  { letter: 'E', hanzi: '休息', pinyin: 'xiūxi', arabic: 'يستريح' },
+  { letter: 'F', hanzi: '工作', pinyin: 'gōngzuò', arabic: 'عمل' },
+];
+
+const ARABIC_MODEL_1_QUESTIONS: FixedMockExamQuestion[] = [
+  // القسم الأول: الاستماع (1–5: جملة صينية -> المعنى العربي)
+  {
+    number: 1,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (فهم الجملة المسموعة)',
+    points: 5,
+    audioSingle: { hanzi: '我是李老师的学生。', pinyin: 'Wǒ shì Lǐ lǎoshī de xuésheng.', arabic: 'أنا طالب الأستاذ لي.' },
+    options: [
+      { letter: 'A', arabic: 'أنا طالب الأستاذ لي.' },
+      { letter: 'B', arabic: 'أنا معلم الأستاذ لي.' },
+      { letter: 'C', arabic: 'الأستاذ لي صديقي في العمل.' },
+    ],
+    correctLetter: 'A',
+    translationAr: '我是李老师的学生 — أنا طالب الأستاذ لي.',
+  },
+  {
+    number: 2,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (فهم الجملة المسموعة)',
+    points: 5,
+    audioSingle: { hanzi: '很高兴认识你。', pinyin: 'Hěn gāoxìng rènshi nǐ.', arabic: 'يسعدني جداً التعرف إليك.' },
+    options: [
+      { letter: 'A', arabic: 'أعتذر عن التأخير.' },
+      { letter: 'B', arabic: 'يسعدني جداً التعرف إليك.' },
+      { letter: 'C', arabic: 'إلى اللقاء غداً.' },
+    ],
+    correctLetter: 'B',
+    translationAr: '很高兴认识你 — يسعدني جداً التعرف إليك.',
+  },
+  {
+    number: 3,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (فهم الجملة المسموعة)',
+    points: 5,
+    audioSingle: { hanzi: '我的中文老师也是中国人。', pinyin: 'Wǒ de Zhōngwén lǎoshī yě shì Zhōngguórén.', arabic: 'معلمي للغة الصينية صيني الجنسية أيضاً.' },
+    options: [
+      { letter: 'A', arabic: 'معلمي للغة الصينية ليس صينياً.' },
+      { letter: 'B', arabic: 'أنا أدرّس اللغة الصينية في الصين.' },
+      { letter: 'C', arabic: 'معلمي للغة الصينية صيني الجنسية أيضاً.' },
+    ],
+    correctLetter: 'C',
+    translationAr: '我的中文老师也是中国人 — معلمي للغة الصينية صيني الجنسية أيضاً.',
+  },
+  {
+    number: 4,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (فهم الجملة المسموعة)',
+    points: 5,
+    audioSingle: { hanzi: '他今年五岁。', pinyin: 'Tā jīnnián wǔ suì.', arabic: 'عمره خمس سنوات هذه السنة.' },
+    options: [
+      { letter: 'A', arabic: 'عمره خمس سنوات هذه السنة.' },
+      { letter: 'B', arabic: 'لديه خمسة أطفال في البيت.' },
+      { letter: 'C', arabic: 'اليوم الخامس من الشهر.' },
+    ],
+    correctLetter: 'A',
+    translationAr: '他今年五岁 — عمره خمس سنوات هذه السنة.',
+  },
+  {
+    number: 5,
+    section: 'listening',
+    partId: 'listening-p1',
+    partLabelZh: '听力第一部分',
+    partLabelAr: 'الاستماع — الجزء ١ (فهم الجملة المسموعة)',
+    points: 5,
+    audioSingle: { hanzi: '今天九月八号，我休息。', pinyin: 'Jīntiān jiǔ yuè bā hào, wǒ xiūxi.', arabic: 'اليوم ٨ سبتمبر، وأنا في إجازة.' },
+    options: [
+      { letter: 'A', arabic: 'اليوم ٩ أغسطس، ولديّ عمل كثير.' },
+      { letter: 'B', arabic: 'اليوم ٨ سبتمبر، وأنا في إجازة.' },
+      { letter: 'C', arabic: 'غداً ٨ سبتمبر، سنبدأ الدراسة.' },
+    ],
+    correctLetter: 'B',
+    translationAr: '今天九月八号，我休息 — اليوم ٨ سبتمبر، وأنا في إجازة.',
+  },
+
+  // 6–10: سؤال صيني مسموع -> الرد العربي المنطقي
+  {
+    number: 6,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (الرد المنطقي بالعربية)',
+    points: 5,
+    audioSingle: { hanzi: '请问，你叫什么名字？', pinyin: 'Qǐngwèn, nǐ jiào shénme míngzi?', arabic: 'لو سمحت، ما اسمك؟' },
+    options: [
+      { letter: 'A', arabic: 'اسمي لي ون.' },
+      { letter: 'B', arabic: 'في أسرتي أربعة أفراد.' },
+      { letter: 'C', arabic: 'اليوم يوم الأحد.' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'السؤال عن الاسم ← الرد المنطقي: اسمي لي ون.',
+  },
+  {
+    number: 7,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (الرد المنطقي بالعربية)',
+    points: 5,
+    audioSingle: { hanzi: '你认识他吗？', pinyin: 'Nǐ rènshi tā ma?', arabic: 'هل تعرفه؟' },
+    options: [
+      { letter: 'A', arabic: 'نعم، اليوم ٨ سبتمبر.' },
+      { letter: 'B', arabic: 'نعم أعرفه، إنه زميلي في الدراسة.' },
+      { letter: 'C', arabic: 'لا، لا أجيد الطبخ.' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'السؤال: هل تعرفه؟ ← الرد: نعم أعرفه، إنه زميلي.',
+  },
+  {
+    number: 8,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (الرد المنطقي بالعربية)',
+    points: 5,
+    audioSingle: { hanzi: '你家有几口人？', pinyin: 'Nǐ jiā yǒu jǐ kǒu rén?', arabic: 'كم عدد أفراد أسرتك؟' },
+    options: [
+      { letter: 'A', arabic: 'أعرف إعداد النودلز.' },
+      { letter: 'B', arabic: 'عملي مزدحم جداً.' },
+      { letter: 'C', arabic: 'أسرتي مكوّنة من أربعة أفراد.' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'السؤال عن عدد أفراد الأسرة ← C.',
+  },
+  {
+    number: 9,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (الرد المنطقي بالعربية)',
+    points: 5,
+    audioSingle: { hanzi: '你会做饭吗？', pinyin: 'Nǐ huì zuò fàn ma?', arabic: 'هل تجيد الطبخ؟' },
+    options: [
+      { letter: 'A', arabic: 'نعم، أجيد إعداد النودلز والجياوتسي.' },
+      { letter: 'B', arabic: 'لديها عشرون طالباً.' },
+      { letter: 'C', arabic: 'هذا حاسوبي الجديد.' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'السؤال عن الطبخ ← A.',
+  },
+  {
+    number: 10,
+    section: 'listening',
+    partId: 'listening-p2',
+    partLabelZh: '听力第二部分',
+    partLabelAr: 'الاستماع — الجزء ٢ (الرد المنطقي بالعربية)',
+    points: 5,
+    audioSingle: { hanzi: '这是你的新电脑吗？', pinyin: 'Zhè shì nǐ de xīn diànnǎo ma?', arabic: 'هل هذا حاسوبك الجديد؟' },
+    options: [
+      { letter: 'A', arabic: 'عمري عشرون سنة.' },
+      { letter: 'B', arabic: 'نعم، إنه حاسوبي الجديد.' },
+      { letter: 'C', arabic: 'أختي لديها طفلان.' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'السؤال: هل هذا حاسوبك الجديد؟ ← B.',
+  },
+
+  // 11–15: حوارات بين متحدثين -> مطابقة 6 أوصاف عربية (A–F)
+  {
+    number: 11,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (مطابقة الحوارات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '今天星期日，你去工作吗？', pinyin: 'Jīntiān xīngqīrì, nǐ qù gōngzuò ma?', arabic: 'اليوم الأحد، هل تذهب إلى العمل؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '不去，今天我休息。', pinyin: 'Bú qù, jīntiān wǒ xiūxi.', arabic: 'لا، اليوم أنا في إجازة.' },
+    ],
+    options: AR_M1_L3_BANK,
+    correctLetter: 'A',
+    translationAr: 'الرجل لا يعمل يوم الأحد لأنه في إجازة.',
+  },
+  {
+    number: 12,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (مطابقة الحوارات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '这是你的新电脑吗？', pinyin: 'Zhè shì nǐ de xīn diànnǎo ma?', arabic: 'هل هذا حاسوبك الجديد؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '是的，很好用。', pinyin: 'Shì de, hěn hǎoyòng.', arabic: 'نعم، سهل الاستخدام جداً.' },
+    ],
+    options: AR_M1_L3_BANK,
+    correctLetter: 'B',
+    translationAr: 'الحوار يدور حول حاسوب محمول جديد.',
+  },
+  {
+    number: 13,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (مطابقة الحوارات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你家有几口人？', pinyin: 'Nǐ jiā yǒu jǐ kǒu rén?', arabic: 'كم فرداً في أسرتك؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '四口人，我有两个孩子。', pinyin: 'Sì kǒu rén, wǒ yǒu liǎng gè háizi.', arabic: 'أربعة أفراد، لديّ طفلان.' },
+    ],
+    options: AR_M1_L3_BANK,
+    correctLetter: 'C',
+    translationAr: 'الحوار يصف أسرة من أربعة أفراد.',
+  },
+  {
+    number: 14,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (مطابقة الحوارات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '李老师有多少学生？', pinyin: 'Lǐ lǎoshī yǒu duōshao xuésheng?', arabic: 'كم طالباً لدى المعلمة لي؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '她有二十个学生。', pinyin: 'Tā yǒu èrshí gè xuésheng.', arabic: 'لديها عشرون طالباً.' },
+    ],
+    options: AR_M1_L3_BANK,
+    correctLetter: 'D',
+    translationAr: 'الحوار يوضح أن لدى المعلمة عشرين طالباً.',
+  },
+  {
+    number: 15,
+    section: 'listening',
+    partId: 'listening-p3',
+    partLabelZh: '听力第三部分',
+    partLabelAr: 'الاستماع — الجزء ٣ (مطابقة الحوارات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-l3',
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你会做什么中国饭？', pinyin: 'Nǐ huì zuò shénme Zhōngguó fàn?', arabic: 'ماذا تجيد من الطبخ الصيني؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我会做面条儿。', pinyin: 'Wǒ huì zuò miàntiáor.', arabic: 'أجيد إعداد النودلز.' },
+    ],
+    options: AR_M1_L3_BANK,
+    correctLetter: 'E',
+    translationAr: 'الحوار يتحدث عن مهارة إعداد النودلز الصينية.',
+  },
+
+  // 16–20: حوارات مع سؤال استنتاجي بالعربية
+  {
+    number: 16,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الاستنتاج والفهم)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '王明，你儿子今年几岁？', pinyin: 'Wáng Míng, nǐ érzi jīnnián jǐ suì?', arabic: 'يا وانغ مينغ، كم عمر ابنك؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我儿子五岁，女儿八岁。', pinyin: 'Wǒ érzi wǔ suì, nǚér bā suì.', arabic: 'ابني ٥ سنوات وابنتي ٨ سنوات.' },
+    ],
+    questionAr: 'السؤال: كم عمر ابنة وانغ مينغ؟',
+    options: [
+      { letter: 'A', arabic: '٥ سنوات' },
+      { letter: 'B', arabic: '٨ سنوات' },
+      { letter: 'C', arabic: '٣ سنوات' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'فخ منطقي: الابن ٥ سنوات، بينما السؤال عن الابنة وعمرها ٨ سنوات.',
+  },
+  {
+    number: 17,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الاستنتاج والفهم)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '今天九月八号，我们今天上课吗？', pinyin: 'Jīntiān jiǔ yuè bā hào, wǒmen jīntiān shàng kè ma?', arabic: 'اليوم ٨ سبتمبر، هل لدينا درس اليوم؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '今天不上课，明天九月九号上课。', pinyin: 'Jīntiān bú shàng kè, míngtiān jiǔ yuè jiǔ hào shàng kè.', arabic: 'لا درس اليوم، الدرس غداً ٩ سبتمبر.' },
+    ],
+    questionAr: 'السؤال: متى يبدأ الدرس؟',
+    options: [
+      { letter: 'A', arabic: 'اليوم ٨ سبتمبر' },
+      { letter: 'B', arabic: 'الأول من مارس' },
+      { letter: 'C', arabic: 'غداً ٩ سبتمبر' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'لا درس اليوم؛ الدرس يبدأ غداً في ٩ سبتمبر.',
+  },
+  {
+    number: 18,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الاستنتاج والفهم)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你女朋友是哪国人？', pinyin: 'Nǐ nǚpéngyou shì nǎ guó rén?', arabic: 'ما جنسية خطيبتك؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我是中国人，她不是中国人，她是美国人。', pinyin: 'Wǒ shì Zhōngguórén, tā bú shì Zhōngguórén, tā shì Měiguórén.', arabic: 'أنا صيني، هي ليست صينية بل أمريكية.' },
+    ],
+    questionAr: 'السؤال: ما هي جنسية الفتاة؟',
+    options: [
+      { letter: 'A', arabic: 'أمريكية' },
+      { letter: 'B', arabic: 'صينية' },
+      { letter: 'C', arabic: 'بريطانية' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'الرجل صيني، أما الفتاة فهي أمريكية.',
+  },
+  {
+    number: 19,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الاستنتاج والفهم)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你会说中文吗？会写汉字吗？', pinyin: 'Nǐ huì shuō Zhōngwén ma? Huì xiě Hànzì ma?', arabic: 'هل تتحدث الصينية وتكتب الرموز؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '我会说中文，但是不会写汉字。', pinyin: 'Wǒ huì shuō Zhōngwén, dànshì bú huì xiě Hànzì.', arabic: 'أتحدث الصينية لكني لا أجيد كتابة الرموز.' },
+    ],
+    questionAr: 'السؤال: ما العبارة الصحيحة عن الرجل؟',
+    options: [
+      { letter: 'A', arabic: 'يجيد كتابة الرموز ولا يتحدث الصينية' },
+      { letter: 'B', arabic: 'يتحدث الصينية لكنه لا يجيد كتابة الرموز' },
+      { letter: 'C', arabic: 'لا يتحدث الصينية ولا يكتب الرموز' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'يتحدث الصينية ولا يجيد كتابة الرموز.',
+  },
+  {
+    number: 20,
+    section: 'listening',
+    partId: 'listening-p4',
+    partLabelZh: '听力第四部分',
+    partLabelAr: 'الاستماع — الجزء ٤ (الاستنتاج والفهم)',
+    points: 5,
+    audioDialogue: [
+      { speaker: 'A', roleLabelZh: '女', hanzi: '你工作还忙吗？', pinyin: 'Nǐ gōngzuò hái máng ma?', arabic: 'هل لا يزال عملك مزدحماً؟' },
+      { speaker: 'B', roleLabelZh: '男', hanzi: '星期一到星期五很忙，星期日不忙。', pinyin: 'Xīngqīyī dào xīngqīwǔ hěn máng, xīngqīrì bù máng.', arabic: 'من الإثنين إلى الجمعة مزدحم جداً، والأحد غير مزدحم.' },
+    ],
+    questionAr: 'السؤال: متى يكون عمل الرجل غير مزدحم؟',
+    options: [
+      { letter: 'A', arabic: 'يوم الإثنين' },
+      { letter: 'B', arabic: 'يوم الجمعة' },
+      { letter: 'C', arabic: 'يوم الأحد' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'يكون غير مزدحم يوم الأحد (星期日).',
+  },
+
+  // القسم الثاني: القراءة (21–25: 5 جمل صينية -> مطابقة 6 ترجمات عربية A–F)
+  {
+    number: 21,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالترجمة العربية A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r1',
+    promptZh: '她是我的中文老师。',
+    promptPinyin: 'Tā shì wǒ de Zhōngwén lǎoshī.',
+    options: AR_M1_R1_BANK,
+    correctLetter: 'B',
+    translationAr: '她是我的中文老师 ← هي معلمتي للغة الصينية.',
+  },
+  {
+    number: 22,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالترجمة العربية A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r1',
+    promptZh: '今天九月八号。',
+    promptPinyin: 'Jīntiān jiǔ yuè bā hào.',
+    options: AR_M1_R1_BANK,
+    correctLetter: 'A',
+    translationAr: '今天九月八号 ← اليوم هو الثامن من سبتمبر.',
+  },
+  {
+    number: 23,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالترجمة العربية A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r1',
+    promptZh: '我们三月一号上课。',
+    promptPinyin: 'Wǒmen sān yuè yī hào shàng kè.',
+    options: AR_M1_R1_BANK,
+    correctLetter: 'F',
+    translationAr: '我们三月一号上课 ← نبدأ الدروس في الأول من مارس.',
+  },
+  {
+    number: 24,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالترجمة العربية A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r1',
+    promptZh: '我有两个孩子。',
+    promptPinyin: 'Wǒ yǒu liǎng gè háizi.',
+    options: AR_M1_R1_BANK,
+    correctLetter: 'D',
+    translationAr: '我有两个孩子 ← لديّ طفلان في البيت.',
+  },
+  {
+    number: 25,
+    section: 'reading',
+    partId: 'reading-p1',
+    partLabelZh: '阅读第一部分',
+    partLabelAr: 'القراءة — الجزء ١ (مطابقة الجمل بالترجمة العربية A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r1',
+    promptZh: '我会做饺子，也会做一些菜。',
+    promptPinyin: 'Wǒ huì zuò jiǎozi, yě huì zuò yìxiē cài.',
+    options: AR_M1_R1_BANK,
+    correctLetter: 'C',
+    translationAr: '我会做饺子，也会做一些菜 ← أعرف كيف أعدّ الجياوتسي وبعض الأطباق.',
+  },
+
+  // 26–30: 5 جمل عربية -> مطابقة 6 جمل صينية A–F
+  {
+    number: 26,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة العربي بالصيني A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r2',
+    promptAr: 'ما هي جنسيتك؟',
+    options: AR_M1_R2_BANK,
+    correctLetter: 'B',
+    translationAr: 'ما هي جنسيتك؟ ← 你是哪国人？',
+  },
+  {
+    number: 27,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة العربي بالصيني A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r2',
+    promptAr: 'هل تتحدث اللغة الصينية؟',
+    options: AR_M1_R2_BANK,
+    correctLetter: 'D',
+    translationAr: 'هل تتحدث اللغة الصينية؟ ← 你会说中文吗？',
+  },
+  {
+    number: 28,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة العربي بالصيني A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r2',
+    promptAr: 'اليوم يوم الأحد، أنا في إجازة.',
+    options: AR_M1_R2_BANK,
+    correctLetter: 'F',
+    translationAr: 'اليوم يوم الأحد، أنا في إجازة ← 今天星期日，我休息。',
+  },
+  {
+    number: 29,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة العربي بالصيني A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r2',
+    promptAr: 'كم عدد أفراد أسرتك؟',
+    options: AR_M1_R2_BANK,
+    correctLetter: 'C',
+    translationAr: 'كم عدد أفراد أسرتك؟ ← 你家有几口人？',
+  },
+  {
+    number: 30,
+    section: 'reading',
+    partId: 'reading-p2',
+    partLabelZh: '阅读第二部分',
+    partLabelAr: 'القراءة — الجزء ٢ (مطابقة العربي بالصيني A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r2',
+    promptAr: 'لو سمحت، ما اسمك؟',
+    options: AR_M1_R2_BANK,
+    correctLetter: 'A',
+    translationAr: 'لو سمحت، ما اسمك؟ ← 请问，你叫什么名字？',
+  },
+
+  // 31–35: بنك الكلمات A–F مع سياق عربي
+  {
+    number: 31,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r3',
+    promptZh: '请问，你叫什么____？',
+    promptPinyin: 'Qǐngwèn, nǐ jiào shénme?',
+    promptAr: 'المطلوب: لو سمحت، ما اسمك؟',
+    options: AR_M1_R3_WORDBANK,
+    correctLetter: 'A',
+    translationAr: 'الكلمة المناسبة هي 名字 (اسم).',
+  },
+  {
+    number: 32,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r3',
+    promptZh: '这是你的新____吗？',
+    promptPinyin: 'Zhè shì nǐ de xīn ma?',
+    promptAr: 'المطلوب: هل هذا حاسوبك الجديد؟',
+    options: AR_M1_R3_WORDBANK,
+    correctLetter: 'C',
+    translationAr: 'الكلمة المناسبة هي 电脑 (حاسوب).',
+  },
+  {
+    number: 33,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r3',
+    promptZh: '她有二十个____。',
+    promptPinyin: 'Tā yǒu èrshí gè.',
+    promptAr: 'المطلوب: لديها عشرون طالباً.',
+    options: AR_M1_R3_WORDBANK,
+    correctLetter: 'D',
+    translationAr: 'الكلمة المناسبة هي 学生 (طالب).',
+  },
+  {
+    number: 34,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r3',
+    promptZh: '你最近____忙吗？',
+    promptPinyin: 'Nǐ zuìjìn máng ma?',
+    promptAr: 'المطلوب: هل عملك مزدحم مؤخراً؟',
+    options: AR_M1_R3_WORDBANK,
+    correctLetter: 'F',
+    translationAr: 'الكلمة المناسبة هي 工作 (عمل).',
+  },
+  {
+    number: 35,
+    section: 'reading',
+    partId: 'reading-p3',
+    partLabelZh: '阅读第三部分',
+    partLabelAr: 'القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)',
+    points: 5,
+    sharedBankId: 'ar-m1-r3',
+    promptZh: '今天星期日，我在家____。',
+    promptPinyin: 'Jīntiān xīngqīrì, wǒ zài jiā.',
+    promptAr: 'المطلوب: اليوم الأحد، أنا أستريح في البيت.',
+    options: AR_M1_R3_WORDBANK,
+    correctLetter: 'E',
+    translationAr: 'الكلمة المناسبة هي 休息 (يستريح).',
+  },
+
+  // 36–40: نص صيني قصير + سؤال استنتاجي بالعربية ★
+  {
+    number: 36,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم بالعربية ★)',
+    points: 5,
+    promptZh: '我叫大卫，是美国人。李老师是我的中文老师，他有二十个学生。',
+    promptPinyin: 'Wǒ jiào Dàwèi, shì Měiguórén. Lǐ lǎoshī shì wǒ de Zhōngwén lǎoshī, tā yǒu èrshí gè xuésheng.',
+    questionAr: '★ ماذا نعرف عن ديفيد من النص؟',
+    options: [
+      { letter: 'A', arabic: 'هو طالب أمريكي يدرس الصينية عند الأستاذ لي' },
+      { letter: 'B', arabic: 'هو معلم صيني لديه عشرون طالباً' },
+      { letter: 'C', arabic: 'هو لا يعرف الأستاذ لي' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'ديفيد أمريكي ويدرس الصينية لدى الأستاذ لي.',
+  },
+  {
+    number: 37,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم بالعربية ★)',
+    points: 5,
+    promptZh: '我家有四口人：爸爸、妈妈、姐姐和我。姐姐今年二十岁，我十五岁。',
+    promptPinyin: 'Wǒ jiā yǒu sì kǒu rén: bàba, māma, jiějie hé wǒ. Jiějie jīnnián èrshí suì, wǒ shíwǔ suì.',
+    questionAr: '★ كم عمر المتحدث في النص؟',
+    options: [
+      { letter: 'A', arabic: '٢٠ سنة' },
+      { letter: 'B', arabic: '١٥ سنة' },
+      { letter: 'C', arabic: '٤ سنوات' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'فخ منطقي: الأخت عمرها ٢٠ سنة، أما المتحدث فعمره ١٥ سنة.',
+  },
+  {
+    number: 38,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم بالعربية ★)',
+    points: 5,
+    promptZh: '王丽星期一到星期六都工作，很忙。星期日她不工作，在家做饭、休息。',
+    promptPinyin: 'Wáng Lì xīngqīyī dào xīngqīliù dōu gōngzuò, hěn máng. Xīngqīrì tā bù gōngzuò, zài jiā zuò fàn, xiūxi.',
+    questionAr: '★ ماذا تفعل وانغ لي يوم الأحد؟',
+    options: [
+      { letter: 'A', arabic: 'تذهب إلى العمل وهي مشغولة جداً' },
+      { letter: 'B', arabic: 'تبدأ دورة اللغة الصينية' },
+      { letter: 'C', arabic: 'تطبخ وتستريح في البيت' },
+    ],
+    correctLetter: 'C',
+    translationAr: 'يوم الأحد لا تعمل، بل تطبخ وتستريح في البيت.',
+  },
+  {
+    number: 39,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم بالعربية ★)',
+    points: 5,
+    promptZh: '李文会做面条儿和饺子，但是不会做中国菜。他的妈妈很会做中国菜。',
+    promptPinyin: 'Lǐ Wén huì zuò miàntiáor hé jiǎozi, dànshì bú huì zuò Zhōngguó cài. Tā de māma hěn huì zuò Zhōngguó cài.',
+    questionAr: '★ من الذي يجيد طبخ الأطباق الصينية؟',
+    options: [
+      { letter: 'A', arabic: 'والدة لي ون' },
+      { letter: 'B', arabic: 'لي ون فقط' },
+      { letter: 'C', arabic: 'لا أحد منهما' },
+    ],
+    correctLetter: 'A',
+    translationAr: 'لي ون يجيد النودلز والجياوتسي فقط، أما والدته فتجيد الأطباق الصينية.',
+  },
+  {
+    number: 40,
+    section: 'reading',
+    partId: 'reading-p4',
+    partLabelZh: '阅读第四部分',
+    partLabelAr: 'القراءة — الجزء ٤ (الاستنتاج والفهم بالعربية ★)',
+    points: 5,
+    promptZh: '今天九月八号，星期六。明天九月九号，星期日，我们不去学校上课。',
+    promptPinyin: 'Jīntiān jiǔ yuè bā hào, xīngqīliù. Míngtiān jiǔ yuè jiǔ hào, xīngqīrì, wǒmen bú qù xuéxiào shàng kè.',
+    questionAr: '★ لماذا لا يذهبون إلى المدرسة غداً؟',
+    options: [
+      { letter: 'A', arabic: 'لأن غداً يوم الإثنين' },
+      { letter: 'B', arabic: 'لأن غداً يوم الأحد (إجازة)' },
+      { letter: 'C', arabic: 'لأن اليوم الأول من مارس' },
+    ],
+    correctLetter: 'B',
+    translationAr: 'غداً ٩ سبتمبر يوافق يوم الأحد ولا توجد دراسة.',
+  },
+];
+
+// =============================================================================
+// تصدير جميع النماذج الموحدة (١٠ دولية + ٥ عربية)
+// =============================================================================
+
+export const INTERNATIONAL_MOCK_EXAMS: FixedMockExamPaper[] = [
+  {
+    id: 'intl-model-1',
+    track: 'international',
+    modelNumber: 1,
+    titleAr: 'النموذج الدولي ١ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（一）',
+    subtitleAr: '٤٠ سؤالاً موحداً (صيني خالص + بينين Ruby + مشاهد بصرية) · الفصول ١–٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS,
+  },
+  ...Array.from({ length: 9 }, (_, i) => {
+    const num = i + 2;
+    return {
+      id: `intl-model-${num}`,
+      track: 'international' as const,
+      modelNumber: num,
+      titleAr: `النموذج الدولي ${num} — HSK 3.0`,
+      titleZh: `HSK 3.0 国际模拟试卷（${['二', '三', '四', '五', '六', '七', '八', '九', '十'][i]}）`,
+      subtitleAr: 'نموذج موحّد مهيّأ للإدراج (٤٠ سؤالاً · ٢٠٠ درجة)',
+      status: 'coming-soon' as const,
+      listeningDurationSeconds: 12 * 60,
+      readingDurationSeconds: 20 * 60,
+      maxScore: 200,
+      passScore: 120,
+      questions: [],
+    };
+  }),
+];
+
+export const ARABIC_MOCK_EXAMS: FixedMockExamPaper[] = [
+  {
+    id: 'ar-model-1',
+    track: 'arabic',
+    modelNumber: 1,
+    titleAr: 'النموذج التطبيقي العربي ١',
+    titleZh: '阿语应用模拟试卷（一）',
+    subtitleAr: '٤٠ سؤالاً موحداً بنفس هيكلة HSK 3.0 والفخاخ المنطقية لقياس الفهم والترجمة العربية',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: ARABIC_MODEL_1_QUESTIONS,
+  },
+  ...Array.from({ length: 4 }, (_, i) => {
+    const num = i + 2;
+    return {
+      id: `ar-model-${num}`,
+      track: 'arabic' as const,
+      modelNumber: num,
+      titleAr: `النموذج التطبيقي العربي ${num}`,
+      titleZh: `阿语应用模拟试卷（${['二', '三', '四', '五'][i]}）`,
+      subtitleAr: 'نموذج تطبيقي مهيّأ للإدراج (٤٠ سؤالاً · ٢٠٠ درجة)',
+      status: 'coming-soon' as const,
+      listeningDurationSeconds: 12 * 60,
+      readingDurationSeconds: 20 * 60,
+      maxScore: 200,
+      passScore: 120,
+      questions: [],
+    };
+  }),
+];
+
+export const ALL_FIXED_MOCK_EXAMS: FixedMockExamPaper[] = [
+  ...INTERNATIONAL_MOCK_EXAMS,
+  ...ARABIC_MOCK_EXAMS,
+];
+
+// =============================================================================
+// الجزء أ: تدريبات أنماط HSK 3.0 السبعة المعتمدة (غير مؤقتة — صيني خالص Ruby)
+// =============================================================================
+
+export const HSK_PATTERN_MODULES: HskPatternModule[] = [
+  {
+    id: 'listening-p1',
+    numberLabel: '01',
+    codeZh: '听力第一部分',
+    titleAr: 'الاستماع ومطابقة المشاهد',
+    formatLabel: 'Audio → 3 Visual Cards A/B/C',
+    difficultyLabel: 'تأسيسي • سهل',
+    difficultyTone: 'jade',
+    section: 'listening',
+    descriptionAr: 'استمع إلى الجملة الصينية واختر المشهد البصري المطابق من بين ثلاث بطاقات (A / B / C).',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter((q) => q.partId === 'listening-p1'),
+  },
+  {
+    id: 'listening-p2',
+    numberLabel: '02',
+    codeZh: '听力第二部分',
+    titleAr: 'الاستماع واختيار الرد المناسب',
+    formatLabel: 'Audio → 3 Chinese/Pinyin Replies',
+    difficultyLabel: 'تأسيسي • متوسط',
+    difficultyTone: 'gold',
+    section: 'listening',
+    descriptionAr: 'استمع إلى السؤال أو العبارة ثم اختر الرد الصيني المنطقي الأنسب بنظام Ruby Pinyin.',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter((q) => q.partId === 'listening-p2'),
+  },
+  {
+    id: 'listening-p3',
+    numberLabel: '03',
+    codeZh: '听力第三部分',
+    titleAr: 'الاستماع للحوارات ومطابقة المشاهد',
+    formatLabel: 'Dialogue → 6 Visual Cards A–F',
+    difficultyLabel: 'تطبيقي • متوسط',
+    difficultyTone: 'gold',
+    section: 'listening',
+    descriptionAr: 'استمع إلى حوار قصير بين متحدثين (女 / 男) وطابقه بالمشهد المناسب من لوحة البطاقات الست (A–F).',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter((q) => q.partId === 'listening-p3'),
+  },
+  {
+    id: 'listening-p4',
+    numberLabel: '04',
+    codeZh: '听力第四部分',
+    titleAr: 'الاستماع والفهم والاستنتاج',
+    formatLabel: 'Audio + 问： → 3 Choices',
+    difficultyLabel: 'تطبيقي • متقدم',
+    difficultyTone: 'cinnabar',
+    section: 'listening',
+    descriptionAr: 'استمع إلى الحوار ثم أجب عن السؤال الاستنتاجي (问：...) باختيار الإجابة الأدق.',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter((q) => q.partId === 'listening-p4'),
+  },
+  {
+    id: 'reading-p1',
+    numberLabel: '05',
+    codeZh: '阅读第一部分',
+    titleAr: 'مطابقة الجمل بالمشاهد',
+    formatLabel: '5 Sentences → 6 Visual Cards A–F',
+    difficultyLabel: 'تأسيسي • سهل',
+    difficultyTone: 'jade',
+    section: 'reading',
+    descriptionAr: 'اقرأ الجملة الصينية (Ruby Pinyin) واربطها بالمشهد البصري المطابق من بين البطاقات الست (A–F).',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter((q) => q.partId === 'reading-p1'),
+  },
+  {
+    id: 'reading-p2',
+    numberLabel: '06',
+    codeZh: '阅读第二部分',
+    titleAr: 'مطابقة الجمل والردود',
+    formatLabel: '5×5 Dialogue Matching A–F',
+    difficultyLabel: 'تطبيقي • متوسط',
+    difficultyTone: 'gold',
+    section: 'reading',
+    descriptionAr: 'طابق كل جملة صينية بالرد الحواري المناسب لها من قائمة الردود (A–F).',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter((q) => q.partId === 'reading-p2'),
+  },
+  {
+    id: 'reading-p3-4',
+    numberLabel: '07',
+    codeZh: '阅读第三部分 & 第四部分',
+    titleAr: 'بنك الكلمات (选词填空) وأسئلة الاستنتاج (★)',
+    formatLabel: '选词填空 A–F + Inference ★',
+    difficultyLabel: 'تطبيقي • متقدم',
+    difficultyTone: 'cinnabar',
+    section: 'reading',
+    descriptionAr: 'أكمل الفراغات من بنك الكلمات (A–F) ثم أجب عن أسئلة الفهم والاستنتاج (★) على الفقرات القصيرة.',
+    questions: INTERNATIONAL_MODEL_1_QUESTIONS.filter(
+      (q) => q.partId === 'reading-p3' || q.partId === 'reading-p4'
+    ),
+  },
+];
+
+export const ALL_HSK_PATTERN_IDS: HskPatternId[] = HSK_PATTERN_MODULES.map((m) => m.id);

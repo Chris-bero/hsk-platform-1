@@ -132,10 +132,10 @@ export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
         </div>
       </div>
 
-      {/* بطاقة محاكي امتحان HSK الدولي */}
+      {/* بطاقة بوابة الامتحانات الدولية HSK 3.0 */}
       <button
         type="button"
-        onClick={() => onNavigate('mock-exam')}
+        onClick={() => onNavigate('hsk-portal')}
         className="w-full text-right neo-frame rounded-xl p-6 sm:p-7 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C]/50 dark:hover:border-[#EF4444]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-5 transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C]"
       >
         <div className="flex items-start gap-4">
@@ -144,22 +144,24 @@ export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
           </span>
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-[#D97706] dark:text-[#F59E0B]">
-              <span>٤٠ سؤالاً · ٢٠٠ درجة</span>
+              <span>٧ أنماط HSK 3.0 معتمدة</span>
               <span aria-hidden="true">·</span>
-              <span>الاستماع ١٥ دقيقة + القراءة والقواعد ١٧ دقيقة</span>
+              <span>نماذج موحّدة (٤٠ سؤالاً · ٢٠٠ درجة)</span>
+              <span aria-hidden="true">·</span>
+              <span>Ruby Pinyin</span>
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              محاكي امتحان HSK الدولي
+              بوابة الامتحانات الدولية HSK 3.0
             </h2>
             <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
-              خُض تجربة الامتحان الرسمي الكاملة بقسمَين مؤقّتَين وحوارات صوتية بين متحدثَين وتقرير
-              درجات فوري من ٢٠٠ درجة (درجة النجاح ١٢٠).
+              تدرّب على الأنماط الدولية السبعة دون مؤقت، وخُض الامتحانات التجريبية الموحّدة
+              بنسختيها الدولية الخالصة والتطبيقية العربية مع مراجعة كاملة لنصوص الاستماع.
             </p>
           </div>
         </div>
 
         <span className="inline-flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] rounded-lg bg-[#B91C1C] dark:bg-[#EF4444] text-white text-sm font-bold shrink-0 self-start sm:self-center">
-          <span>دخول المحاكي</span>
+          <span>دخول البوابة</span>
           <ArrowLeft className="w-4 h-4" />
         </span>
       </button>

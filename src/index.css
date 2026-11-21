@@ -60,6 +60,34 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Official HSK 3.0 Ruby Pinyin directly above each Hanzi character */
+.hsk-ruby-line {
+  direction: ltr;
+  unicode-bidi: isolate;
+  line-height: 2.35;
+}
+
+.hsk-ruby {
+  ruby-position: over;
+  ruby-align: center;
+  margin-inline: 0.04em;
+}
+
+.hsk-ruby rt {
+  font-family: 'Tajawal', system-ui, -apple-system, sans-serif;
+  font-size: 0.46em;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--ink-muted);
+  letter-spacing: 0.01em;
+  user-select: none;
+  padding-bottom: 0.12em;
+}
+
+.hsk-ruby-hide-pinyin rt {
+  display: none;
+}
+
 /* Subtle Neo-Chinese traditional corner bracket frame */
 .neo-frame {
   position: relative;

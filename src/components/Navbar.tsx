@@ -15,7 +15,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
   const navItems: { view: AppView; label: string }[] = [
     { view: 'home', label: 'الرئيسية' },
     { view: 'chapters', label: 'الفصول الخمسة عشر' },
-    { view: 'mock-exam', label: 'محاكي امتحان HSK' },
+    { view: 'hsk-portal', label: 'بوابة الامتحانات الدولية' },
     { view: 'analytics', label: 'صفحتي والإحصائيات' },
   ];
 
@@ -27,6 +27,9 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
         currentView === 'custom-builder' ||
         currentView === 'drill'
       );
+    }
+    if (view === 'hsk-portal') {
+      return currentView === 'hsk-portal' || currentView === 'mock-exam';
     }
     return currentView === view;
   };

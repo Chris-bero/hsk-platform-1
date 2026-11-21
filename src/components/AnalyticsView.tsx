@@ -198,13 +198,13 @@ export function AnalyticsView({ onStartMistakeReview, onOpenMockExam }: Analytic
         })}
       </div>
 
-      {/* سجل محاكي امتحان HSK الدولي */}
+      {/* سجل بوابة الامتحانات الدولية HSK 3.0 */}
       <div className="rounded-xl border border-[#1C1917]/10 dark:border-[#F5F2EB]/10 bg-white dark:bg-[#1E1C1A] p-6 sm:p-8 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1C1917]/10 dark:border-[#F5F2EB]/10 pb-4">
           <div className="flex items-center gap-2.5">
             <Award className="w-5 h-5 text-[#B91C1C] dark:text-[#EF4444] shrink-0" />
             <h2 className="text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              سجل محاكي امتحان HSK الدولي (٢٠٠ درجة)
+              سجل بوابة الامتحانات الدولية HSK 3.0 (٢٠٠ درجة)
             </h2>
           </div>
           {onOpenMockExam && (
@@ -213,18 +213,57 @@ export function AnalyticsView({ onStartMistakeReview, onOpenMockExam }: Analytic
               onClick={onOpenMockExam}
               className="px-4 py-2 min-h-[38px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white text-xs font-bold transition-colors self-start sm:self-auto"
             >
-              بدء امتحان دولي جديد
+              فتح بوابة HSK 3.0
             </button>
           )}
         </div>
 
-        {mockExamHistory.length === 0 ? (
+        {(progress.hskMockResults?.length ?? 0) === 0 && mockExamHistory.length === 0 ? (
           <p className="text-sm text-[#57534E] dark:text-[#A8A29E]">
-            لم تُجرِ أي محاولة في محاكي امتحان HSK الدولي بعد. يمكنك البدء لاختبار مستواك في
-            الاستماع والقراءة والقواعد من ٢٠٠ درجة.
+            لم تُجرِ أي محاولة في بوابة الامتحانات الدولية HSK 3.0 بعد. يمكنك التدرب على الأنماط
+            السبعة أو خوض الامتحانات التجريبية الموحّدة من ٢٠٠ درجة.
           </p>
         ) : (
           <div className="divide-y divide-[#1C1917]/8 dark:divide-[#F5F2EB]/8">
+            {(progress.hskMockResults ?? []).map((att) => (
+              <div
+                key={att.id}
+                className="py-3.5 flex flex-wrap items-center justify-between gap-4 text-sm"
+              >
+                <div className="space-y-0.5">
+                  <p className="font-bold text-[#1C1917] dark:text-[#F5F2EB] tabular-nums">
+                    {att.examTitle} — {att.totalScore} / {att.maxScore}
+                  </p>
+                  <p className="text-xs text-[#57534E] dark:text-[#A8A29E] tabular-nums">
+                    {new Date(att.completedAt).toLocaleString('ar-EG', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm tabular-nums">
+                  <span className="text-[#57534E] dark:text-[#A8A29E]">
+                    الاستماع: <strong className="text-[#1C1917] dark:text-[#F5F2EB]">{att.listeningScore}/100</strong>
+                  </span>
+                  <span className="text-[#57534E] dark:text-[#A8A29E]">
+                    القراءة: <strong className="text-[#1C1917] dark:text-[#F5F2EB]">{att.readingScore}/100</strong>
+                  </span>
+                  <span
+                    className={`font-bold ${
+                      att.passed
+                        ? 'text-[#15803D] dark:text-[#22C55E]'
+                        : 'text-[#B91C1C] dark:text-[#EF4444]'
+                    }`}
+                  >
+                    {att.passed ? 'ناجح' : 'لم يجتز'}
+                  </span>
+                </div>
+              </div>
+            ))}
             {mockExamHistory.map((att) => (
               <div
                 key={att.id}
@@ -232,7 +271,7 @@ export function AnalyticsView({ onStartMistakeReview, onOpenMockExam }: Analytic
               >
                 <div className="space-y-0.5">
                   <p className="font-bold text-[#1C1917] dark:text-[#F5F2EB] tabular-nums">
-                    الدرجة الإجمالية: {att.totalScore} / {att.maxScore}
+                    امتحان محاكي عشوائي — {att.totalScore} / {att.maxScore}
                   </p>
                   <p className="text-xs text-[#57534E] dark:text-[#A8A29E] tabular-nums">
                     {new Date(att.completedAt).toLocaleString('ar-EG', {

@@ -5,6 +5,7 @@ import { ChaptersGridView } from './components/ChaptersGridView';
 import { CustomQuizBuilderView } from './components/CustomQuizBuilderView';
 import { DrillSessionRunner, DrillSessionSource } from './components/drills/DrillSessionRunner';
 import { HomeView } from './components/HomeView';
+import { HskPortalView } from './components/HskPortalView';
 import { LoginGate } from './components/LoginGate';
 import { MockExamView } from './components/MockExamView';
 import { Navbar } from './components/Navbar';
@@ -95,7 +96,9 @@ function MainShell() {
           />
         )}
 
-        {view === 'mock-exam' && <MockExamView onBack={() => handleNavigate('home')} />}
+        {view === 'hsk-portal' && <HskPortalView />}
+
+        {view === 'mock-exam' && <MockExamView onBack={() => handleNavigate('hsk-portal')} />}
 
         {view === 'drill' && sessionSource && (
           <DrillSessionRunner
@@ -107,7 +110,7 @@ function MainShell() {
         {view === 'analytics' && (
           <AnalyticsView
             onStartMistakeReview={handleStartMistakeReview}
-            onOpenMockExam={() => handleNavigate('mock-exam')}
+            onOpenMockExam={() => handleNavigate('hsk-portal')}
           />
         )}
       </main>

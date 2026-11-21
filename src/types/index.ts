@@ -66,9 +66,43 @@ export type AppView =
   | 'chapters'
   | 'chapter-hub'
   | 'custom-builder'
+  | 'hsk-portal'
   | 'mock-exam'
   | 'drill'
   | 'analytics';
+
+export type HskPatternId =
+  | 'listening-p1'
+  | 'listening-p2'
+  | 'listening-p3'
+  | 'listening-p4'
+  | 'reading-p1'
+  | 'reading-p2'
+  | 'reading-p3-4';
+
+export interface HskPatternStatEntry {
+  attempted: number;
+  correct: number;
+}
+
+export interface HskMockExamResult {
+  id: string;
+  examId: string;
+  examTitle: string;
+  examTrack: 'international' | 'arabic';
+  modelNumber: number;
+  completedAt: string;
+  listeningCorrect: number;
+  listeningTotal: number;
+  listeningScore: number;
+  readingCorrect: number;
+  readingTotal: number;
+  readingScore: number;
+  totalScore: number;
+  maxScore: number;
+  passed: boolean;
+  elapsedSeconds: number;
+}
 
 export interface CustomQuizConfig {
   chapterIds: number[];
@@ -184,6 +218,9 @@ export interface StudentProgress {
   chapterStats: Record<number, ChapterStatEntry>;
   mistakes: MistakeItem[];
   mockExamHistory?: MockExamAttempt[];
+  /** Separate HSK 3.0 International Portal analytics */
+  hskPatternStats?: Record<HskPatternId, HskPatternStatEntry>;
+  hskMockResults?: HskMockExamResult[];
 }
 
 export interface SheetsSyncPayload {
@@ -197,4 +234,6 @@ export interface SheetsSyncPayload {
   activeMinutes: number;
   overallProgressPercent: number;
   lastActive: string;
+  hskMockResults?: string | HskMockExamResult[];
+  hskPatternStats?: string | Record<HskPatternId, HskPatternStatEntry>;
 }
