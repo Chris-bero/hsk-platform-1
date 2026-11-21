@@ -1392,260 +1392,200 @@
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "intl-m1-r3",
-        "promptZh": "很高兴____你。",
-        "promptPinyin": "Hěn gāoxìng nǐ.",
-        "promptAr": "يسعدني جداً التعرف إليك.",
+        "promptZh": "你好！很高兴____你。",
+        "promptPinyin": "Nǐ hǎo! Hěn gāoxìng nǐ.",
+        "promptAr": "مرحباً! يسعدني جداً التعرف إليك.",
         "options": [
           {
             "letter": "A",
-            "hanzi": "认识",
-            "pinyin": "rènshi",
-            "arabic": "يعرف / يتعرّف على"
+            "hanzi": "学习",
+            "pinyin": "xuéxí",
+            "arabic": "يدرس / يتعلم"
           },
           {
             "letter": "B",
             "hanzi": "休息",
             "pinyin": "xiūxi",
-            "arabic": "يستريح / في إجازة"
+            "arabic": "يستريح"
           },
           {
             "letter": "C",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل / يعمل"
+            "hanzi": "认识",
+            "pinyin": "rènshi",
+            "arabic": "يتعرّف على / يعرف"
           },
           {
             "letter": "D",
-            "hanzi": "孩子",
-            "pinyin": "háizi",
-            "arabic": "أطفال / أبناء"
-          },
-          {
-            "letter": "E",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم / أستاذ"
-          },
-          {
-            "letter": "F",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب / كمبيوتر"
+            "hanzi": "工作",
+            "pinyin": "gōngzuò",
+            "arabic": "يعمل"
           }
         ],
-        "correctLetter": "A",
-        "translationAr": "很高兴认识你 — يسعدني جداً التعرف إليك."
+        "correctLetter": "C",
+        "translationAr": "你好！很高兴认识你 — مرحباً! يسعدني جداً التعرف إليك.",
+        "noteAr": "جميع الخيارات أفعال ثنائية المقطع، والفعل المناسب للتعارف مع الضمير 你 هو 认识."
       },
       {
         "number": 32,
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "intl-m1-r3",
-        "promptZh": "她是我的中文____。",
-        "promptPinyin": "Tā shì wǒ de Zhōngwén.",
-        "promptAr": "هي معلمتي للغة الصينية.",
+        "promptZh": "王老师有很多____，他们每天学习中文。",
+        "promptPinyin": "Wáng lǎoshī yǒu hěn duō, tāmen měitiān xuéxí Zhōngwén.",
+        "promptAr": "لدى الأستاذ وانغ الكثير من الطلاب، وهم يدرسون الصينية كل يوم.",
         "options": [
           {
             "letter": "A",
-            "hanzi": "认识",
-            "pinyin": "rènshi",
-            "arabic": "يعرف / يتعرّف على"
+            "hanzi": "医生",
+            "pinyin": "yīshēng",
+            "arabic": "طبيب / أطباء"
           },
           {
             "letter": "B",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح / في إجازة"
+            "hanzi": "学生",
+            "pinyin": "xuésheng",
+            "arabic": "طالب / طلاب"
           },
           {
             "letter": "C",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل / يعمل"
+            "hanzi": "太太",
+            "pinyin": "tàitai",
+            "arabic": "زوجة"
           },
           {
             "letter": "D",
-            "hanzi": "孩子",
-            "pinyin": "háizi",
-            "arabic": "أطفال / أبناء"
-          },
-          {
-            "letter": "E",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم / أستاذ"
-          },
-          {
-            "letter": "F",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب / كمبيوتر"
+            "hanzi": "哥哥",
+            "pinyin": "gēge",
+            "arabic": "أخ أكبر"
           }
         ],
-        "correctLetter": "E",
-        "translationAr": "她是我的中文老师 — هي معلمتي للغة الصينية."
+        "correctLetter": "B",
+        "translationAr": "王老师有很多学生，他们每天学习中文 — لدى الأستاذ وانغ طلاب كثيرون يدرسون الصينية كل يوم.",
+        "noteAr": "جميع الخيارات أسماء أشخاص، وسياق «الأستاذ» و«دراسة الصينية يومياً» يحدد كلمة 学生."
       },
       {
         "number": 33,
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "intl-m1-r3",
-        "promptZh": "你最近____还忙吗？",
-        "promptPinyin": "Nǐ zuìjìn hái máng ma?",
-        "promptAr": "هل لا يزال عملك مزدحماً مؤخراً؟",
+        "promptZh": "你最近____还忙吗？星期日有时间休息吗？",
+        "promptPinyin": "Nǐ zuìjìn hái máng ma? Xīngqīrì yǒu shíjiān xiūxi ma?",
+        "promptAr": "هل لا يزال عملك مزدحماً مؤخراً؟ هل لديك وقت للراحة يوم الأحد؟",
         "options": [
           {
             "letter": "A",
-            "hanzi": "认识",
-            "pinyin": "rènshi",
-            "arabic": "يعرف / يتعرّف على"
+            "hanzi": "名字",
+            "pinyin": "míngzi",
+            "arabic": "اسم"
           },
           {
             "letter": "B",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح / في إجازة"
+            "hanzi": "电脑",
+            "pinyin": "diànnǎo",
+            "arabic": "حاسوب"
           },
           {
             "letter": "C",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل / يعمل"
+            "hanzi": "朋友",
+            "pinyin": "péngyou",
+            "arabic": "صديق"
           },
           {
             "letter": "D",
-            "hanzi": "孩子",
-            "pinyin": "háizi",
-            "arabic": "أطفال / أبناء"
-          },
-          {
-            "letter": "E",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم / أستاذ"
-          },
-          {
-            "letter": "F",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب / كمبيوتر"
+            "hanzi": "工作",
+            "pinyin": "gōngzuò",
+            "arabic": "عمل"
           }
         ],
-        "correctLetter": "C",
-        "translationAr": "你最近工作还忙吗？ — هل لا يزال عملك مزدحماً؟"
+        "correctLetter": "D",
+        "translationAr": "你最近工作还忙吗？ — هل لا يزال عملك مزدحماً مؤخراً؟",
+        "noteAr": "جميع الخيارات أسماء، والكلمة الوحيدة التي توصف بالازدحام (忙) وتقابل الراحة (休息) هي 工作."
       },
       {
         "number": 34,
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "intl-m1-r3",
-        "promptZh": "姐姐有两个____。",
-        "promptPinyin": "Jiějie yǒu liǎng gè.",
-        "promptAr": "أختي الكبرى لديها طفلان.",
+        "promptZh": "姐姐有两个____，一个儿子，一个女儿。",
+        "promptPinyin": "Jiějie yǒu liǎng gè, yí gè érzi, yí gè nǚér.",
+        "promptAr": "أختي الكبرى لديها طفلان: ابن وابنة.",
         "options": [
           {
             "letter": "A",
-            "hanzi": "认识",
-            "pinyin": "rènshi",
-            "arabic": "يعرف / يتعرّف على"
+            "hanzi": "电脑",
+            "pinyin": "diànnǎo",
+            "arabic": "حاسوب"
           },
           {
             "letter": "B",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح / في إجازة"
-          },
-          {
-            "letter": "C",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل / يعمل"
-          },
-          {
-            "letter": "D",
             "hanzi": "孩子",
             "pinyin": "háizi",
             "arabic": "أطفال / أبناء"
           },
           {
-            "letter": "E",
+            "letter": "C",
             "hanzi": "老师",
             "pinyin": "lǎoshī",
-            "arabic": "معلم / أستاذ"
+            "arabic": "معلم"
           },
           {
-            "letter": "F",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب / كمبيوتر"
+            "letter": "D",
+            "hanzi": "哥哥",
+            "pinyin": "gēge",
+            "arabic": "أخ أكبر"
           }
         ],
-        "correctLetter": "D",
-        "translationAr": "姐姐有两个孩子 — أختي الكبرى لديها طفلان."
+        "correctLetter": "B",
+        "translationAr": "姐姐有两个孩子，一个儿子，一个女儿 — أختي الكبرى لديها طفلان: ابن وابنة.",
+        "noteAr": "جميع الخيارات أسماء تقبل أداة التصنيف 个، وتوضيح «一个儿子，一个女儿» يحسم الإجابة لـ 孩子."
       },
       {
         "number": 35,
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (بنك الكلمات 选词填空 A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "intl-m1-r3",
-        "promptZh": "今天星期日，我在家____。",
-        "promptPinyin": "Jīntiān xīngqīrì, wǒ zài jiā.",
-        "promptAr": "اليوم الأحد، وأنا أستريح في البيت.",
+        "promptZh": "今天星期日，我们不工作，在家____。",
+        "promptPinyin": "Jīntiān xīngqīrì, wǒmen bù gōngzuò, zài jiā.",
+        "promptAr": "اليوم الأحد، نحن لا نعمل ونستريح في البيت.",
         "options": [
           {
             "letter": "A",
-            "hanzi": "认识",
-            "pinyin": "rènshi",
-            "arabic": "يعرف / يتعرّف على"
+            "hanzi": "休息",
+            "pinyin": "xiūxi",
+            "arabic": "يستريح"
           },
           {
             "letter": "B",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح / في إجازة"
+            "hanzi": "上课",
+            "pinyin": "shàng kè",
+            "arabic": "يحضر درساً"
           },
           {
             "letter": "C",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل / يعمل"
+            "hanzi": "请问",
+            "pinyin": "qǐngwèn",
+            "arabic": "يسأل بأدب / لو سمحت"
           },
           {
             "letter": "D",
-            "hanzi": "孩子",
-            "pinyin": "háizi",
-            "arabic": "أطفال / أبناء"
-          },
-          {
-            "letter": "E",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم / أستاذ"
-          },
-          {
-            "letter": "F",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب / كمبيوتر"
+            "hanzi": "认识",
+            "pinyin": "rènshi",
+            "arabic": "يتعرّف على"
           }
         ],
-        "correctLetter": "B",
-        "translationAr": "今天星期日，我在家休息 — اليوم الأحد، أستريح في البيت."
+        "correctLetter": "A",
+        "translationAr": "今天星期日，我们不工作，在家休息 — اليوم الأحد، لا نعمل ونستريح في البيت.",
+        "noteAr": "جميع الخيارات أفعال، وسياق «يوم الأحد وعدم العمل في البيت» يطابق الفعل 休息."
       },
       {
         "number": 36,
@@ -3183,24 +3123,23 @@
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "ar-m1-r3",
         "promptZh": "请问，你叫什么____？",
         "promptPinyin": "Qǐngwèn, nǐ jiào shénme?",
         "promptAr": "المطلوب: لو سمحت، ما اسمك؟",
         "options": [
           {
             "letter": "A",
-            "hanzi": "名字",
-            "pinyin": "míngzi",
-            "arabic": "اسم"
-          },
-          {
-            "letter": "B",
             "hanzi": "老师",
             "pinyin": "lǎoshī",
             "arabic": "معلم"
+          },
+          {
+            "letter": "B",
+            "hanzi": "名字",
+            "pinyin": "míngzi",
+            "arabic": "اسم"
           },
           {
             "letter": "C",
@@ -3210,24 +3149,12 @@
           },
           {
             "letter": "D",
-            "hanzi": "学生",
-            "pinyin": "xuésheng",
-            "arabic": "طالب"
-          },
-          {
-            "letter": "E",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح"
-          },
-          {
-            "letter": "F",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل"
+            "hanzi": "朋友",
+            "pinyin": "péngyou",
+            "arabic": "صديق"
           }
         ],
-        "correctLetter": "A",
+        "correctLetter": "B",
         "translationAr": "الكلمة المناسبة هي 名字 (اسم)."
       },
       {
@@ -3235,24 +3162,23 @@
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "ar-m1-r3",
         "promptZh": "这是你的新____吗？",
         "promptPinyin": "Zhè shì nǐ de xīn ma?",
         "promptAr": "المطلوب: هل هذا حاسوبك الجديد؟",
         "options": [
           {
             "letter": "A",
-            "hanzi": "名字",
-            "pinyin": "míngzi",
-            "arabic": "اسم"
+            "hanzi": "饺子",
+            "pinyin": "jiǎozi",
+            "arabic": "جياوتسي (زلابية)"
           },
           {
             "letter": "B",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم"
+            "hanzi": "面条儿",
+            "pinyin": "miàntiáor",
+            "arabic": "نودلز"
           },
           {
             "letter": "C",
@@ -3262,21 +3188,9 @@
           },
           {
             "letter": "D",
-            "hanzi": "学生",
-            "pinyin": "xuésheng",
-            "arabic": "طالب"
-          },
-          {
-            "letter": "E",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح"
-          },
-          {
-            "letter": "F",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل"
+            "hanzi": "汉字",
+            "pinyin": "Hànzì",
+            "arabic": "رموز صينية"
           }
         ],
         "correctLetter": "C",
@@ -3287,51 +3201,38 @@
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "ar-m1-r3",
-        "promptZh": "她有二十个____。",
-        "promptPinyin": "Tā yǒu èrshí gè.",
-        "promptAr": "المطلوب: لديها عشرون طالباً.",
+        "promptZh": "李老师有二十个____。",
+        "promptPinyin": "Lǐ lǎoshī yǒu èrshí gè.",
+        "promptAr": "المطلوب: لدى الأستاذ لي عشرون طالباً.",
         "options": [
           {
             "letter": "A",
-            "hanzi": "名字",
-            "pinyin": "míngzi",
-            "arabic": "اسم"
-          },
-          {
-            "letter": "B",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم"
-          },
-          {
-            "letter": "C",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب"
-          },
-          {
-            "letter": "D",
             "hanzi": "学生",
             "pinyin": "xuésheng",
             "arabic": "طالب"
           },
           {
-            "letter": "E",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح"
+            "letter": "B",
+            "hanzi": "医生",
+            "pinyin": "yīshēng",
+            "arabic": "طبيب"
           },
           {
-            "letter": "F",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل"
+            "letter": "C",
+            "hanzi": "哥哥",
+            "pinyin": "gēge",
+            "arabic": "أخ أكبر"
+          },
+          {
+            "letter": "D",
+            "hanzi": "孩子",
+            "pinyin": "háizi",
+            "arabic": "طفل"
           }
         ],
-        "correctLetter": "D",
+        "correctLetter": "A",
         "translationAr": "الكلمة المناسبة هي 学生 (طالب)."
       },
       {
@@ -3339,51 +3240,38 @@
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "ar-m1-r3",
         "promptZh": "你最近____忙吗？",
         "promptPinyin": "Nǐ zuìjìn máng ma?",
         "promptAr": "المطلوب: هل عملك مزدحم مؤخراً؟",
         "options": [
           {
             "letter": "A",
-            "hanzi": "名字",
-            "pinyin": "míngzi",
-            "arabic": "اسم"
+            "hanzi": "时间",
+            "pinyin": "shíjiān",
+            "arabic": "وقت"
           },
           {
             "letter": "B",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم"
+            "hanzi": "星期",
+            "pinyin": "xīngqī",
+            "arabic": "أسبوع"
           },
           {
             "letter": "C",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب"
+            "hanzi": "中文",
+            "pinyin": "Zhōngwén",
+            "arabic": "اللغة الصينية"
           },
           {
             "letter": "D",
-            "hanzi": "学生",
-            "pinyin": "xuésheng",
-            "arabic": "طالب"
-          },
-          {
-            "letter": "E",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح"
-          },
-          {
-            "letter": "F",
             "hanzi": "工作",
             "pinyin": "gōngzuò",
             "arabic": "عمل"
           }
         ],
-        "correctLetter": "F",
+        "correctLetter": "D",
         "translationAr": "الكلمة المناسبة هي 工作 (عمل)."
       },
       {
@@ -3391,51 +3279,38 @@
         "section": "reading",
         "partId": "reading-p3",
         "partLabelZh": "阅读第三部分",
-        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ من بنك الكلمات A–F)",
+        "partLabelAr": "القراءة — الجزء ٣ (إكمال الفراغ السياقي 选词填空)",
         "points": 5,
-        "sharedBankId": "ar-m1-r3",
         "promptZh": "今天星期日，我在家____。",
         "promptPinyin": "Jīntiān xīngqīrì, wǒ zài jiā.",
         "promptAr": "المطلوب: اليوم الأحد، أنا أستريح في البيت.",
         "options": [
           {
             "letter": "A",
-            "hanzi": "名字",
-            "pinyin": "míngzi",
-            "arabic": "اسم"
+            "hanzi": "上课",
+            "pinyin": "shàng kè",
+            "arabic": "أحضر درساً"
           },
           {
             "letter": "B",
-            "hanzi": "老师",
-            "pinyin": "lǎoshī",
-            "arabic": "معلم"
+            "hanzi": "认识",
+            "pinyin": "rènshi",
+            "arabic": "أتعرّف على"
           },
           {
             "letter": "C",
-            "hanzi": "电脑",
-            "pinyin": "diànnǎo",
-            "arabic": "حاسوب"
+            "hanzi": "休息",
+            "pinyin": "xiūxi",
+            "arabic": "أستريح"
           },
           {
             "letter": "D",
-            "hanzi": "学生",
-            "pinyin": "xuésheng",
-            "arabic": "طالب"
-          },
-          {
-            "letter": "E",
-            "hanzi": "休息",
-            "pinyin": "xiūxi",
-            "arabic": "يستريح"
-          },
-          {
-            "letter": "F",
-            "hanzi": "工作",
-            "pinyin": "gōngzuò",
-            "arabic": "عمل"
+            "hanzi": "学习",
+            "pinyin": "xuéxí",
+            "arabic": "أدرس"
           }
         ],
-        "correctLetter": "E",
+        "correctLetter": "C",
         "translationAr": "الكلمة المناسبة هي 休息 (يستريح)."
       },
       {

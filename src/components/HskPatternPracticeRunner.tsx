@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -27,9 +27,35 @@ interface HskPatternPracticeRunnerProps {
   onExit: () => void;
 }
 
+const CHOICE_LETTERS: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'> = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+function shuffleQuestionOptions(q: FixedMockExamQuestion): FixedMockExamQuestion {
+  // Shuffle text options in untimed Pattern Drills (reading-p2 / reading-p3) for fresh order every run
+  if (q.partId !== 'reading-p2' && q.partId !== 'reading-p3') return q;
+  const indexed = q.options.map((opt) => ({
+    opt,
+    isCorrect: opt.letter === q.correctLetter,
+  }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const remapped = indexed.map((entry, idx) => ({
+    ...entry.opt,
+    letter: CHOICE_LETTERS[idx] ?? entry.opt.letter,
+  }));
+  const newCorrectIdx = indexed.findIndex((entry) => entry.isCorrect);
+  return {
+    ...q,
+    options: remapped,
+    correctLetter: CHOICE_LETTERS[newCorrectIdx] ?? q.correctLetter,
+  };
+}
+
 export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeRunnerProps) {
   const { showPinyin, togglePinyin, recordHskPatternPractice } = useApp();
 
+  const [sessionSeed, setSessionSeed] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [showListeningQuestionText, setShowListeningQuestionText] = useState<
@@ -41,7 +67,11 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
   const [finished, setFinished] = useState(false);
   const [recorded, setRecorded] = useState(false);
 
-  const questions = module.questions;
+  const questions = useMemo(
+    () => module.questions.map(shuffleQuestionOptions),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [module, sessionSeed]
+  );
   const currentQ: FixedMockExamQuestion | undefined = questions[currentIndex];
 
   useEffect(() => {
@@ -122,6 +152,7 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
 
   const handleRestart = () => {
     stopChineseSpeech();
+    setSessionSeed((s) => s + 1);
     setCurrentIndex(0);
     setSelectedAnswers({});
     setShowListeningQuestionText({});
