@@ -42,7 +42,7 @@ function doPost(e) {
     var rawBody = e && e.postData && e.postData.contents ? e.postData.contents : '{}';
     var data = JSON.parse(rawBody);
     var existingRows = sheet.getDataRange().getValues();
-    var defaultAccessStr = '{"chapters":[1],"mocks":false}';
+    var defaultAccessStr = '{"chapters":[1],"mocks":false,"patterns":true}';
 
     function findStudentRowNumber(idVal, codeVal) {
       var targetId = String(idVal || '').trim();
@@ -263,11 +263,14 @@ function doGet(e) {
       }
 
       var rawAccess = item.unlockedAccess !== undefined ? item.unlockedAccess : row[13];
-      var parsedAccess = { chapters: [1], mocks: false };
+      var parsedAccess = { chapters: [1], mocks: false, patterns: true };
       if (typeof rawAccess === 'string' && rawAccess.trim()) {
-        try { parsedAccess = JSON.parse(rawAccess); } catch (e3) { parsedAccess = { chapters: [1], mocks: false }; }
+        try { parsedAccess = JSON.parse(rawAccess); } catch (e3) { parsedAccess = { chapters: [1], mocks: false, patterns: true }; }
       } else if (rawAccess && typeof rawAccess === 'object') {
         parsedAccess = rawAccess;
+      }
+      if (parsedAccess && typeof parsedAccess === 'object' && parsedAccess.patterns === undefined) {
+        parsedAccess.patterns = true;
       }
 
       var rawBoundDevice = item.boundDeviceId !== undefined ? item.boundDeviceId : row[14];

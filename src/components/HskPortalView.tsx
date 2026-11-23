@@ -22,7 +22,7 @@ import {
   INTERNATIONAL_MOCK_EXAMS,
 } from '../data/mockExamsData';
 import { HskPatternId } from '../types';
-import { isMocksUnlocked } from '../utils/accessControl';
+import { isMocksUnlocked, isPatternsUnlocked } from '../utils/accessControl';
 import { HskFixedMockExamRunner } from './HskFixedMockExamRunner';
 import { HskPatternPracticeRunner } from './HskPatternPracticeRunner';
 import { LockedAccessModal } from './LockedAccessModal';
@@ -134,8 +134,10 @@ export function HskPortalView() {
   const [activePattern, setActivePattern] = useState<HskPatternModule | null>(null);
   const [activePaper, setActivePaper] = useState<FixedMockExamPaper | null>(null);
   const [lockedPaperModal, setLockedPaperModal] = useState<FixedMockExamPaper | null>(null);
+  const [lockedPatternModal, setLockedPatternModal] = useState<HskPatternModule | null>(null);
   const [examTrackTab, setExamTrackTab] = useState<'international' | 'arabic'>('international');
   const mocksAllowed = isMocksUnlocked(unlockedAccess);
+  const patternsAllowed = isPatternsUnlocked(unlockedAccess);
 
   if (activePattern) {
     return (
@@ -343,8 +345,18 @@ export function HskPortalView() {
               <button
                 key={mod.id}
                 type="button"
-                onClick={() => setActivePattern(mod)}
-                className="text-right rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C]/45 dark:hover:border-[#EF4444]/45 hover:-translate-y-0.5 p-5 flex flex-col justify-between gap-4 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C]"
+                onClick={() => {
+                  if (!patternsAllowed) {
+                    setLockedPatternModal(mod);
+                    return;
+                  }
+                  setActivePattern(mod);
+                }}
+                className={`text-right rounded-xl border p-5 flex flex-col justify-between gap-4 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] ${
+                  patternsAllowed
+                    ? 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C]/45 dark:hover:border-[#EF4444]/45 hover:-translate-y-0.5'
+                    : 'border-[#D97706]/25 dark:border-[#F59E0B]/25 bg-[#F4EFE6]/85 dark:bg-[#191715]'
+                }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2 text-xs">
@@ -416,12 +428,23 @@ export function HskPortalView() {
 
                 <div className="flex items-center justify-between pt-3 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 text-xs tabular-nums">
                   <span className="text-[#57534E] dark:text-[#A8A29E]">
-                    {solved > 0 ? 'مواصلة التدريب' : 'تدريب غير مؤقت'}
+                    {!patternsAllowed
+                      ? 'يتطلب التفعيل من المعلم'
+                      : solved > 0
+                        ? 'مواصلة التدريب'
+                        : 'تدريب غير مؤقت'}
                   </span>
-                  <span className="font-bold text-[#B91C1C] dark:text-[#EF4444] inline-flex items-center gap-1">
-                    <span>ابدأ النمط</span>
-                    <ArrowLeft className="w-3.5 h-3.5" />
-                  </span>
+                  {patternsAllowed ? (
+                    <span className="font-bold text-[#B91C1C] dark:text-[#EF4444] inline-flex items-center gap-1">
+                      <span>ابدأ النمط</span>
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                    </span>
+                  ) : (
+                    <span className="font-bold text-[#B45309] dark:text-[#F59E0B] inline-flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>مغلق</span>
+                    </span>
+                  )}
                 </div>
               </button>
             );
@@ -647,10 +670,19 @@ export function HskPortalView() {
         </div>
       )}
       <LockedAccessModal
-        isOpen={Boolean(lockedPaperModal)}
-        itemTitle={lockedPaperModal ? lockedPaperModal.titleAr : ''}
-        itemType="mock-exam"
-        onClose={() => setLockedPaperModal(null)}
+        isOpen={Boolean(lockedPaperModal || lockedPatternModal)}
+        itemTitle={
+          lockedPaperModal
+            ? lockedPaperModal.titleAr
+            : lockedPatternModal
+              ? `${lockedPatternModal.codeZh} — ${lockedPatternModal.titleAr}`
+              : ''
+        }
+        itemType={lockedPatternModal ? 'pattern-drill' : 'mock-exam'}
+        onClose={() => {
+          setLockedPaperModal(null);
+          setLockedPatternModal(null);
+        }}
       />
     </motion.section>
   );

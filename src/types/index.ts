@@ -1,6 +1,7 @@
 export interface UnlockedAccess {
   chapters: 'ALL' | number[];
   mocks: boolean;
+  patterns?: boolean;
 }
 
 export interface Student {

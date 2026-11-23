@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 interface LockedAccessModalProps {
   isOpen: boolean;
   itemTitle: string;
-  itemType: 'chapter' | 'mock-exam';
+  itemType: 'chapter' | 'mock-exam' | 'pattern-drill';
   onClose: () => void;
 }
 
@@ -67,7 +67,11 @@ export function LockedAccessModal({
             </span>
             <div className="text-right">
               <p className="text-[11px] font-bold text-[#B45309] dark:text-[#F59E0B]">
-                {itemType === 'chapter' ? 'محتوى يتطلب تفعيل الصلاحية' : 'الامتحانات الشاملة الموحّدة'}
+                {itemType === 'chapter'
+                  ? 'محتوى يتطلب تفعيل الصلاحية'
+                  : itemType === 'pattern-drill'
+                    ? 'تدريبات الأنماط الدولية HSK 3.0'
+                    : 'الامتحانات الشاملة الموحّدة'}
               </p>
               <h2
                 id="locked-access-title"

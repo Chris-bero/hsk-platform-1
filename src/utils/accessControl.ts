@@ -5,12 +5,14 @@ export const TOTAL_COURSE_CHAPTERS = 15;
 export const DEFAULT_FREE_TRIAL_ACCESS: UnlockedAccess = {
   chapters: [1],
   mocks: false,
+  patterns: true,
 };
 
 export function createDefaultFreeTrialAccess(): UnlockedAccess {
   return {
     chapters: [1],
     mocks: false,
+    patterns: true,
   };
 }
 
@@ -34,7 +36,7 @@ export function parseUnlockedAccess(raw: unknown): UnlockedAccess {
     return createDefaultFreeTrialAccess();
   }
 
-  const record = obj as { chapters?: unknown; mocks?: unknown };
+  const record = obj as { chapters?: unknown; mocks?: unknown; patterns?: unknown };
   let chapters: 'ALL' | number[] = [1];
 
   if (typeof record.chapters === 'string' && record.chapters.trim().toUpperCase() === 'ALL') {
@@ -51,7 +53,8 @@ export function parseUnlockedAccess(raw: unknown): UnlockedAccess {
   }
 
   const mocks = Boolean(record.mocks);
-  return { chapters, mocks };
+  const patterns = record.patterns === undefined ? true : Boolean(record.patterns);
+  return { chapters, mocks, patterns };
 }
 
 export function isChapterUnlocked(
@@ -66,6 +69,11 @@ export function isChapterUnlocked(
 export function isMocksUnlocked(access: UnlockedAccess | undefined | null): boolean {
   const resolved = access ? parseUnlockedAccess(access) : DEFAULT_FREE_TRIAL_ACCESS;
   return Boolean(resolved.mocks);
+}
+
+export function isPatternsUnlocked(access: UnlockedAccess | undefined | null): boolean {
+  const resolved = access ? parseUnlockedAccess(access) : DEFAULT_FREE_TRIAL_ACCESS;
+  return resolved.patterns !== false;
 }
 
 export function countUnlockedChapters(access: UnlockedAccess | undefined | null): number {
