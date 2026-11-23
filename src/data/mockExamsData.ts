@@ -5,6 +5,14 @@ import { INTERNATIONAL_MODEL_3_QUESTIONS } from './intlMockExam3';
 import { INTERNATIONAL_MODEL_4_QUESTIONS } from './intlMockExam4';
 import { INTERNATIONAL_MODEL_5_QUESTIONS } from './intlMockExam5';
 import { INTERNATIONAL_MODEL_6_QUESTIONS } from './intlMockExam6';
+import { INTERNATIONAL_MODEL_7_QUESTIONS } from './intlMockExam7';
+import { INTERNATIONAL_MODEL_8_QUESTIONS } from './intlMockExam8';
+import { INTERNATIONAL_MODEL_9_QUESTIONS } from './intlMockExam9';
+import { INTERNATIONAL_MODEL_10_QUESTIONS } from './intlMockExam10';
+import { ARABIC_MODEL_2_QUESTIONS } from './arMockExam2';
+import { ARABIC_MODEL_3_QUESTIONS } from './arMockExam3';
+import { ARABIC_MODEL_4_QUESTIONS } from './arMockExam4';
+import { ARABIC_MODEL_5_QUESTIONS } from './arMockExam5';
 
 export type HskExamPartId =
   | 'listening-p1'
@@ -1756,23 +1764,62 @@ export const INTERNATIONAL_MOCK_EXAMS: FixedMockExamPaper[] = [
     passScore: 120,
     questions: INTERNATIONAL_MODEL_6_QUESTIONS,
   },
-  ...Array.from({ length: 4 }, (_, i) => {
-    const num = i + 7;
-    return {
-      id: `intl-model-${num}`,
-      track: 'international' as const,
-      modelNumber: num,
-      titleAr: `النموذج الدولي ${num} — HSK 3.0`,
-      titleZh: `HSK 3.0 国际模拟试卷（${['七', '八', '九', '十'][i]}）`,
-      subtitleAr: 'نموذج موحّد مهيّأ للإدراج (٤٠ سؤالاً · ٢٠٠ درجة)',
-      status: 'coming-soon' as const,
-      listeningDurationSeconds: 12 * 60,
-      readingDurationSeconds: 20 * 60,
-      maxScore: 200,
-      passScore: 120,
-      questions: [],
-    };
-  }),
+  {
+    id: 'intl-model-7',
+    track: 'international',
+    modelNumber: 7,
+    titleAr: 'النموذج الدولي ٧ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（七）',
+    subtitleAr: '٤٠ سؤالاً موحداً (المراجعة الشاملة ٧: المواعيد، التسوق والأسعار، الطقس والنفي 不/没) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_7_QUESTIONS,
+  },
+  {
+    id: 'intl-model-8',
+    track: 'international',
+    modelNumber: 8,
+    titleAr: 'النموذج الدولي ٨ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（八）',
+    subtitleAr: '٤٠ سؤالاً موحداً (المراجعة الشاملة ٨: الجامعة والمستشفى، الأسرة والحيوانات، الأفعال المساعدة) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_8_QUESTIONS,
+  },
+  {
+    id: 'intl-model-9',
+    track: 'international',
+    modelNumber: 9,
+    titleAr: 'النموذج الدولي ٩ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（九）',
+    subtitleAr: '٤٠ سؤالاً موحداً (المراجعة الشاملة ٩: المطعم، القطار والطائرة، 正在 مقابل 了 وأدوات التصنيف) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_9_QUESTIONS,
+  },
+  {
+    id: 'intl-model-10',
+    track: 'international',
+    modelNumber: 10,
+    titleAr: 'النموذج الدولي ١٠ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（十）',
+    subtitleAr: '٤٠ سؤالاً موحداً (الاختبار القياسي الختامي الشامل لمستوى HSK 3.0 الكامل) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_10_QUESTIONS,
+  },
 ];
 
 export const ARABIC_MOCK_EXAMS: FixedMockExamPaper[] = [
@@ -1790,23 +1837,62 @@ export const ARABIC_MOCK_EXAMS: FixedMockExamPaper[] = [
     passScore: 120,
     questions: ARABIC_MODEL_1_QUESTIONS,
   },
-  ...Array.from({ length: 4 }, (_, i) => {
-    const num = i + 2;
-    return {
-      id: `ar-model-${num}`,
-      track: 'arabic' as const,
-      modelNumber: num,
-      titleAr: `النموذج التطبيقي العربي ${num}`,
-      titleZh: `阿语应用模拟试卷（${['二', '三', '四', '五'][i]}）`,
-      subtitleAr: 'نموذج تطبيقي مهيّأ للإدراج (٤٠ سؤالاً · ٢٠٠ درجة)',
-      status: 'coming-soon' as const,
-      listeningDurationSeconds: 12 * 60,
-      readingDurationSeconds: 20 * 60,
-      maxScore: 200,
-      passScore: 120,
-      questions: [],
-    };
-  }),
+  {
+    id: 'ar-model-2',
+    track: 'arabic',
+    modelNumber: 2,
+    titleAr: 'النموذج التطبيقي العربي ٢',
+    titleZh: '阿语应用模拟试卷（二）',
+    subtitleAr: '٤٠ سؤالاً موحداً (التعارف، المواعيد، التسوق، المطاعم والمستشفى) · الفصول ١–٨',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: ARABIC_MODEL_2_QUESTIONS,
+  },
+  {
+    id: 'ar-model-3',
+    track: 'arabic',
+    modelNumber: 3,
+    titleAr: 'النموذج التطبيقي العربي ٣',
+    titleZh: '阿语应用模拟试卷（三）',
+    subtitleAr: '٤٠ سؤالاً موحداً (الجهات المكانية، الأسعار، الحياة الجامعية، الطقس والصحة) · الفصول ١–١٢',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: ARABIC_MODEL_3_QUESTIONS,
+  },
+  {
+    id: 'ar-model-4',
+    track: 'arabic',
+    modelNumber: 4,
+    titleAr: 'النموذج التطبيقي العربي ٤',
+    titleZh: '阿语应用模拟试卷（四）',
+    subtitleAr: '٤٠ سؤالاً موحداً (الطلب المهذب، طلب الطعام، السفر بالقطار ومطار داشينغ) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: ARABIC_MODEL_4_QUESTIONS,
+  },
+  {
+    id: 'ar-model-5',
+    track: 'arabic',
+    modelNumber: 5,
+    titleAr: 'النموذج التطبيقي العربي ٥ — الامتحان الشامل الختامي',
+    titleZh: '阿语应用模拟试卷（五）',
+    subtitleAr: '٤٠ سؤالاً موحداً (الاختبار التطبيقي الشامل الختامي وفخاخ قواعد HSK 3.0 الدقيقة) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: ARABIC_MODEL_5_QUESTIONS,
+  },
 ];
 
 export const ALL_FIXED_MOCK_EXAMS: FixedMockExamPaper[] = [
