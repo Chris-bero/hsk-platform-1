@@ -1,7 +1,14 @@
+export interface UnlockedAccess {
+  chapters: 'ALL' | number[];
+  mocks: boolean;
+}
+
 export interface Student {
   id: string;
   name: string;
   code: string;
+  unlockedAccess?: UnlockedAccess;
+  boundDeviceId?: string;
 }
 
 export interface VocabSyllable {
@@ -81,8 +88,11 @@ export type HskPatternId =
   | 'reading-p3-4';
 
 export interface HskPatternStatEntry {
+  solved: number;
   attempted: number;
   correct: number;
+  wrong: number;
+  accuracyPercent: number;
 }
 
 export interface HskMockExamResult {
@@ -236,4 +246,5 @@ export interface SheetsSyncPayload {
   lastActive: string;
   hskMockResults?: string | HskMockExamResult[];
   hskPatternStats?: string | Record<HskPatternId, HskPatternStatEntry>;
+  unlockedAccess?: string | UnlockedAccess;
 }

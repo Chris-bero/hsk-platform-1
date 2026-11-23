@@ -28,7 +28,9 @@ function doPost(e) {
       'lastActive',
       'chaptersBreakdown',
       'hskMockResults',
-      'hskPatternStats'
+      'hskPatternStats',
+      'unlockedAccess',
+      'boundDeviceId'
     ];
 
     if (sheet.getLastRow() === 0) {
@@ -40,16 +42,35 @@ function doPost(e) {
     var rawBody = e && e.postData && e.postData.contents ? e.postData.contents : '{}';
     var data = JSON.parse(rawBody);
     var existingRows = sheet.getDataRange().getValues();
+    var defaultAccessStr = '{"chapters":[1],"mocks":false}';
 
-    // تسجيل طالب جديد من لوحة المعلم (بإحصائيات صفرية إن لم يكن الكود موجوداً)
-    if (data.action === 'registerStudent') {
-      var newCode = String(data.studentCode || '').trim();
-      for (var r = 1; r < existingRows.length; r++) {
-        if (String(existingRows[r][2]).trim().toLowerCase() === newCode.toLowerCase()) {
-          return ContentService.createTextOutput(JSON.stringify({ ok: true, alreadyExists: true }))
-            .setMimeType(ContentService.MimeType.JSON);
+    function findStudentRowNumber(idVal, codeVal) {
+      var targetId = String(idVal || '').trim();
+      var targetCode = String(codeVal || '').trim().toLowerCase();
+      for (var idx = 1; idx < existingRows.length; idx++) {
+        var rId = String(existingRows[idx][0] || '').trim();
+        var rCode = String(existingRows[idx][2] || '').trim().toLowerCase();
+        if ((targetId && rId === targetId) || (targetCode && rCode === targetCode)) {
+          return idx + 1;
         }
       }
+      return -1;
+    }
+
+    // تسجيل طالب جديد من لوحة المعلم (بإحصائيات صفرية وصلاحية تجريبية افتراضية دون ربط جهاز)
+    if (data.action === 'registerStudent') {
+      var newCode = String(data.studentCode || '').trim();
+      if (findStudentRowNumber(data.studentId, newCode) > 0) {
+        return ContentService.createTextOutput(JSON.stringify({ ok: true, alreadyExists: true }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+      var initialAccessStr =
+        typeof data.unlockedAccess === 'string' && data.unlockedAccess.trim()
+          ? data.unlockedAccess
+          : data.unlockedAccess && typeof data.unlockedAccess === 'object'
+            ? JSON.stringify(data.unlockedAccess)
+            : defaultAccessStr;
 
       var newRow = [
         String(data.studentId || newCode || ''),
@@ -64,7 +85,9 @@ function doPost(e) {
         new Date().toISOString(),
         '[]',
         '[]',
-        '{}'
+        '{}',
+        initialAccessStr,
+        ''
       ];
       sheet.appendRow(newRow);
 
@@ -72,7 +95,71 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // تحديث أو إضافة صف تقدم الطالب عند إتمام أي تدريب أو امتحان
+    // تحديث صلاحيات الوصول (الفصول + الامتحانات الشاملة) في العمود 14 فقط
+    if (data.action === 'updateAccess') {
+      var accessStr =
+        typeof data.unlockedAccess === 'string' && data.unlockedAccess.trim()
+          ? data.unlockedAccess
+          : data.unlockedAccess && typeof data.unlockedAccess === 'object'
+            ? JSON.stringify(data.unlockedAccess)
+            : defaultAccessStr;
+
+      var accessRowIndex = findStudentRowNumber(data.studentId, data.studentCode);
+      if (accessRowIndex > 0) {
+        sheet.getRange(accessRowIndex, 14).setValue(accessStr);
+      } else {
+        sheet.appendRow([
+          String(data.studentId || data.studentCode || ''),
+          String(data.studentName || '').trim(),
+          String(data.studentCode || '').trim(),
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          new Date().toISOString(),
+          '[]',
+          '[]',
+          '{}',
+          accessStr,
+          ''
+        ]);
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({ ok: true, updatedAccess: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ربط جهاز الطالب (العمود 15 فقط) عند أول تسجيل دخول إذا كان فارغاً
+    if (data.action === 'bindDevice') {
+      var deviceToBind = String(data.boundDeviceId || data.deviceId || '').trim();
+      var bindRowIndex = findStudentRowNumber(data.studentId, data.studentCode);
+      if (bindRowIndex > 0 && deviceToBind) {
+        var currentDevice = String(existingRows[bindRowIndex - 1][14] || '').trim();
+        if (!currentDevice || currentDevice === deviceToBind) {
+          sheet.getRange(bindRowIndex, 15).setValue(deviceToBind);
+          return ContentService.createTextOutput(JSON.stringify({ ok: true, bound: true }))
+            .setMimeType(ContentService.MimeType.JSON);
+        }
+        return ContentService.createTextOutput(JSON.stringify({ ok: false, alreadyBound: true }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      return ContentService.createTextOutput(JSON.stringify({ ok: false, notFound: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // فك ارتباط جهاز الطالب (تصفير العمود 15 فقط) من لوحة المعلم عند تغيير الهاتف/الجهاز
+    if (data.action === 'unbindDevice') {
+      var unbindRowIndex = findStudentRowNumber(data.studentId, data.studentCode);
+      if (unbindRowIndex > 0) {
+        sheet.getRange(unbindRowIndex, 15).setValue('');
+      }
+      return ContentService.createTextOutput(JSON.stringify({ ok: true, unbound: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // تحديث أو إضافة صف تقدم الطالب عند إتمام أي تدريب أو امتحان (الأعمدة 1..13 فقط)
     var breakdownStr =
       typeof data.chaptersBreakdown === 'string'
         ? data.chaptersBreakdown
@@ -102,22 +189,18 @@ function doPost(e) {
       hskPatternStr
     ];
 
-    var targetRowIndex = -1;
-    for (var i = 1; i < existingRows.length; i++) {
-      var rowId = String(existingRows[i][0]).trim();
-      var rowCode = String(existingRows[i][2]).trim();
-      if (
-        (data.studentId && rowId === String(data.studentId).trim()) ||
-        (data.studentCode && rowCode.toLowerCase() === String(data.studentCode).trim().toLowerCase())
-      ) {
-        targetRowIndex = i + 1;
-        break;
-      }
-    }
+    var targetRowIndex = findStudentRowNumber(data.studentId, data.studentCode);
 
     if (targetRowIndex > 0) {
+      // تحديث الأعمدة 1..13 فقط للحفاظ على صلاحيات المعلم (14) والجهاز المرتبط (15)
       sheet.getRange(targetRowIndex, 1, 1, rowValues.length).setValues([rowValues]);
+      var existingAccessCell = existingRows[targetRowIndex - 1][13];
+      if (!existingAccessCell || String(existingAccessCell).trim() === '') {
+        sheet.getRange(targetRowIndex, 14).setValue(defaultAccessStr);
+      }
     } else {
+      rowValues.push(defaultAccessStr);
+      rowValues.push('');
       sheet.appendRow(rowValues);
     }
 
@@ -179,6 +262,17 @@ function doGet(e) {
         parsedHskPattern = rawHskPattern;
       }
 
+      var rawAccess = item.unlockedAccess !== undefined ? item.unlockedAccess : row[13];
+      var parsedAccess = { chapters: [1], mocks: false };
+      if (typeof rawAccess === 'string' && rawAccess.trim()) {
+        try { parsedAccess = JSON.parse(rawAccess); } catch (e3) { parsedAccess = { chapters: [1], mocks: false }; }
+      } else if (rawAccess && typeof rawAccess === 'object') {
+        parsedAccess = rawAccess;
+      }
+
+      var rawBoundDevice = item.boundDeviceId !== undefined ? item.boundDeviceId : row[14];
+      var parsedBoundDevice = rawBoundDevice ? String(rawBoundDevice).trim() : '';
+
       students.push({
         studentId: String(item.studentId || row[0] || ''),
         studentName: String(item.studentName || row[1] || ''),
@@ -192,7 +286,9 @@ function doGet(e) {
         lastActive: item.lastActive ? String(item.lastActive) : '',
         chaptersBreakdown: parsedBreakdown,
         hskMockResults: parsedHskMock,
-        hskPatternStats: parsedHskPattern
+        hskPatternStats: parsedHskPattern,
+        unlockedAccess: parsedAccess,
+        boundDeviceId: parsedBoundDevice
       });
     }
 
@@ -207,7 +303,8 @@ function doGet(e) {
 */
 
 import { ALLOWED_STUDENTS, authenticateStudent } from '../data/students';
-import { SheetsSyncPayload, Student } from '../types';
+import { SheetsSyncPayload, Student, UnlockedAccess } from '../types';
+import { getOrCreateClientDeviceId, parseUnlockedAccess } from '../utils/accessControl';
 
 export const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxA27jKarngLH1l9aIK8vVxd_vNj1UZG6dXTMqluOcaBe6VoFd0VzE7snVvPXqQFdR_fQ/exec ';
 
@@ -270,13 +367,84 @@ function registerDynamicStudentInMemory(student: Student): void {
   const normName = normalizeCredential(student.name);
   const normCode = normalizeCodeCompact(student.code);
 
-  const exists = ALLOWED_STUDENTS.some(
+  const existingIdx = ALLOWED_STUDENTS.findIndex(
     (s) =>
       normalizeCredential(s.id) === normId ||
       (normalizeCredential(s.name) === normName && normalizeCodeCompact(s.code) === normCode)
   );
-  if (!exists) {
+  if (existingIdx === -1) {
     ALLOWED_STUDENTS.push(student);
+  } else {
+    ALLOWED_STUDENTS[existingIdx] = {
+      ...ALLOWED_STUDENTS[existingIdx],
+      ...student,
+    };
+  }
+}
+
+export const DEVICE_LOCKED_WARNING_AR =
+  'عذراً، هذا الكود مرتبط بجهاز آخر بالفعل ولا يمكن استخدامه على أكثر من جهاز. تواصل مع المعلم (Laohu) في حال تغيير جهازك.';
+
+export type StudentVerificationResult =
+  | { status: 'ok'; student: Student }
+  | { status: 'device_locked'; message: string }
+  | { status: 'not_found' };
+
+export interface StudentSheetSessionState {
+  unlockedAccess: UnlockedAccess;
+  boundDeviceId: string;
+}
+
+function updateLocalStudentBoundDevice(studentId: string, studentCode: string, deviceId: string): void {
+  const normId = normalizeCredential(studentId);
+  const compactCode = normalizeCodeCompact(studentCode);
+  try {
+    const raw = localStorage.getItem(LOCAL_REGISTERED_STUDENTS_KEY);
+    if (!raw) return;
+    const list = JSON.parse(raw) as Array<Record<string, unknown>>;
+    if (!Array.isArray(list)) return;
+    let changed = false;
+    for (const item of list) {
+      const itemId = normalizeCredential(String(item.studentId ?? item.id ?? ''));
+      const itemCode = normalizeCodeCompact(String(item.studentCode ?? item.code ?? ''));
+      if ((normId && itemId === normId) || (compactCode && itemCode === compactCode)) {
+        item.boundDeviceId = deviceId;
+        changed = true;
+      }
+    }
+    if (changed) {
+      localStorage.setItem(LOCAL_REGISTERED_STUDENTS_KEY, JSON.stringify(list));
+    }
+  } catch {
+    // تجاهل
+  }
+}
+
+export async function bindStudentDeviceInSheet(
+  student: Pick<Student, 'id' | 'name' | 'code'>,
+  deviceId: string
+): Promise<void> {
+  updateLocalStudentBoundDevice(student.id, student.code, deviceId);
+  const endpoint = getConfiguredSheetsUrl();
+  if (!endpoint || !deviceId.trim()) return;
+
+  try {
+    await fetch(endpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'bindDevice',
+        studentId: student.id,
+        studentName: student.name,
+        studentCode: student.code,
+        boundDeviceId: deviceId,
+      }),
+    });
+  } catch {
+    // تجاهل أخطاء الشبكة العابرة؛ تم الحفظ محلياً
   }
 }
 
@@ -296,6 +464,8 @@ function findLocallyRegisteredStudent(name: string, code: string): Student | nul
       name?: string;
       studentCode?: string;
       code?: string;
+      unlockedAccess?: unknown;
+      boundDeviceId?: unknown;
     }>;
 
     if (!Array.isArray(list)) return null;
@@ -311,7 +481,13 @@ function findLocallyRegisteredStudent(name: string, code: string): Student | nul
         normalizeCredential(sCode) === cleanedCode || normalizeCodeCompact(sCode) === compactCode;
 
       if (nameMatches && codeMatches) {
-        const matched: Student = { id: sId, name: sName, code: sCode };
+        const matched: Student = {
+          id: sId,
+          name: sName,
+          code: sCode,
+          unlockedAccess: parseUnlockedAccess(item.unlockedAccess),
+          boundDeviceId: String(item.boundDeviceId ?? '').trim(),
+        };
         registerDynamicStudentInMemory(matched);
         return matched;
       }
@@ -323,19 +499,59 @@ function findLocallyRegisteredStudent(name: string, code: string): Student | nul
   return null;
 }
 
+function findLocalSessionOverride(
+  studentId: string,
+  studentCode: string
+): StudentSheetSessionState | null {
+  const normId = normalizeCredential(studentId);
+  const compactCode = normalizeCodeCompact(studentCode);
+  try {
+    const raw = localStorage.getItem(LOCAL_REGISTERED_STUDENTS_KEY);
+    if (!raw) return null;
+    const list = JSON.parse(raw) as Array<{
+      studentId?: string;
+      id?: string;
+      studentCode?: string;
+      code?: string;
+      unlockedAccess?: unknown;
+      boundDeviceId?: unknown;
+    }>;
+    if (!Array.isArray(list)) return null;
+
+    for (const item of list) {
+      const itemId = normalizeCredential(String(item.studentId ?? item.id ?? ''));
+      const itemCode = normalizeCodeCompact(String(item.studentCode ?? item.code ?? ''));
+      if ((normId && itemId === normId) || (compactCode && itemCode === compactCode)) {
+        return {
+          unlockedAccess: parseUnlockedAccess(item.unlockedAccess),
+          boundDeviceId: String(item.boundDeviceId ?? '').trim(),
+        };
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 /**
- * التحقق الديناميكي من بيانات الطالب عبر Google Sheets (GET) مع توحيد المسافات
- * والرجوع الآمن إلى القائمة المحلية في حال انقطاع الاتصال.
+ * التحقق الديناميكي من بيانات الطالب عبر Google Sheets (GET) مع نظام ربط الجهاز الواحد (Single-Device Lock):
+ * - إن كان عمود boundDeviceId فارغاً، يُربط هذا الجهاز تلقائياً ويُحفظ في Google Sheets (action: 'bindDevice').
+ * - إن كان مرتبطاً بنفس الجهاز الحالي، يُسمح بالدخول.
+ * - إن كان مرتبطاً بجهاز آخر مختلف، يُحظر الدخول مع رسالة تنبيه عربية واضحة.
  */
 export async function verifyStudentFromSheet(
   name: string,
   code: string
-): Promise<Student | null> {
+): Promise<StudentVerificationResult> {
   const normalizedInputName = normalizeCredential(name);
   const normalizedInputCode = normalizeCredential(code);
   const compactInputCode = normalizeCodeCompact(code);
-  if (!normalizedInputName || !normalizedInputCode) return null;
+  if (!normalizedInputName || !normalizedInputCode) {
+    return { status: 'not_found' };
+  }
 
+  const clientDeviceId = getOrCreateClientDeviceId();
   const endpoint = getConfiguredSheetsUrl();
 
   if (endpoint) {
@@ -376,13 +592,29 @@ export async function verifyStudentFromSheet(
             normalizeCodeCompact(rowCode) === compactInputCode;
 
           if (nameMatches && codeMatches) {
+            const existingBoundDevice = String(row.boundDeviceId ?? '').trim();
+
+            if (existingBoundDevice && existingBoundDevice !== clientDeviceId) {
+              return {
+                status: 'device_locked',
+                message: DEVICE_LOCKED_WARNING_AR,
+              };
+            }
+
             const matched: Student = {
               id: rowId || rowCode,
               name: rowName || name.trim().replace(/\s+/g, ' '),
               code: rowCode,
+              unlockedAccess: parseUnlockedAccess(row.unlockedAccess),
+              boundDeviceId: existingBoundDevice || clientDeviceId,
             };
+
+            if (!existingBoundDevice) {
+              void bindStudentDeviceInSheet(matched, clientDeviceId);
+            }
+
             registerDynamicStudentInMemory(matched);
-            return matched;
+            return { status: 'ok', student: matched };
           }
         }
       }
@@ -393,10 +625,97 @@ export async function verifyStudentFromSheet(
 
   const localDynamic = findLocallyRegisteredStudent(name, code);
   if (localDynamic) {
-    return localDynamic;
+    const existingLocalDevice = String(localDynamic.boundDeviceId ?? '').trim();
+    if (existingLocalDevice && existingLocalDevice !== clientDeviceId) {
+      return {
+        status: 'device_locked',
+        message: DEVICE_LOCKED_WARNING_AR,
+      };
+    }
+    const boundStudent: Student = {
+      ...localDynamic,
+      boundDeviceId: existingLocalDevice || clientDeviceId,
+    };
+    if (!existingLocalDevice) {
+      void bindStudentDeviceInSheet(boundStudent, clientDeviceId);
+    }
+    return { status: 'ok', student: boundStudent };
   }
 
-  return authenticateStudent(name, code);
+  const fallback = authenticateStudent(name, code);
+  if (fallback) {
+    return {
+      status: 'ok',
+      student: {
+        ...fallback,
+        unlockedAccess: parseUnlockedAccess(fallback.unlockedAccess),
+        boundDeviceId: clientDeviceId,
+      },
+    };
+  }
+
+  return { status: 'not_found' };
+}
+
+/**
+ * جلب أحدث صلاحيات الوصول (unlockedAccess) وحالة الجهاز المرتبط (boundDeviceId) من Google Sheets.
+ */
+export async function fetchStudentSessionFromSheet(
+  student: Pick<Student, 'id' | 'code'>
+): Promise<StudentSheetSessionState | null> {
+  const normId = normalizeCredential(student.id);
+  const compactCode = normalizeCodeCompact(student.code);
+  const endpoint = getConfiguredSheetsUrl();
+
+  if (endpoint) {
+    try {
+      const response = await fetch(endpoint, { method: 'GET', cache: 'no-store' });
+      if (response.ok) {
+        const data: unknown = await response.json();
+        const rows = Array.isArray(data)
+          ? data
+          : data &&
+              typeof data === 'object' &&
+              'students' in data &&
+              Array.isArray((data as { students?: unknown }).students)
+            ? (data as { students: unknown[] }).students
+            : data &&
+                typeof data === 'object' &&
+                'rows' in data &&
+                Array.isArray((data as { rows?: unknown }).rows)
+              ? (data as { rows: unknown[] }).rows
+              : [];
+
+        for (const rawRow of rows) {
+          if (!rawRow || typeof rawRow !== 'object') continue;
+          const row = rawRow as Record<string, unknown>;
+          const rowCode = String(row.studentCode ?? row.code ?? '').trim();
+          const rowId = String(row.studentId ?? row.id ?? rowCode).trim();
+
+          if (
+            (normId && normalizeCredential(rowId) === normId) ||
+            (compactCode && normalizeCodeCompact(rowCode) === compactCode)
+          ) {
+            return {
+              unlockedAccess: parseUnlockedAccess(row.unlockedAccess),
+              boundDeviceId: String(row.boundDeviceId ?? '').trim(),
+            };
+          }
+        }
+      }
+    } catch {
+      // الرجوع إلى النسخة المحلية في حال تعذر الاتصال
+    }
+  }
+
+  return findLocalSessionOverride(student.id, student.code);
+}
+
+export async function fetchStudentAccessFromSheet(
+  student: Pick<Student, 'id' | 'code'>
+): Promise<UnlockedAccess | null> {
+  const session = await fetchStudentSessionFromSheet(student);
+  return session ? session.unlockedAccess : null;
 }
 
 function buildChaptersBreakdownFromStorage(studentId: string): ChapterBreakdownEntry[] {

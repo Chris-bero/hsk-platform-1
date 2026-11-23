@@ -30,9 +30,14 @@ export function LoginGate() {
     setIsVerifying(true);
     try {
       const configuredUrl = getConfiguredSheetsUrl();
-      const verifiedStudent = await verifyStudentFromSheet(cleanedName, cleanedCode);
+      const verification = await verifyStudentFromSheet(cleanedName, cleanedCode);
 
-      if (!verifiedStudent) {
+      if (verification.status === 'device_locked') {
+        setErrorMsg(verification.message);
+        return;
+      }
+
+      if (verification.status !== 'ok') {
         if (!configuredUrl) {
           setErrorMsg(
             'لم يتم ربط المنصة بجدول بيانات المعلم بعد. يرجى من المعلم إضافة رابط مزامنة الجدول أولاً لتفعيل تسجيل الدخول.'
@@ -43,7 +48,11 @@ export function LoginGate() {
         return;
       }
 
-      const success = login(verifiedStudent.name, verifiedStudent.code);
+      const success = login(
+        verification.student.name,
+        verification.student.code,
+        verification.student
+      );
       if (!success) {
         setErrorMsg('تعذر التحقق من البيانات. تأكد من مطابقة الاسم والرمز المسجل لدى المعلم.');
       }

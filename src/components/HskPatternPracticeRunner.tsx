@@ -65,7 +65,6 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
   const [activeSpeaker, setActiveSpeaker] = useState<'A' | 'B' | null>(null);
   const [slowMode, setSlowMode] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [recorded, setRecorded] = useState(false);
 
   const questions = useMemo(
     () => module.questions.map(shuffleQuestionOptions),
@@ -133,20 +132,17 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
 
   const handleSelectOption = (letter: string) => {
     if (!currentQ || selectedAnswers[currentQ.number]) return;
+    const answeredCorrectly = letter === currentQ.correctLetter;
     setSelectedAnswers((prev) => ({ ...prev, [currentQ.number]: letter }));
+    // تسجيل فوري لكل سؤال مع مزامنة مباشرة إلى التخزين المحلي و Google Sheets
+    void recordHskPatternPractice(module.id, 1, answeredCorrectly ? 1 : 0);
   };
 
   const handleNext = () => {
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
-      const total = questions.length;
-      const correct = questions.filter((q) => selectedAnswers[q.number] === q.correctLetter).length;
       setFinished(true);
-      if (!recorded) {
-        setRecorded(true);
-        void recordHskPatternPractice(module.id, total, correct);
-      }
     }
   };
 
@@ -157,13 +153,19 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
     setSelectedAnswers({});
     setShowListeningQuestionText({});
     setFinished(false);
-    setRecorded(false);
   };
 
   if (finished) {
     const total = questions.length;
     const correct = questions.filter((q) => selectedAnswers[q.number] === q.correctLetter).length;
+    const wrong = Math.max(0, total - correct);
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    const pctColor =
+      pct >= 85
+        ? 'text-[#15803D] dark:text-[#22C55E]'
+        : pct >= 70
+          ? 'text-[#B45309] dark:text-[#F59E0B]'
+          : 'text-[#B91C1C] dark:text-[#EF4444]';
 
     return (
       <motion.section
@@ -179,22 +181,27 @@ export function HskPatternPracticeRunner({ module, onExit }: HskPatternPracticeR
             اكتمل تدريب: {module.titleAr}
           </h1>
 
-          <div className="inline-flex items-center gap-6 px-6 py-4 rounded-xl bg-[#F9F6F0] dark:bg-[#121110] border border-[#1C1917]/10 dark:border-[#F5F2EB]/10 tabular-nums">
+          <div className="inline-flex flex-wrap items-center justify-center gap-6 px-6 py-4 rounded-xl bg-[#F9F6F0] dark:bg-[#121110] border border-[#1C1917]/10 dark:border-[#F5F2EB]/10 tabular-nums">
             <div>
-              <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">النتيجة</p>
+              <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">الصحيح</p>
               <p className="text-2xl font-bold text-[#15803D] dark:text-[#22C55E]">
                 {correct} / {total}
               </p>
             </div>
             <div className="h-8 w-px bg-[#1C1917]/12 dark:bg-[#F5F2EB]/12" />
             <div>
+              <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">الأخطاء</p>
+              <p className="text-2xl font-bold text-[#B91C1C] dark:text-[#EF4444]">{wrong}</p>
+            </div>
+            <div className="h-8 w-px bg-[#1C1917]/12 dark:bg-[#F5F2EB]/12" />
+            <div>
               <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">نسبة الدقة</p>
-              <p className="text-2xl font-bold text-[#B91C1C] dark:text-[#EF4444]">{pct}%</p>
+              <p className={`text-2xl font-bold ${pctColor}`}>{pct}%</p>
             </div>
           </div>
 
           <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">
-            تم حفظ نتيجتك في سجل بوابة الامتحانات الدولية HSK 3.0 بشكل مستقل عن تدريبات الفصول اليومية.
+            تم حفظ ومزامنة نتائجك في سجل بوابة الامتحانات الدولية HSK 3.0 بشكل مستقل عن تدريبات الفصول اليومية.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -6,12 +6,16 @@ import {
   ClipboardCheck,
   GraduationCap,
   Layers,
+  Lock,
   SlidersHorizontal,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useApp } from '../context/AppContext';
 import { ALL_DRILL_TYPES, CHAPTERS_DATA, DRILL_METADATA } from '../data/chaptersData';
-import { CustomQuizConfig, DrillType, QuizMode } from '../types';
+import { ChapterData, CustomQuizConfig, DrillType, QuizMode } from '../types';
+import { isChapterUnlocked } from '../utils/accessControl';
 import { countAvailableQuestionsForConfig } from '../utils/drillGenerators';
+import { LockedAccessModal } from './LockedAccessModal';
 
 interface CustomQuizBuilderViewProps {
   onStartCustomQuiz: (config: CustomQuizConfig) => void;
@@ -29,18 +33,33 @@ export function CustomQuizBuilderView({
   onStartCustomQuiz,
   onBack,
 }: CustomQuizBuilderViewProps) {
-  const populatedChapterIds = useMemo(
+  const { unlockedAccess } = useApp();
+  const [lockedChapterModal, setLockedChapterModal] = useState<ChapterData | null>(null);
+
+  const populatedUnlockedChapterIds = useMemo(
     () =>
-      CHAPTERS_DATA.filter((ch) => ch.vocab.length > 0 || ch.sentences.length > 0).map(
-        (ch) => ch.id
-      ),
-    []
+      CHAPTERS_DATA.filter(
+        (ch) =>
+          (ch.vocab.length > 0 || ch.sentences.length > 0) &&
+          isChapterUnlocked(unlockedAccess, ch.id)
+      ).map((ch) => ch.id),
+    [unlockedAccess]
   );
 
-  const [selectedChapterIds, setSelectedChapterIds] = useState<number[]>(populatedChapterIds);
+  const [selectedChapterIds, setSelectedChapterIds] = useState<number[]>(
+    populatedUnlockedChapterIds
+  );
   const [drillScope, setDrillScope] = useState<DrillType | 'all'>('all');
   const [questionLimit, setQuestionLimit] = useState<10 | 20 | 40 | 'all'>(20);
   const [mode, setMode] = useState<QuizMode>('practice');
+
+  // إزالة أي فصل مقفل من التحديد تلقائياً أو تفعيل المفتوحة إن تغيرت الصلاحيات
+  useEffect(() => {
+    setSelectedChapterIds((prev) => {
+      const stillValid = prev.filter((id) => populatedUnlockedChapterIds.includes(id));
+      return stillValid.length > 0 ? stillValid : populatedUnlockedChapterIds;
+    });
+  }, [populatedUnlockedChapterIds]);
 
   const availableQuestionsCount = useMemo(
     () => countAvailableQuestionsForConfig(CHAPTERS_DATA, selectedChapterIds, drillScope),
@@ -53,17 +72,21 @@ export function CustomQuizBuilderView({
       : Math.min(availableQuestionsCount, questionLimit);
 
   const allPopulatedSelected =
-    populatedChapterIds.length > 0 &&
-    populatedChapterIds.every((id) => selectedChapterIds.includes(id));
+    populatedUnlockedChapterIds.length > 0 &&
+    populatedUnlockedChapterIds.every((id) => selectedChapterIds.includes(id));
 
-  const toggleChapter = (chapterId: number) => {
+  const toggleChapter = (chapter: ChapterData) => {
+    if (!isChapterUnlocked(unlockedAccess, chapter.id)) {
+      setLockedChapterModal(chapter);
+      return;
+    }
     setSelectedChapterIds((prev) =>
-      prev.includes(chapterId) ? prev.filter((id) => id !== chapterId) : [...prev, chapterId]
+      prev.includes(chapter.id) ? prev.filter((id) => id !== chapter.id) : [...prev, chapter.id]
     );
   };
 
   const handleSelectAllPopulated = () => {
-    setSelectedChapterIds(populatedChapterIds);
+    setSelectedChapterIds(populatedUnlockedChapterIds);
   };
 
   const handleClearChapters = () => {
@@ -132,8 +155,8 @@ export function CustomQuizBuilderView({
               ١. اختيار الفصول الدراسية
             </h2>
             <p className="text-xs text-[#57534E] dark:text-[#A8A29E] mt-0.5 tabular-nums">
-              الفصول المحددة: {selectedChapterIds.length} من أصل {populatedChapterIds.length} فصل
-              متاح
+              الفصول المحددة: {selectedChapterIds.length} من أصل {populatedUnlockedChapterIds.length}{' '}
+              فصل مفتوح لك حالياً
             </p>
           </div>
 
@@ -160,29 +183,34 @@ export function CustomQuizBuilderView({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {CHAPTERS_DATA.map((chapter) => {
             const isEmpty = chapter.vocab.length === 0 && chapter.sentences.length === 0;
-            const isSelected = selectedChapterIds.includes(chapter.id);
+            const isUnlocked = isChapterUnlocked(unlockedAccess, chapter.id);
+            const isSelected = isUnlocked && selectedChapterIds.includes(chapter.id);
 
             return (
               <button
                 key={chapter.id}
                 type="button"
-                disabled={isEmpty}
-                onClick={() => toggleChapter(chapter.id)}
+                disabled={isUnlocked && isEmpty}
+                onClick={() => toggleChapter(chapter)}
                 aria-pressed={isSelected}
                 className={`text-right rounded-xl border p-4 flex items-center justify-between gap-3 transition-all duration-150 ${
-                  isEmpty
-                    ? 'border-[#1C1917]/8 dark:border-[#F5F2EB]/8 bg-[#F2ECE1]/45 dark:bg-[#181614] opacity-55 cursor-not-allowed'
-                    : isSelected
-                      ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C]/7 dark:bg-[#EF4444]/12 ring-1 ring-[#B91C1C]/25 dark:ring-[#EF4444]/25'
-                      : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-[#F9F6F0]/60 dark:bg-[#121110]/60 hover:border-[#B91C1C]/40'
+                  !isUnlocked
+                    ? 'border-[#D97706]/25 dark:border-[#F59E0B]/25 bg-[#F2ECE1]/65 dark:bg-[#181614] hover:border-[#D97706]/55'
+                    : isEmpty
+                      ? 'border-[#1C1917]/8 dark:border-[#F5F2EB]/8 bg-[#F2ECE1]/45 dark:bg-[#181614] opacity-55 cursor-not-allowed'
+                      : isSelected
+                        ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C]/7 dark:bg-[#EF4444]/12 ring-1 ring-[#B91C1C]/25 dark:ring-[#EF4444]/25'
+                        : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-[#F9F6F0]/60 dark:bg-[#121110]/60 hover:border-[#B91C1C]/40'
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span
                     className={`font-hanzi w-9 h-9 rounded-md border flex items-center justify-center text-sm font-bold shrink-0 ${
-                      isSelected
-                        ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
-                        : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] text-[#1C1917] dark:text-[#F5F2EB]'
+                      !isUnlocked
+                        ? 'border-[#D97706]/35 bg-[#D97706]/10 text-[#B45309] dark:text-[#F59E0B]'
+                        : isSelected
+                          ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
+                          : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] text-[#1C1917] dark:text-[#F5F2EB]'
                     }`}
                   >
                     {chapter.chineseNumeral}
@@ -192,23 +220,29 @@ export function CustomQuizBuilderView({
                       {chapter.titleAr}
                     </p>
                     <p className="text-xs text-[#57534E] dark:text-[#A8A29E] truncate tabular-nums">
-                      {isEmpty
-                        ? 'قيد الإضافة'
-                        : `${chapter.vocab.length} مفردة · ${chapter.sentences.length} جملة`}
+                      {!isUnlocked
+                        ? '🔒 مغلق · اضغط للتفعيل'
+                        : isEmpty
+                          ? 'قيد الإضافة'
+                          : `${chapter.vocab.length} مفردة · ${chapter.sentences.length} جملة`}
                     </p>
                   </div>
                 </div>
 
-                {!isEmpty && (
-                  <span
-                    className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
-                      isSelected
-                        ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
-                        : 'border-[#1C1917]/25 dark:border-[#F5F2EB]/25 bg-white dark:bg-[#1E1C1A]'
-                    }`}
-                  >
-                    {isSelected && <Check className="w-3.5 h-3.5" />}
-                  </span>
+                {!isUnlocked ? (
+                  <Lock className="w-4 h-4 text-[#B45309] dark:text-[#F59E0B] shrink-0" />
+                ) : (
+                  !isEmpty && (
+                    <span
+                      className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
+                          : 'border-[#1C1917]/25 dark:border-[#F5F2EB]/25 bg-white dark:bg-[#1E1C1A]'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3.5 h-3.5" />}
+                    </span>
+                  )
                 )}
               </button>
             );
@@ -380,6 +414,16 @@ export function CustomQuizBuilderView({
           <ArrowLeft className="w-4 h-4" />
         </button>
       </div>
+      <LockedAccessModal
+        isOpen={Boolean(lockedChapterModal)}
+        itemTitle={
+          lockedChapterModal
+            ? `${lockedChapterModal.titleAr} (第${lockedChapterModal.id}课)`
+            : ''
+        }
+        itemType="chapter"
+        onClose={() => setLockedChapterModal(null)}
+      />
     </motion.section>
   );
 }

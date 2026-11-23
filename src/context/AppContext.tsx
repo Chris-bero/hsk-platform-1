@@ -10,7 +10,12 @@ import { ALL_DRILL_TYPES, CHAPTERS_DATA } from '../data/chaptersData';
 import { ALL_HSK_PATTERN_IDS } from '../data/mockExamsData';
 import { authenticateStudent } from '../data/students';
 import { useActiveStudyTimer } from '../hooks/useActiveStudyTimer';
-import { syncStudentStatsToSheets, SyncResult } from '../services/sheetsSync';
+import {
+  bindStudentDeviceInSheet,
+  fetchStudentSessionFromSheet,
+  syncStudentStatsToSheets,
+  SyncResult,
+} from '../services/sheetsSync';
 import {
   ChapterStatEntry,
   DrillStatEntry,
@@ -24,7 +29,9 @@ import {
   SheetsSyncPayload,
   Student,
   StudentProgress,
+  UnlockedAccess,
 } from '../types';
+import { getOrCreateClientDeviceId, parseUnlockedAccess } from '../utils/accessControl';
 
 type ThemeMode = 'light' | 'dark';
 
@@ -47,6 +54,23 @@ function makeMistakeKey(chapterId: number, drillType: DrillType, sourceItemId: s
   return `${chapterId}::${drillType}::${sourceItemId}`;
 }
 
+function normalizeHskPatternEntry(
+  raw?: Partial<HskPatternStatEntry> | null
+): HskPatternStatEntry {
+  const solved = Math.max(0, Number(raw?.solved ?? raw?.attempted ?? 0));
+  const correct = Math.max(0, Math.min(solved, Number(raw?.correct ?? 0)));
+  const wrong =
+    raw?.wrong !== undefined ? Math.max(0, Number(raw.wrong)) : Math.max(0, solved - correct);
+  const accuracyPercent = solved > 0 ? Math.round((correct / solved) * 100) : 0;
+  return {
+    solved,
+    attempted: solved,
+    correct,
+    wrong,
+    accuracyPercent,
+  };
+}
+
 function createEmptyProgress(studentId: string): StudentProgress {
   const drillStats = {} as Record<DrillType, DrillStatEntry>;
   const drillTimeSeconds = {} as Record<DrillType, number>;
@@ -62,7 +86,7 @@ function createEmptyProgress(studentId: string): StudentProgress {
 
   const hskPatternStats = {} as Record<HskPatternId, HskPatternStatEntry>;
   for (const pid of ALL_HSK_PATTERN_IDS) {
-    hskPatternStats[pid] = { attempted: 0, correct: 0 };
+    hskPatternStats[pid] = normalizeHskPatternEntry();
   }
 
   return {
@@ -122,7 +146,7 @@ function loadStudentProgress(studentId: string): StudentProgress {
     if (parsed.hskPatternStats) {
       for (const pid of ALL_HSK_PATTERN_IDS) {
         if (parsed.hskPatternStats[pid]) {
-          mergedHskPatternStats[pid] = parsed.hskPatternStats[pid];
+          mergedHskPatternStats[pid] = normalizeHskPatternEntry(parsed.hskPatternStats[pid]);
         }
       }
     }
@@ -232,7 +256,9 @@ interface AppContextValue {
   showPinyin: boolean;
   togglePinyin: () => void;
   currentStudent: Student | null;
-  login: (nameOrId: string, code: string) => boolean;
+  unlockedAccess: UnlockedAccess;
+  refreshStudentAccess: () => Promise<UnlockedAccess | null>;
+  login: (nameOrId: string, code: string, verifiedStudent?: Student) => boolean;
   logout: () => void;
   progress: StudentProgress | null;
   analytics: ComputedAnalytics;
@@ -279,7 +305,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentStudent, setCurrentStudent] = useState<Student | null>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SESSION);
-      return saved ? (JSON.parse(saved) as Student) : null;
+      if (!saved) return null;
+      const parsed = JSON.parse(saved) as Student;
+      return {
+        ...parsed,
+        unlockedAccess: parseUnlockedAccess(parsed.unlockedAccess),
+      };
     } catch {
       return null;
     }
@@ -348,27 +379,135 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setShowPinyin((prev) => !prev);
   }, []);
 
-  const login = useCallback((nameOrId: string, code: string): boolean => {
-    const matched = authenticateStudent(nameOrId, code);
-    if (!matched) return false;
+  const refreshStudentAccess = useCallback(async (): Promise<UnlockedAccess | null> => {
+    if (!currentStudent) return null;
+    const latestSession = await fetchStudentSessionFromSheet(currentStudent);
+    if (!latestSession) return null;
 
-    setCurrentStudent(matched);
-    const loaded = loadStudentProgress(matched.id);
-    const today = getTodayIsoDate();
-    if (!loaded.studyDates.includes(today)) {
-      loaded.studyDates = [...loaded.studyDates, today];
+    const clientDeviceId = getOrCreateClientDeviceId();
+    if (latestSession.boundDeviceId && latestSession.boundDeviceId !== clientDeviceId) {
+      setCurrentStudent(null);
+      setProgress(null);
+      try {
+        localStorage.removeItem(STORAGE_KEYS.SESSION);
+      } catch {
+        // تجاهل
+      }
+      return null;
     }
-    loaded.lastActive = new Date().toISOString();
-    saveStudentProgress(loaded);
-    setProgress(loaded);
 
-    try {
-      localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(matched));
-    } catch {
-      // تجاهل
+    if (!latestSession.boundDeviceId) {
+      void bindStudentDeviceInSheet(currentStudent, clientDeviceId);
     }
-    return true;
-  }, []);
+
+    const latestAccess = latestSession.unlockedAccess;
+    setCurrentStudent((prev) => {
+      if (!prev) return prev;
+      const prevJson = JSON.stringify(parseUnlockedAccess(prev.unlockedAccess));
+      const nextJson = JSON.stringify(latestAccess);
+      const nextBound = latestSession.boundDeviceId || clientDeviceId;
+      if (prevJson === nextJson && prev.boundDeviceId === nextBound) return prev;
+      const updatedStudent: Student = {
+        ...prev,
+        unlockedAccess: latestAccess,
+        boundDeviceId: nextBound,
+      };
+      try {
+        localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(updatedStudent));
+      } catch {
+        // تجاهل
+      }
+      return updatedStudent;
+    });
+
+    return latestAccess;
+  }, [currentStudent]);
+
+  // مزامنة صلاحيات الطالب وحالة ارتباط الجهاز تلقائياً من Google Sheets عند فتح أو تحديث الصفحة
+  useEffect(() => {
+    if (!currentStudent) return;
+    let active = true;
+    const clientDeviceId = getOrCreateClientDeviceId();
+
+    fetchStudentSessionFromSheet(currentStudent).then((latestSession) => {
+      if (!active || !latestSession) return;
+
+      if (latestSession.boundDeviceId && latestSession.boundDeviceId !== clientDeviceId) {
+        setCurrentStudent(null);
+        setProgress(null);
+        try {
+          localStorage.removeItem(STORAGE_KEYS.SESSION);
+        } catch {
+          // تجاهل
+        }
+        return;
+      }
+
+      if (!latestSession.boundDeviceId) {
+        void bindStudentDeviceInSheet(currentStudent, clientDeviceId);
+      }
+
+      const latestAccess = latestSession.unlockedAccess;
+      const nextBound = latestSession.boundDeviceId || clientDeviceId;
+
+      setCurrentStudent((prev) => {
+        if (!prev || prev.id !== currentStudent.id) return prev;
+        const prevJson = JSON.stringify(parseUnlockedAccess(prev.unlockedAccess));
+        const nextJson = JSON.stringify(latestAccess);
+        if (prevJson === nextJson && prev.boundDeviceId === nextBound) return prev;
+        const updatedStudent: Student = {
+          ...prev,
+          unlockedAccess: latestAccess,
+          boundDeviceId: nextBound,
+        };
+        try {
+          localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(updatedStudent));
+        } catch {
+          // تجاهل
+        }
+        return updatedStudent;
+      });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [currentStudent?.id, currentStudent?.code]);
+
+  const unlockedAccess = useMemo<UnlockedAccess>(
+    () => parseUnlockedAccess(currentStudent?.unlockedAccess),
+    [currentStudent?.unlockedAccess]
+  );
+
+  const login = useCallback(
+    (nameOrId: string, code: string, verifiedStudent?: Student): boolean => {
+      const matched = verifiedStudent ?? authenticateStudent(nameOrId, code);
+      if (!matched) return false;
+
+      const normalizedStudent: Student = {
+        ...matched,
+        unlockedAccess: parseUnlockedAccess(matched.unlockedAccess),
+      };
+
+      setCurrentStudent(normalizedStudent);
+      const loaded = loadStudentProgress(normalizedStudent.id);
+      const today = getTodayIsoDate();
+      if (!loaded.studyDates.includes(today)) {
+        loaded.studyDates = [...loaded.studyDates, today];
+      }
+      loaded.lastActive = new Date().toISOString();
+      saveStudentProgress(loaded);
+      setProgress(loaded);
+
+      try {
+        localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(normalizedStudent));
+      } catch {
+        // تجاهل
+      }
+      return true;
+    },
+    []
+  );
 
   const logout = useCallback(() => {
     setCurrentStudent(null);
@@ -636,18 +775,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ? progress.studyDates
         : [...progress.studyDates, today];
 
-      const currentPatternStats = { ...(progress.hskPatternStats ?? {}) } as Record<
-        HskPatternId,
-        HskPatternStatEntry
-      >;
+      const currentPatternStats = {} as Record<HskPatternId, HskPatternStatEntry>;
       for (const pid of ALL_HSK_PATTERN_IDS) {
-        if (!currentPatternStats[pid]) {
-          currentPatternStats[pid] = { attempted: 0, correct: 0 };
-        }
+        currentPatternStats[pid] = normalizeHskPatternEntry(progress.hskPatternStats?.[pid]);
       }
+
+      const prevEntry = currentPatternStats[patternId];
+      const nextSolved = prevEntry.solved + attempted;
+      const nextCorrect = prevEntry.correct + correct;
+      const nextWrong = Math.max(0, nextSolved - nextCorrect);
+      const nextAccuracy = nextSolved > 0 ? Math.round((nextCorrect / nextSolved) * 100) : 0;
+
       currentPatternStats[patternId] = {
-        attempted: currentPatternStats[patternId].attempted + attempted,
-        correct: currentPatternStats[patternId].correct + correct,
+        solved: nextSolved,
+        attempted: nextSolved,
+        correct: nextCorrect,
+        wrong: nextWrong,
+        accuracyPercent: nextAccuracy,
       };
 
       const updatedProgress: StudentProgress = {
@@ -796,6 +940,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showPinyin,
     togglePinyin,
     currentStudent,
+    unlockedAccess,
+    refreshStudentAccess,
     login,
     logout,
     progress,

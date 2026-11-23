@@ -11,9 +11,10 @@ import { MockExamView } from './components/MockExamView';
 import { Navbar } from './components/Navbar';
 import { AppProvider, useApp } from './context/AppContext';
 import { AppView, ChapterData, CustomQuizConfig, QuizMode, SessionDrillKey } from './types';
+import { isChapterUnlocked } from './utils/accessControl';
 
 function MainShell() {
-  const { currentStudent } = useApp();
+  const { currentStudent, unlockedAccess } = useApp();
   const [view, setView] = useState<AppView>('home');
   const [activeChapter, setActiveChapter] = useState<ChapterData | null>(null);
   const [quizMode, setQuizMode] = useState<QuizMode>('practice');
@@ -30,6 +31,7 @@ function MainShell() {
   };
 
   const handleSelectChapter = (chapter: ChapterData) => {
+    if (!isChapterUnlocked(unlockedAccess, chapter.id)) return;
     setActiveChapter(chapter);
     setView('chapter-hub');
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -22,8 +22,10 @@ import {
   INTERNATIONAL_MOCK_EXAMS,
 } from '../data/mockExamsData';
 import { HskPatternId } from '../types';
+import { isMocksUnlocked } from '../utils/accessControl';
 import { HskFixedMockExamRunner } from './HskFixedMockExamRunner';
 import { HskPatternPracticeRunner } from './HskPatternPracticeRunner';
+import { LockedAccessModal } from './LockedAccessModal';
 
 function getToneClasses(tone: 'jade' | 'gold' | 'cinnabar'): string {
   if (tone === 'jade') return 'text-[#15803D] dark:text-[#22C55E]';
@@ -128,10 +130,12 @@ function PatternMiniPreview({ id }: { id: HskPatternId }) {
 }
 
 export function HskPortalView() {
-  const { progress } = useApp();
+  const { progress, unlockedAccess } = useApp();
   const [activePattern, setActivePattern] = useState<HskPatternModule | null>(null);
   const [activePaper, setActivePaper] = useState<FixedMockExamPaper | null>(null);
+  const [lockedPaperModal, setLockedPaperModal] = useState<FixedMockExamPaper | null>(null);
   const [examTrackTab, setExamTrackTab] = useState<'international' | 'arabic'>('international');
+  const mocksAllowed = isMocksUnlocked(unlockedAccess);
 
   if (activePattern) {
     return (
@@ -158,19 +162,57 @@ export function HskPortalView() {
     hskResults.length > 0 ? Math.max(...hskResults.map((r) => r.totalScore)) : null;
   const passedCount = hskResults.filter((r) => r.passed).length;
 
-  let patternAttempted = 0;
+  let patternSolved = 0;
   let patternCorrect = 0;
+  let patternWrong = 0;
+  let patternsStarted = 0;
   if (patternStats) {
     for (const m of HSK_PATTERN_MODULES) {
       const st = patternStats[m.id];
       if (st) {
-        patternAttempted += st.attempted;
-        patternCorrect += st.correct;
+        const solved = st.solved ?? st.attempted ?? 0;
+        const correct = st.correct ?? 0;
+        const wrong = st.wrong ?? Math.max(0, solved - correct);
+        if (solved > 0) patternsStarted += 1;
+        patternSolved += solved;
+        patternCorrect += correct;
+        patternWrong += wrong;
       }
     }
   }
   const patternAccuracy =
-    patternAttempted > 0 ? Math.round((patternCorrect / patternAttempted) * 100) : null;
+    patternSolved > 0 ? Math.round((patternCorrect / patternSolved) * 100) : null;
+
+  const getAccuracyBadgeClasses = (acc: number | null) => {
+    if (acc === null) {
+      return {
+        text: 'text-[#57534E] dark:text-[#A8A29E]',
+        badge: 'bg-[#1C1917]/6 dark:bg-[#F5F2EB]/8 text-[#57534E] dark:text-[#A8A29E]',
+        bar: 'bg-[#1C1917]/20 dark:bg-[#F5F2EB]/20',
+      };
+    }
+    if (acc >= 85) {
+      return {
+        text: 'text-[#15803D] dark:text-[#22C55E]',
+        badge: 'bg-[#15803D]/12 dark:bg-[#22C55E]/15 text-[#15803D] dark:text-[#22C55E]',
+        bar: 'bg-[#15803D] dark:bg-[#22C55E]',
+      };
+    }
+    if (acc >= 70) {
+      return {
+        text: 'text-[#B45309] dark:text-[#F59E0B]',
+        badge: 'bg-[#D97706]/12 dark:bg-[#F59E0B]/15 text-[#B45309] dark:text-[#F59E0B]',
+        bar: 'bg-[#D97706] dark:bg-[#F59E0B]',
+      };
+    }
+    return {
+      text: 'text-[#B91C1C] dark:text-[#EF4444]',
+      badge: 'bg-[#B91C1C]/12 dark:bg-[#EF4444]/15 text-[#B91C1C] dark:text-[#EF4444]',
+      bar: 'bg-[#B91C1C] dark:bg-[#EF4444]',
+    };
+  };
+
+  const overallPatternStyle = getAccuracyBadgeClasses(patternAccuracy);
 
   const displayedPapers =
     examTrackTab === 'international' ? INTERNATIONAL_MOCK_EXAMS : ARABIC_MOCK_EXAMS;
@@ -245,8 +287,18 @@ export function HskPortalView() {
             <p className="text-xs font-semibold text-[#57534E] dark:text-[#A8A29E]">
               دقة تدريبات الأنماط الـ ٧
             </p>
-            <p className="text-2xl font-bold text-[#D97706] dark:text-[#F59E0B] mt-1">
-              {patternAccuracy !== null ? `${patternAccuracy}%` : '—'}
+            <div className="flex items-baseline justify-between gap-2 mt-1">
+              <p className={`text-2xl font-bold ${overallPatternStyle.text}`}>
+                {patternAccuracy !== null ? `${patternAccuracy}%` : '—'}
+              </p>
+              <span className="text-[11px] font-semibold text-[#57534E] dark:text-[#A8A29E]">
+                {patternsStarted}/7 أنماط
+              </span>
+            </div>
+            <p className="text-[11px] text-[#57534E] dark:text-[#A8A29E] mt-1">
+              {patternSolved > 0
+                ? `${patternSolved} محلول · ${patternCorrect} صحيح · ${patternWrong} خطأ`
+                : 'ابدأ بأي نمط بالأسفل'}
             </p>
           </div>
         </div>
@@ -278,7 +330,14 @@ export function HskPortalView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {HSK_PATTERN_MODULES.map((mod) => {
             const st = patternStats?.[mod.id];
-            const acc = st && st.attempted > 0 ? Math.round((st.correct / st.attempted) * 100) : null;
+            const solved = st ? (st.solved ?? st.attempted ?? 0) : 0;
+            const correct = st ? (st.correct ?? 0) : 0;
+            const wrong = st ? (st.wrong ?? Math.max(0, solved - correct)) : 0;
+            const acc =
+              solved > 0
+                ? (st?.accuracyPercent ?? Math.round((correct / solved) * 100))
+                : null;
+            const accStyle = getAccuracyBadgeClasses(acc);
 
             return (
               <button
@@ -324,13 +383,40 @@ export function HskPortalView() {
                   </div>
 
                   <PatternMiniPreview id={mod.id} />
+
+                  {/* مؤشر تقدم ودقة الطالب في هذا النمط */}
+                  <div className="rounded-lg bg-[#F9F6F0] dark:bg-[#141312] border border-[#1C1917]/8 dark:border-[#F5F2EB]/8 p-3 space-y-2 tabular-nums">
+                    <div className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="font-semibold text-[#57534E] dark:text-[#A8A29E]">
+                        {solved > 0 ? `تم حل ${solved} سؤال` : `${mod.questions.length} أسئلة تدريبية`}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded font-bold ${accStyle.badge}`}>
+                        {acc !== null ? `الدقة: ${acc}%` : 'لم يبدأ بعد'}
+                      </span>
+                    </div>
+
+                    <div
+                      className="h-1.5 w-full rounded-full bg-[#1C1917]/10 dark:bg-[#F5F2EB]/10 overflow-hidden"
+                      aria-hidden="true"
+                    >
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${accStyle.bar}`}
+                        style={{ width: `${acc ?? 0}%` }}
+                      />
+                    </div>
+
+                    {solved > 0 && (
+                      <div className="flex items-center justify-between text-[11px] font-semibold">
+                        <span className="text-[#15803D] dark:text-[#22C55E]">صحيح: {correct}</span>
+                        <span className="text-[#B91C1C] dark:text-[#EF4444]">أخطاء: {wrong}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 text-xs tabular-nums">
                   <span className="text-[#57534E] dark:text-[#A8A29E]">
-                    {acc !== null
-                      ? `دقتك: ${acc}% (${st?.correct}/${st?.attempted})`
-                      : `${mod.questions.length} أسئلة تدريبية`}
+                    {solved > 0 ? 'مواصلة التدريب' : 'تدريب غير مؤقت'}
                   </span>
                   <span className="font-bold text-[#B91C1C] dark:text-[#EF4444] inline-flex items-center gap-1">
                     <span>ابدأ النمط</span>
@@ -407,15 +493,18 @@ export function HskPortalView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedPapers.map((paper) => {
             const isReady = paper.status === 'ready';
+            const isLocked = !mocksAllowed;
             const best = getBestResultForPaper(paper.id);
 
             return (
               <div
                 key={paper.id}
                 className={`rounded-xl border p-5 flex flex-col justify-between gap-4 transition-all duration-150 ${
-                  isReady
-                    ? 'border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A]'
-                    : 'border-[#1C1917]/8 dark:border-[#F5F2EB]/8 bg-[#F2ECE1]/60 dark:bg-[#181614] opacity-75'
+                  isLocked
+                    ? 'border-[#D97706]/25 dark:border-[#F59E0B]/25 bg-[#F4EFE6]/85 dark:bg-[#191715]'
+                    : isReady
+                      ? 'border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A]'
+                      : 'border-[#1C1917]/8 dark:border-[#F5F2EB]/8 bg-[#F2ECE1]/60 dark:bg-[#181614] opacity-75'
                 }`}
               >
                 <div className="space-y-2.5">
@@ -423,7 +512,12 @@ export function HskPortalView() {
                     <span className="font-hanzi font-bold text-[#D97706] dark:text-[#F59E0B]">
                       {paper.titleZh}
                     </span>
-                    {isReady ? (
+                    {isLocked ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-[#D97706]/35 dark:border-[#F59E0B]/35 bg-[#D97706]/10 dark:bg-[#F59E0B]/15 font-bold text-[#B45309] dark:text-[#F59E0B] text-[11px]">
+                        <Lock className="w-3 h-3" />
+                        <span>مغلق</span>
+                      </span>
+                    ) : isReady ? (
                       <span className="inline-flex items-center gap-1 font-bold text-[#15803D] dark:text-[#22C55E]">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>متاح الآن</span>
@@ -469,7 +563,16 @@ export function HskPortalView() {
                 </div>
 
                 <div className="pt-2 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8">
-                  {isReady ? (
+                  {isLocked ? (
+                    <button
+                      type="button"
+                      onClick={() => setLockedPaperModal(paper)}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[42px] rounded-lg border border-[#D97706]/40 dark:border-[#F59E0B]/40 bg-[#D97706]/10 hover:bg-[#D97706]/18 dark:bg-[#F59E0B]/15 dark:hover:bg-[#F59E0B]/22 text-[#B45309] dark:text-[#F59E0B] text-xs font-bold transition-colors"
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>🔒 تفعيل الامتحان الشامل</span>
+                    </button>
+                  ) : isReady ? (
                     <button
                       type="button"
                       onClick={() => setActivePaper(paper)}
@@ -543,6 +646,12 @@ export function HskPortalView() {
           </div>
         </div>
       )}
+      <LockedAccessModal
+        isOpen={Boolean(lockedPaperModal)}
+        itemTitle={lockedPaperModal ? lockedPaperModal.titleAr : ''}
+        itemType="mock-exam"
+        onClose={() => setLockedPaperModal(null)}
+      />
     </motion.section>
   );
 }

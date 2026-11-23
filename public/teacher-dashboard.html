@@ -1037,11 +1037,266 @@
       }
 
       .hsk-pattern-pills {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+        gap: 6px;
         font-size: 11px;
         color: var(--ink-muted);
+      }
+
+      .hsk-pattern-chip {
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background-color: var(--canvas);
+        padding: 5px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .hsk-pattern-chip-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4px;
+      }
+
+      .hsk-pattern-chip-meta {
+        font-size: 10px;
+        color: var(--ink-muted);
+      }
+
+      .modal-hsk-section {
+        margin-top: 22px;
+      }
+
+      /* زر ونافذة إدارة الصلاحيات */
+      .access-cell {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .access-summary-text {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink-muted);
+      }
+
+      .btn-access {
+        min-height: 34px;
+        padding: 5px 11px;
+        border-radius: 7px;
+        border: 1px solid rgba(180, 83, 9, 0.35);
+        background-color: var(--gold-soft);
+        color: var(--gold);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background-color 140ms ease, border-color 140ms ease;
+      }
+
+      .btn-access:hover {
+        border-color: var(--gold);
+        background-color: rgba(217, 119, 6, 0.18);
+      }
+
+      .access-modal-dialog {
+        max-width: 720px;
+      }
+
+      .access-quick-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .access-chapters-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      @media (max-width: 680px) {
+        .access-chapters-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .access-ch-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 11px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background-color: var(--canvas);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        transition: border-color 140ms ease, background-color 140ms ease;
+      }
+
+      .access-ch-item:hover {
+        border-color: var(--cinnabar);
+      }
+
+      .access-ch-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--cinnabar);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .access-mocks-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background-color: var(--canvas);
+        cursor: pointer;
+        margin-bottom: 16px;
+      }
+
+      .access-mocks-box:hover {
+        border-color: var(--jade);
+      }
+
+      .access-mocks-box input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--jade);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .access-device-box {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background-color: var(--bg-soft);
+        margin-bottom: 16px;
+      }
+
+      .device-status-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+      }
+
+      .device-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .device-badge.bound {
+        background-color: var(--jade-soft);
+        color: var(--jade);
+        border: 1px solid rgba(21, 128, 61, 0.35);
+      }
+
+      .device-badge.unbound {
+        background-color: var(--surface);
+        color: var(--ink-muted);
+        border: 1px solid var(--border);
+      }
+
+      .device-id-code {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--ink-muted);
+        background-color: var(--surface);
+        border: 1px dashed var(--border);
+        border-radius: 6px;
+        padding: 2px 8px;
+      }
+
+      .btn-reset-device {
+        min-height: 38px;
+        padding: 7px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(185, 28, 28, 0.45);
+        background-color: var(--cinnabar-soft);
+        color: var(--cinnabar);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
+      }
+
+      .btn-reset-device:hover:not(:disabled) {
+        background-color: var(--cinnabar);
+        color: #fff;
+      }
+
+      .btn-reset-device:disabled {
+        opacity: 0.48;
+        cursor: not-allowed;
+      }
+
+      .device-summary-chip {
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .access-status-msg {
+        display: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 14px;
+      }
+
+      .access-status-msg.visible {
+        display: block;
+      }
+
+      .access-status-msg.ok {
+        border: 1px solid rgba(21, 128, 61, 0.35);
+        background-color: var(--jade-soft);
+        color: var(--jade);
+      }
+
+      .access-status-msg.info {
+        border: 1px solid rgba(180, 83, 9, 0.35);
+        background-color: var(--gold-soft);
+        color: var(--gold);
+      }
+
+      .access-footer-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
       }
 
       .hsk-model-attempt {
@@ -1275,6 +1530,7 @@
                 <th data-sort="activeMinutes">الوقت (دقيقة)<span class="sort-arrow"></span></th>
                 <th data-sort="overallProgressPercent">نسبة إنجاز المنهج (١٥ فصلاً)<span class="sort-arrow"></span></th>
                 <th data-sort="lastActive">آخر نشاط<span class="sort-arrow"></span></th>
+                <th>الصلاحيات والجهاز</th>
               </tr>
             </thead>
             <tbody id="studentsTableBody"></tbody>
@@ -1367,7 +1623,7 @@
           <article class="kpi-card">
             <span class="kpi-label">متوسط دقة تدريبات أنماط HSK 3.0</span>
             <span id="hskKpiPatternAvg" class="kpi-value tabular-nums">0%</span>
-            <span class="kpi-sub">عبر الأنماط السبعة المعتمدة</span>
+            <span id="hskKpiPatternSub" class="kpi-sub tabular-nums">عبر الأنماط السبعة المعتمدة</span>
           </article>
         </section>
 
@@ -1401,8 +1657,8 @@
                 <tr>
                   <th>الطالب والرمز</th>
                   <th>نتائج النماذج (الاستماع /100 · القراءة /100 · المجموع /200 · الحالة)</th>
-                  <th>دقة أنماط HSK 3.0 السبعة (听力1–4 · 阅读1–4)</th>
-                  <th>متوسط الأنماط</th>
+                  <th>تحليل أنماط HSK 3.0 السبعة (المحلول · الصحيح/الخطأ · الدقة)</th>
+                  <th>ملخص الأنماط الـ ٧</th>
                 </tr>
               </thead>
               <tbody id="hskStudentsTableBody"></tbody>
@@ -1461,7 +1717,10 @@
             </div>
           </div>
 
-          <button type="button" id="closeModalBtn" class="btn">إغلاق</button>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <button type="button" id="modalManageAccessBtn" class="btn-access">إدارة الصلاحيات والجهاز 🔐</button>
+            <button type="button" id="closeModalBtn" class="btn">إغلاق</button>
+          </div>
         </div>
 
         <div class="modal-body">
@@ -1515,6 +1774,124 @@
                 <tbody id="modalChaptersBody"></tbody>
               </table>
             </div>
+          </div>
+
+          <div class="chapters-card modal-hsk-section">
+            <div class="chapters-card-header">
+              <div>
+                <h3 class="chapters-card-title">تحليل أنماط HSK 3.0 الدولية (٧ أنماط)</h3>
+                <span id="modalHskPatternsSummary" class="table-meta tabular-nums">
+                  إحصائيات مستقلة عن تدريبات الفصول اليومية
+                </span>
+              </div>
+              <div class="legend-inline">
+                <span class="tone-jade">ممتاز (٨٥٪+)</span>
+                <span aria-hidden="true">·</span>
+                <span class="tone-gold">متوسط (٧٠٪–٨٤٪)</span>
+                <span aria-hidden="true">·</span>
+                <span class="tone-cinnabar">يحتاج مراجعة (&lt;٧٠٪)</span>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table class="chapters-table">
+                <thead>
+                  <tr>
+                    <th>النمط الدولي (HSK 3.0)</th>
+                    <th>المحلول</th>
+                    <th>الصحيح</th>
+                    <th>الأخطاء</th>
+                    <th>نسبة الدقة</th>
+                    <th>التقييم</th>
+                  </tr>
+                </thead>
+                <tbody id="modalHskPatternsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- نافذة إدارة صلاحيات الطالب (الفصول 1–15 + الامتحانات الشاملة) -->
+    <div
+      id="accessModalBackdrop"
+      class="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="accessModalTitle"
+    >
+      <div class="neo-frame modal-dialog access-modal-dialog" id="accessModalDialog">
+        <div class="modal-header">
+          <div class="modal-student-id">
+            <span class="seal modal-seal font-hanzi" aria-hidden="true">权</span>
+            <div>
+              <div class="meta-line">
+                <span>إدارة الصلاحيات والجهاز (Freemium &amp; Single-Device Lock)</span>
+                <span aria-hidden="true">·</span>
+                <span id="accessStudentCode" class="tabular-nums">الرمز: —</span>
+              </div>
+              <h2 id="accessModalTitle" class="modal-title">—</h2>
+            </div>
+          </div>
+
+          <button type="button" id="closeAccessModalBtn" class="btn">إغلاق</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="access-quick-bar">
+            <span style="font-size:13px;font-weight:700;color:var(--ink)">
+              ١. الفصول الدراسية المفتوحة للطالب (١ إلى ١٥):
+            </span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" id="selectAllChaptersBtn" class="btn btn-primary" style="min-height:36px;padding:6px 12px;font-size:12px">
+                تفعيل كل الفصول (1–15)
+              </button>
+              <button type="button" id="resetTrialChaptersBtn" class="btn" style="min-height:36px;padding:6px 12px;font-size:12px">
+                نسخة تجريبية (فصل 1 فقط)
+              </button>
+            </div>
+          </div>
+
+          <div id="accessChaptersGrid" class="access-chapters-grid"></div>
+
+          <label class="access-mocks-box" for="accessMocksCheckbox">
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--ink)">
+                ٢. تفعيل الامتحانات الشاملة (١٥ نموذجاً موحداً)
+              </div>
+              <div style="font-size:12px;color:var(--ink-muted);margin-top:2px">
+                يتيح للطالب دخول جميع الامتحانات التجريبية الموحدة (١٠ دولية + ٥ عربية). تدريبات الأنماط السبعة غير المؤقتة تبقى مفتوحة دائماً للتجربة.
+              </div>
+            </div>
+            <input type="checkbox" id="accessMocksCheckbox" />
+          </label>
+
+          <div class="access-device-box">
+            <div style="flex:1;min-width:220px">
+              <div style="font-size:14px;font-weight:700;color:var(--ink)">
+                ٣. حماية الجهاز الواحد (Single-Device Lock)
+              </div>
+              <div style="font-size:12px;color:var(--ink-muted);margin-top:2px">
+                يُربط كود الطالب تلقائياً بأول جهاز يسجل الدخول منه لمنع مشاركة الكود. إذا غيّر الطالب جهازه، اضغط فك الارتباط.
+              </div>
+              <div class="device-status-row">
+                <span id="accessDeviceStatusBadge" class="device-badge unbound">غير مرتبط</span>
+                <span id="accessDeviceIdText" class="device-id-code tabular-nums" dir="ltr" style="display:none"></span>
+              </div>
+            </div>
+            <button type="button" id="resetDeviceBtn" class="btn-reset-device" disabled>
+              فك ارتباط الجهاز (Reset Device)
+            </button>
+          </div>
+
+          <div id="accessStatusMsg" class="access-status-msg" role="status"></div>
+
+          <div class="access-footer-actions">
+            <button type="button" id="cancelAccessModalBtn" class="btn">إلغاء</button>
+            <button type="button" id="saveAccessBtn" class="btn btn-primary">
+              حفظ الصلاحيات في Google Sheets
+            </button>
           </div>
         </div>
       </div>
@@ -1621,14 +1998,16 @@
               }
             ],
             hskPatternStats: {
-              'listening-p1': { attempted: 10, correct: 9 },
-              'listening-p2': { attempted: 10, correct: 8 },
-              'listening-p3': { attempted: 5, correct: 4 },
-              'listening-p4': { attempted: 5, correct: 4 },
-              'reading-p1': { attempted: 10, correct: 9 },
-              'reading-p2': { attempted: 5, correct: 4 },
-              'reading-p3-4': { attempted: 10, correct: 7 }
-            }
+              'listening-p1': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
+              'listening-p2': { solved: 10, attempted: 10, correct: 8, wrong: 2, accuracyPercent: 80 },
+              'listening-p3': { solved: 5, attempted: 5, correct: 4, wrong: 1, accuracyPercent: 80 },
+              'listening-p4': { solved: 5, attempted: 5, correct: 4, wrong: 1, accuracyPercent: 80 },
+              'reading-p1': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
+              'reading-p2': { solved: 5, attempted: 5, correct: 4, wrong: 1, accuracyPercent: 80 },
+              'reading-p3-4': { solved: 10, attempted: 10, correct: 7, wrong: 3, accuracyPercent: 70 }
+            },
+            unlockedAccess: { chapters: [1, 2, 3, 4, 5], mocks: true },
+            boundDeviceId: 'DEV-DEMO1234-A9F2'
           },
           {
             studentId: 'ST02',
@@ -1679,14 +2058,16 @@
               }
             ],
             hskPatternStats: {
-              'listening-p1': { attempted: 10, correct: 10 },
-              'listening-p2': { attempted: 10, correct: 9 },
-              'listening-p3': { attempted: 10, correct: 9 },
-              'listening-p4': { attempted: 10, correct: 9 },
-              'reading-p1': { attempted: 10, correct: 10 },
-              'reading-p2': { attempted: 10, correct: 9 },
-              'reading-p3-4': { attempted: 10, correct: 9 }
-            }
+              'listening-p1': { solved: 10, attempted: 10, correct: 10, wrong: 0, accuracyPercent: 100 },
+              'listening-p2': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
+              'listening-p3': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
+              'listening-p4': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
+              'reading-p1': { solved: 10, attempted: 10, correct: 10, wrong: 0, accuracyPercent: 100 },
+              'reading-p2': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
+              'reading-p3-4': { solved: 10, attempted: 10, correct: 9, wrong: 1, accuracyPercent: 90 }
+            },
+            unlockedAccess: { chapters: 'ALL', mocks: true },
+            boundDeviceId: 'DEV-DEMO5678-B4C1'
           },
           {
             studentId: 'ST03',
@@ -1720,9 +2101,9 @@
               }
             ],
             hskPatternStats: {
-              'listening-p1': { attempted: 5, correct: 3 },
-              'listening-p2': { attempted: 5, correct: 3 },
-              'reading-p1': { attempted: 5, correct: 4 }
+              'listening-p1': { solved: 5, attempted: 5, correct: 3, wrong: 2, accuracyPercent: 60 },
+              'listening-p2': { solved: 5, attempted: 5, correct: 3, wrong: 2, accuracyPercent: 60 },
+              'reading-p1': { solved: 5, attempted: 5, correct: 4, wrong: 1, accuracyPercent: 80 }
             }
           },
           {
@@ -1792,6 +2173,7 @@
 
         var elModalBackdrop = document.getElementById('studentModalBackdrop');
         var elCloseModalBtn = document.getElementById('closeModalBtn');
+        var elModalManageAccessBtn = document.getElementById('modalManageAccessBtn');
         var elModalName = document.getElementById('modalStudentName');
         var elModalCode = document.getElementById('modalStudentCode');
         var elModalLastActive = document.getElementById('modalStudentLastActive');
@@ -1801,6 +2183,24 @@
         var elModalProgress = document.getElementById('modalProgress');
         var elModalSolvedSummary = document.getElementById('modalSolvedSummary');
         var elModalChaptersBody = document.getElementById('modalChaptersBody');
+        var elModalHskPatternsBody = document.getElementById('modalHskPatternsBody');
+        var elModalHskPatternsSummary = document.getElementById('modalHskPatternsSummary');
+
+        var elAccessModalBackdrop = document.getElementById('accessModalBackdrop');
+        var elCloseAccessModalBtn = document.getElementById('closeAccessModalBtn');
+        var elCancelAccessModalBtn = document.getElementById('cancelAccessModalBtn');
+        var elAccessModalTitle = document.getElementById('accessModalTitle');
+        var elAccessStudentCode = document.getElementById('accessStudentCode');
+        var elAccessChaptersGrid = document.getElementById('accessChaptersGrid');
+        var elSelectAllChaptersBtn = document.getElementById('selectAllChaptersBtn');
+        var elResetTrialChaptersBtn = document.getElementById('resetTrialChaptersBtn');
+        var elAccessMocksCheckbox = document.getElementById('accessMocksCheckbox');
+        var elAccessDeviceStatusBadge = document.getElementById('accessDeviceStatusBadge');
+        var elAccessDeviceIdText = document.getElementById('accessDeviceIdText');
+        var elResetDeviceBtn = document.getElementById('resetDeviceBtn');
+        var elAccessStatusMsg = document.getElementById('accessStatusMsg');
+        var elSaveAccessBtn = document.getElementById('saveAccessBtn');
+        var accessEditingStudent = null;
 
         var elTabBtnStudents = document.getElementById('tabBtnStudents');
         var elTabBtnBank = document.getElementById('tabBtnBank');
@@ -1822,6 +2222,7 @@
         var elHskKpiPassCountSub = document.getElementById('hskKpiPassCountSub');
         var elHskKpiAvgScore = document.getElementById('hskKpiAvgScore');
         var elHskKpiPatternAvg = document.getElementById('hskKpiPatternAvg');
+        var elHskKpiPatternSub = document.getElementById('hskKpiPatternSub');
         var elHskSearchInput = document.getElementById('hskSearchInput');
         var elHskTrackFilter = document.getElementById('hskTrackFilter');
         var elHskStudentsTableBody = document.getElementById('hskStudentsTableBody');
@@ -1832,13 +2233,13 @@
 
         var hskExamBankCache = [];
         var HSK_PATTERN_LABELS = [
-          { id: 'listening-p1', short: '听1' },
-          { id: 'listening-p2', short: '听2' },
-          { id: 'listening-p3', short: '听3' },
-          { id: 'listening-p4', short: '听4' },
-          { id: 'reading-p1', short: '阅1' },
-          { id: 'reading-p2', short: '阅2' },
-          { id: 'reading-p3-4', short: '阅3-4' }
+          { id: 'listening-p1', short: '听1', codeZh: '听力第一部分', titleAr: 'الاستماع ١ · مطابقة الجمل بالصور', section: 'استماع' },
+          { id: 'listening-p2', short: '听2', codeZh: '听力第二部分', titleAr: 'الاستماع ٢ · السؤال والرد الصحيح', section: 'استماع' },
+          { id: 'listening-p3', short: '听3', codeZh: '听力第三部分', titleAr: 'الاستماع ٣ · ربط الحوار بالصورة', section: 'استماع' },
+          { id: 'listening-p4', short: '听4', codeZh: '听力第四部分', titleAr: 'الاستماع ٤ · حوار وسؤال استيعاب', section: 'استماع' },
+          { id: 'reading-p1', short: '阅1', codeZh: '阅读第一部分', titleAr: 'القراءة ١ · مطابقة الجملة بالصورة', section: 'قراءة' },
+          { id: 'reading-p2', short: '阅2', codeZh: '阅读第二部分', titleAr: 'القراءة ٢ · مطابقة الأسئلة والأجوبة', section: 'قراءة' },
+          { id: 'reading-p3-4', short: '阅3-4', codeZh: '阅读第三部分 & 第四部分', titleAr: 'القراءة ٣ و ٤ · إكمال الجمل والاستنتاج', section: 'قراءة' }
         ];
 
         var headerCells = Array.prototype.slice.call(
@@ -1881,16 +2282,69 @@
         function saveLocallyRegisteredStudent(studentObj) {
           try {
             var list = loadLocallyRegisteredStudents();
-            var exists = list.some(function (s) {
-              return String(s.studentCode || '').toLowerCase() === studentObj.studentCode.toLowerCase();
+            var idx = list.findIndex(function (s) {
+              return String(s.studentCode || '').toLowerCase() === String(studentObj.studentCode || '').toLowerCase();
             });
-            if (!exists) {
+            if (idx === -1) {
               list.push(studentObj);
-              localStorage.setItem(LOCAL_REGISTERED_STUDENTS_KEY, JSON.stringify(list));
+            } else {
+              list[idx] = Object.assign({}, list[idx], studentObj);
             }
+            localStorage.setItem(LOCAL_REGISTERED_STUDENTS_KEY, JSON.stringify(list));
           } catch (e) {
             // تجاهل
           }
+        }
+
+        function parseUnlockedAccess(raw) {
+          var fallback = { chapters: [1], mocks: false };
+          if (!raw) return fallback;
+          var obj = raw;
+          if (typeof raw === 'string') {
+            var trimmed = raw.trim();
+            if (!trimmed) return fallback;
+            try {
+              obj = JSON.parse(trimmed);
+            } catch (e) {
+              return fallback;
+            }
+          }
+          if (!obj || typeof obj !== 'object') return fallback;
+          var chapters = [1];
+          if (typeof obj.chapters === 'string' && obj.chapters.trim().toUpperCase() === 'ALL') {
+            chapters = 'ALL';
+          } else if (Array.isArray(obj.chapters)) {
+            var seen = {};
+            chapters = [];
+            for (var i = 0; i < obj.chapters.length; i++) {
+              var n = Number(obj.chapters[i]);
+              if (n >= 1 && n <= 15 && Math.floor(n) === n && !seen[n]) {
+                seen[n] = true;
+                chapters.push(n);
+              }
+            }
+            chapters.sort(function (a, b) { return a - b; });
+          }
+          return { chapters: chapters, mocks: Boolean(obj.mocks) };
+        }
+
+        function formatAccessShortLabel(access) {
+          var norm = parseUnlockedAccess(access);
+          var isAllCh = norm.chapters === 'ALL' || (Array.isArray(norm.chapters) && norm.chapters.length >= 15);
+          if (isAllCh && norm.mocks) {
+            return { text: 'كامل (١٥ فصل + امتحانات)', tone: 'tone-jade' };
+          }
+          if (isAllCh) {
+            return { text: '١٥ فصل · بدون امتحانات', tone: 'tone-gold' };
+          }
+          var count = Array.isArray(norm.chapters) ? norm.chapters.length : 0;
+          if (count === 1 && norm.chapters[0] === 1 && !norm.mocks) {
+            return { text: 'تجريبي (فصل ١ فقط)', tone: '' };
+          }
+          return {
+            text: count + ' فصل' + (norm.mocks ? ' + امتحانات' : ''),
+            tone: 'tone-gold'
+          };
         }
 
         function applyTheme(mode) {
@@ -2157,6 +2611,42 @@
           }
         }
 
+        function normalizeHskPatternStat(entry) {
+          if (!entry || typeof entry !== 'object') {
+            return { solved: 0, correct: 0, wrong: 0, accuracyPercent: 0 };
+          }
+          var solved = Math.max(0, Number(entry.solved !== undefined ? entry.solved : (entry.attempted || 0)));
+          var correct = Math.max(0, Math.min(solved, Number(entry.correct || 0)));
+          var wrong = entry.wrong !== undefined ? Math.max(0, Number(entry.wrong)) : Math.max(0, solved - correct);
+          var accuracyPercent = solved > 0
+            ? (entry.accuracyPercent !== undefined ? Math.round(Number(entry.accuracyPercent)) : Math.round((correct / solved) * 100))
+            : 0;
+          return {
+            solved: solved,
+            correct: correct,
+            wrong: wrong,
+            accuracyPercent: accuracyPercent
+          };
+        }
+
+        function resolveStudentHskPatterns(student) {
+          var localHsk = readLocalStudentHskData(student.studentId) || readLocalStudentHskData(student.studentCode);
+          if (student.hskPatternStats && typeof student.hskPatternStats === 'object' && Object.keys(student.hskPatternStats).length > 0) {
+            return student.hskPatternStats;
+          }
+          if (localHsk && localHsk.hskPatternStats && typeof localHsk.hskPatternStats === 'object') {
+            return localHsk.hskPatternStats;
+          }
+          return {};
+        }
+
+        function getAccuracyToneClass(pct, hasActivity) {
+          if (!hasActivity) return '';
+          if (pct >= 85) return 'tone-jade';
+          if (pct >= 70) return 'tone-gold';
+          return 'tone-cinnabar';
+        }
+
         function renderHskPortalAnalytics() {
           var q = (elHskSearchInput.value || '').trim().toLowerCase();
           var trackFilter = elHskTrackFilter.value || 'all';
@@ -2165,8 +2655,9 @@
           var passedExams = 0;
           var scoreSum = 0;
           var studentsWithHsk = 0;
-          var patternAttemptedAll = 0;
+          var patternSolvedAll = 0;
           var patternCorrectAll = 0;
+          var patternWrongAll = 0;
 
           var rows = [];
 
@@ -2175,9 +2666,7 @@
             var mockList = Array.isArray(s.hskMockResults) && s.hskMockResults.length > 0
               ? s.hskMockResults
               : (localHsk && localHsk.hskMockResults ? localHsk.hskMockResults : []);
-            var patternObj = s.hskPatternStats && Object.keys(s.hskPatternStats).length > 0
-              ? s.hskPatternStats
-              : (localHsk && localHsk.hskPatternStats ? localHsk.hskPatternStats : {});
+            var patternObj = resolveStudentHskPatterns(s);
 
             var filteredMocks = mockList.filter(function (m) {
               if (trackFilter === 'all') return true;
@@ -2192,17 +2681,20 @@
               if (m.passed || Number(m.totalScore || 0) >= 120) passedExams += 1;
             });
 
-            var sAtt = 0;
+            var sSolved = 0;
             var sCor = 0;
+            var sWrong = 0;
             HSK_PATTERN_LABELS.forEach(function (p) {
-              var st = patternObj[p.id];
-              if (st && st.attempted > 0) {
-                sAtt += Number(st.attempted || 0);
-                sCor += Number(st.correct || 0);
+              var norm = normalizeHskPatternStat(patternObj[p.id]);
+              if (norm.solved > 0) {
+                sSolved += norm.solved;
+                sCor += norm.correct;
+                sWrong += norm.wrong;
               }
             });
-            patternAttemptedAll += sAtt;
+            patternSolvedAll += sSolved;
             patternCorrectAll += sCor;
+            patternWrongAll += sWrong;
 
             var matchesQuery =
               !q ||
@@ -2214,22 +2706,29 @@
                 student: s,
                 mocks: filteredMocks,
                 patterns: patternObj,
-                patternAttempted: sAtt,
-                patternCorrect: sCor
+                patternSolved: sSolved,
+                patternCorrect: sCor,
+                patternWrong: sWrong
               });
             }
           });
 
           var passRate = totalExams > 0 ? Math.round((passedExams / totalExams) * 100) : 0;
           var avgScore = totalExams > 0 ? Math.round(scoreSum / totalExams) : 0;
-          var avgPatternAcc = patternAttemptedAll > 0 ? Math.round((patternCorrectAll / patternAttemptedAll) * 100) : 0;
+          var avgPatternAcc = patternSolvedAll > 0 ? Math.round((patternCorrectAll / patternSolvedAll) * 100) : 0;
 
           elHskKpiTotalExams.textContent = String(totalExams);
           elHskKpiStudentsAttempted.textContent = 'عبر ' + studentsWithHsk + ' طالب';
           elHskKpiPassRate.textContent = passRate + '%';
           elHskKpiPassCountSub.textContent = passedExams + ' ناجح · ' + (totalExams - passedExams) + ' لم يجتز';
           elHskKpiAvgScore.textContent = avgScore + ' / 200';
-          elHskKpiPatternAvg.textContent = avgPatternAcc + '%';
+          elHskKpiPatternAvg.textContent = patternSolvedAll > 0 ? avgPatternAcc + '%' : '—';
+          elHskKpiPatternAvg.className = 'kpi-value tabular-nums ' + getAccuracyToneClass(avgPatternAcc, patternSolvedAll > 0);
+          if (elHskKpiPatternSub) {
+            elHskKpiPatternSub.textContent = patternSolvedAll > 0
+              ? patternSolvedAll + ' سؤال · ' + patternCorrectAll + ' صحيح · ' + patternWrongAll + ' خطأ'
+              : 'عبر الأنماط السبعة المعتمدة';
+          }
 
           if (rows.length === 0) {
             elHskStudentsTableBody.innerHTML =
@@ -2254,20 +2753,40 @@
                 }).join('');
 
             var patternPartsHtml = HSK_PATTERN_LABELS.map(function (p) {
-              var st = r.patterns[p.id];
-              var pct = st && st.attempted > 0 ? Math.round((st.correct / st.attempted) * 100) + '%' : '—';
-              return '<span class="tabular-nums"><strong>' + p.short + ':</strong> ' + pct + '</span>';
-            }).join(' · ');
+              var norm = normalizeHskPatternStat(r.patterns[p.id]);
+              var hasData = norm.solved > 0;
+              var tone = getAccuracyToneClass(norm.accuracyPercent, hasData);
+              return (
+                '<div class="hsk-pattern-chip tabular-nums" title="' + escapeHtml(p.codeZh + ' — ' + p.titleAr) + '">' +
+                '<div class="hsk-pattern-chip-top">' +
+                '<strong class="font-hanzi" style="color:var(--ink)">' + p.short + '</strong>' +
+                '<strong class="' + tone + '">' + (hasData ? norm.accuracyPercent + '%' : '—') + '</strong>' +
+                '</div>' +
+                '<div class="hsk-pattern-chip-meta">' +
+                (hasData
+                  ? norm.solved + 'س · <span class="tone-jade">✓' + norm.correct + '</span> / <span class="tone-cinnabar">✗' + norm.wrong + '</span>'
+                  : 'لم يبدأ') +
+                '</div>' +
+                '</div>'
+              );
+            }).join('');
 
-            var sPct = r.patternAttempted > 0 ? Math.round((r.patternCorrect / r.patternAttempted) * 100) : null;
-            var sTone = sPct === null ? '' : sPct >= 80 ? 'tone-jade' : sPct >= 65 ? 'tone-gold' : 'tone-cinnabar';
+            var sPct = r.patternSolved > 0 ? Math.round((r.patternCorrect / r.patternSolved) * 100) : null;
+            var sTone = getAccuracyToneClass(sPct !== null ? sPct : 0, sPct !== null);
 
             return (
-              '<tr>' +
+              '<tr class="student-row" data-student-uid="' + escapeHtml(r.student.uid) + '" tabindex="0" title="انقر لعرض بروفايل الطالب الكامل">' +
               '<td><strong>' + escapeHtml(r.student.studentName) + '</strong><br><span class="tabular-nums" style="font-size:11px;color:var(--ink-muted)" dir="ltr">' + escapeHtml(r.student.studentCode) + '</span></td>' +
-              '<td style="white-space:normal;min-width:340px">' + mocksHtml + '</td>' +
-              '<td style="white-space:normal;min-width:250px"><div class="hsk-pattern-pills">' + patternPartsHtml + '</div></td>' +
-              '<td class="tabular-nums ' + sTone + '"><strong>' + (sPct !== null ? sPct + '%' : '—') + '</strong></td>' +
+              '<td style="white-space:normal;min-width:300px">' + mocksHtml + '</td>' +
+              '<td style="white-space:normal;min-width:360px"><div class="hsk-pattern-pills">' + patternPartsHtml + '</div></td>' +
+              '<td class="tabular-nums" style="min-width:120px">' +
+              '<strong class="' + sTone + '" style="font-size:15px">' + (sPct !== null ? sPct + '%' : '—') + '</strong>' +
+              (r.patternSolved > 0
+                ? '<div style="font-size:11px;color:var(--ink-muted);margin-top:3px">' +
+                  r.patternSolved + ' محلول<br><span class="tone-jade">✓ ' + r.patternCorrect + '</span> · <span class="tone-cinnabar">✗ ' + r.patternWrong + '</span>' +
+                  '</div>'
+                : '<div style="font-size:11px;color:var(--ink-muted);margin-top:3px">لا توجد محاولات</div>') +
+              '</td>' +
               '</tr>'
             );
           }).join('');
@@ -2504,7 +3023,9 @@
             lastActive: row.lastActive ? String(row.lastActive) : '',
             chaptersBreakdown: parseChaptersBreakdown(row.chaptersBreakdown),
             hskMockResults: parseJsonSafe(row.hskMockResults, []),
-            hskPatternStats: parseJsonSafe(row.hskPatternStats, {})
+            hskPatternStats: parseJsonSafe(row.hskPatternStats, {}),
+            unlockedAccess: parseUnlockedAccess(row.unlockedAccess),
+            boundDeviceId: String(row.boundDeviceId || '').trim()
           };
         }
 
@@ -2605,7 +3126,7 @@
 
           if (filtered.length === 0) {
             elTableBody.innerHTML =
-              '<tr><td colspan="10" class="empty-row">لا توجد نتائج مطابقة للبحث الحالي.</td></tr>';
+              '<tr><td colspan="11" class="empty-row">لا توجد نتائج مطابقة للبحث الحالي.</td></tr>';
             return;
           }
 
@@ -2620,6 +3141,8 @@
               var grade = getOverallGrade(s.accuracyPercent, s.totalSolved);
               var fillCls =
                 s.overallProgressPercent >= 100 ? 'progress-fill good' : 'progress-fill';
+              var accessBadge = formatAccessShortLabel(s.unlockedAccess);
+              var isDeviceBound = Boolean(s.boundDeviceId && s.boundDeviceId.trim());
 
               return (
                 '<tr class="student-row" tabindex="0" data-student-uid="' +
@@ -2645,6 +3168,15 @@
                 '</div>' +
                 '</td>' +
                 '<td class="tabular-nums">' + escapeHtml(formatLastActive(s.lastActive)) + '</td>' +
+                '<td>' +
+                '<div class="access-cell">' +
+                '<button type="button" class="btn-access" data-manage-access-uid="' + escapeHtml(s.uid) + '">إدارة الصلاحيات والجهاز 🔐</button>' +
+                '<span class="access-summary-text ' + accessBadge.tone + '">' + escapeHtml(accessBadge.text) + '</span>' +
+                '<span class="device-summary-chip ' + (isDeviceBound ? 'tone-jade' : '') + '" style="' + (isDeviceBound ? '' : 'color:var(--ink-muted)') + '">' +
+                (isDeviceBound ? '🔒 مرتبط بجهاز' : '🔓 غير مرتبط بجهاز') +
+                '</span>' +
+                '</div>' +
+                '</td>' +
                 '</tr>'
               );
             })
@@ -2729,6 +3261,75 @@
           }).join('');
 
           elModalChaptersBody.innerHTML = html;
+
+          // تعبئة جدول تحليل أنماط HSK 3.0 الدولية (7 أنماط) في بروفايل الطالب
+          var patternObj = resolveStudentHskPatterns(student);
+          var totalPatternSolved = 0;
+          var totalPatternCorrect = 0;
+          var totalPatternWrong = 0;
+
+          var hskRowsHtml = HSK_PATTERN_LABELS.map(function (p) {
+            var norm = normalizeHskPatternStat(patternObj[p.id]);
+            var hasAct = norm.solved > 0;
+            var acc = norm.accuracyPercent;
+            var isGood = hasAct && acc >= 85;
+            var isMedium = hasAct && acc >= 70 && acc < 85;
+            var isLow = hasAct && acc < 70;
+
+            totalPatternSolved += norm.solved;
+            totalPatternCorrect += norm.correct;
+            totalPatternWrong += norm.wrong;
+
+            var rowCls = isLow ? 'high-error-row' : '';
+            var fillCls = isGood
+              ? 'progress-fill good'
+              : isMedium
+                ? 'progress-fill warn'
+                : 'progress-fill';
+            var accTone = getAccuracyToneClass(acc, hasAct);
+
+            var statusLabel = !hasAct
+              ? '<span class="status-text" style="color:var(--ink-muted)">لم يبدأ بعد</span>'
+              : isGood
+                ? '<span class="status-text tone-jade">ممتاز</span>'
+                : isMedium
+                  ? '<span class="status-text tone-gold">متوسط</span>'
+                  : '<span class="status-text tone-cinnabar">أخطاء مرتفعة · يحتاج مراجعة</span>';
+
+            return (
+              '<tr class="' + rowCls + '">' +
+              '<td>' +
+              '<div class="chapter-name-wrap">' +
+              '<span class="chapter-numeral font-hanzi" style="min-width:34px;font-size:12px">' + p.short + '</span>' +
+              '<div><strong>' + escapeHtml(p.titleAr) + '</strong><br><span class="font-hanzi" style="font-size:11px;color:var(--ink-muted)">' + escapeHtml(p.codeZh) + '</span></div>' +
+              '</div>' +
+              '</td>' +
+              '<td class="tabular-nums"><strong>' + norm.solved + '</strong></td>' +
+              '<td class="tabular-nums tone-jade"><strong>' + norm.correct + '</strong></td>' +
+              '<td class="tabular-nums ' + (norm.wrong > 0 ? 'tone-cinnabar' : '') + '"><strong>' + norm.wrong + '</strong></td>' +
+              '<td>' +
+              (hasAct
+                ? '<div class="progress-cell tabular-nums">' +
+                  '<div class="progress-track"><div class="' + fillCls + '" style="width:' + acc + '%"></div></div>' +
+                  '<span class="' + accTone + '"><strong>' + acc + '%</strong></span>' +
+                  '</div>'
+                : '<span style="color:var(--ink-muted)">—</span>') +
+              '</td>' +
+              '<td>' + statusLabel + '</td>' +
+              '</tr>'
+            );
+          }).join('');
+
+          if (elModalHskPatternsBody) {
+            elModalHskPatternsBody.innerHTML = hskRowsHtml;
+          }
+          if (elModalHskPatternsSummary) {
+            var overallPatAcc = totalPatternSolved > 0 ? Math.round((totalPatternCorrect / totalPatternSolved) * 100) : 0;
+            elModalHskPatternsSummary.textContent = totalPatternSolved > 0
+              ? 'إجمالي المحلول: ' + totalPatternSolved + ' سؤال · ' + totalPatternCorrect + ' صحيح · ' + totalPatternWrong + ' خطأ · الدقة الإجمالية: ' + overallPatAcc + '%'
+              : 'لم يبدأ الطالب تدريبات أنماط HSK 3.0 الدولية بعد';
+          }
+
           elModalBackdrop.classList.add('open');
           document.body.classList.add('modal-open');
           elCloseModalBtn.focus();
@@ -2738,6 +3339,226 @@
           state.selectedStudent = null;
           elModalBackdrop.classList.remove('open');
           document.body.classList.remove('modal-open');
+        }
+
+        function setAccessStatus(mode, text) {
+          if (!elAccessStatusMsg) return;
+          elAccessStatusMsg.classList.remove('visible', 'ok', 'info');
+          if (!text) {
+            elAccessStatusMsg.textContent = '';
+            return;
+          }
+          elAccessStatusMsg.textContent = text;
+          elAccessStatusMsg.classList.add('visible', mode);
+        }
+
+        function renderAccessDeviceStatus(deviceId) {
+          var cleanId = String(deviceId || '').trim();
+          var isBound = Boolean(cleanId);
+          if (elAccessDeviceStatusBadge) {
+            elAccessDeviceStatusBadge.textContent = isBound ? 'مرتبط بجهاز 🔒' : 'غير مرتبط';
+            elAccessDeviceStatusBadge.className = 'device-badge ' + (isBound ? 'bound' : 'unbound');
+          }
+          if (elAccessDeviceIdText) {
+            if (isBound) {
+              elAccessDeviceIdText.textContent = cleanId;
+              elAccessDeviceIdText.style.display = 'inline-block';
+            } else {
+              elAccessDeviceIdText.textContent = '';
+              elAccessDeviceIdText.style.display = 'none';
+            }
+          }
+          if (elResetDeviceBtn) {
+            elResetDeviceBtn.disabled = !isBound;
+          }
+        }
+
+        function openAccessModal(student) {
+          if (!student) return;
+          accessEditingStudent = student;
+          var norm = parseUnlockedAccess(student.unlockedAccess);
+          var isAll = norm.chapters === 'ALL';
+
+          elAccessModalTitle.textContent = student.studentName;
+          elAccessStudentCode.textContent = 'الرمز: ' + student.studentCode;
+          elAccessMocksCheckbox.checked = Boolean(norm.mocks);
+          renderAccessDeviceStatus(student.boundDeviceId);
+          setAccessStatus('', '');
+
+          elAccessChaptersGrid.innerHTML = CHAPTERS_META.map(function (meta) {
+            var checked = isAll || (Array.isArray(norm.chapters) && norm.chapters.indexOf(meta.id) !== -1);
+            return (
+              '<label class="access-ch-item">' +
+              '<input type="checkbox" class="access-ch-checkbox" value="' + meta.id + '"' + (checked ? ' checked' : '') + ' />' +
+              '<span class="font-hanzi" style="color:var(--cinnabar);min-width:18px;text-align:center">' + meta.zh + '</span>' +
+              '<span>' + escapeHtml(meta.ar) + '</span>' +
+              '</label>'
+            );
+          }).join('');
+
+          elAccessModalBackdrop.classList.add('open');
+          document.body.classList.add('modal-open');
+          elSaveAccessBtn.focus();
+        }
+
+        function closeAccessModal() {
+          accessEditingStudent = null;
+          elAccessModalBackdrop.classList.remove('open');
+          if (!elModalBackdrop.classList.contains('open')) {
+            document.body.classList.remove('modal-open');
+          }
+        }
+
+        function handleSaveAccess() {
+          if (!accessEditingStudent) return;
+          var checkboxes = Array.prototype.slice.call(
+            elAccessChaptersGrid.querySelectorAll('.access-ch-checkbox')
+          );
+          var selectedIds = checkboxes
+            .filter(function (cb) { return cb.checked; })
+            .map(function (cb) { return Number(cb.value); })
+            .sort(function (a, b) { return a - b; });
+
+          var nextAccess = {
+            chapters: selectedIds.length >= 15 ? 'ALL' : selectedIds,
+            mocks: Boolean(elAccessMocksCheckbox.checked)
+          };
+
+          accessEditingStudent.unlockedAccess = nextAccess;
+
+          // تحديث السجل في الحالة المحلية وفي localStorage لضمان التزامن الفوري
+          state.students = state.students.map(function (st) {
+            if (st.uid === accessEditingStudent.uid || st.studentCode.toLowerCase() === accessEditingStudent.studentCode.toLowerCase()) {
+              return Object.assign({}, st, { unlockedAccess: nextAccess });
+            }
+            return st;
+          });
+
+          saveLocallyRegisteredStudent({
+            studentId: accessEditingStudent.studentId || accessEditingStudent.studentCode,
+            studentName: accessEditingStudent.studentName,
+            studentCode: accessEditingStudent.studentCode,
+            unlockedAccess: nextAccess
+          });
+
+          renderTable();
+          renderHskPortalAnalytics();
+
+          var url = getSavedUrl();
+          if (!url) {
+            setAccessStatus('ok', 'تم حفظ الصلاحيات محلياً. أضف رابط Google Sheets لمزامنتها مع أجهزة الطلاب.');
+            return;
+          }
+
+          elSaveAccessBtn.disabled = true;
+          setAccessStatus('info', 'جارٍ حفظ الصلاحيات في Google Sheets...');
+
+          fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'updateAccess',
+              studentId: accessEditingStudent.studentId || accessEditingStudent.studentCode,
+              studentName: accessEditingStudent.studentName,
+              studentCode: accessEditingStudent.studentCode,
+              unlockedAccess: nextAccess
+            })
+          })
+            .then(function () {
+              setAccessStatus(
+                'ok',
+                'تم حفظ الصلاحيات في Google Sheets بنجاح! ستظهر التغييرات للطالب فور تحديث الصفحة.'
+              );
+              setTimeout(function () {
+                fetchStudentData();
+              }, 1600);
+            })
+            .catch(function () {
+              setAccessStatus(
+                'info',
+                'تم الحفظ محلياً، وتعذر الاتصال بـ Google Sheets حالياً. تأكد من الرابط وإعادة المحاولة.'
+              );
+            })
+            .finally(function () {
+              elSaveAccessBtn.disabled = false;
+            });
+        }
+
+        function handleUnbindDevice() {
+          if (!accessEditingStudent) return;
+          var targetStudent = accessEditingStudent;
+
+          targetStudent.boundDeviceId = '';
+
+          state.students = state.students.map(function (st) {
+            if (
+              st.uid === targetStudent.uid ||
+              st.studentCode.toLowerCase() === targetStudent.studentCode.toLowerCase()
+            ) {
+              return Object.assign({}, st, { boundDeviceId: '' });
+            }
+            return st;
+          });
+
+          if (
+            state.selectedStudent &&
+            (state.selectedStudent.uid === targetStudent.uid ||
+              state.selectedStudent.studentCode.toLowerCase() ===
+                targetStudent.studentCode.toLowerCase())
+          ) {
+            state.selectedStudent.boundDeviceId = '';
+          }
+
+          saveLocallyRegisteredStudent({
+            studentId: targetStudent.studentId || targetStudent.studentCode,
+            studentName: targetStudent.studentName,
+            studentCode: targetStudent.studentCode,
+            boundDeviceId: ''
+          });
+
+          renderAccessDeviceStatus('');
+          renderTable();
+          renderHskPortalAnalytics();
+
+          var url = getSavedUrl();
+          if (!url) {
+            setAccessStatus(
+              'ok',
+              'تم فك ارتباط الجهاز محلياً. أضف رابط Google Sheets لمزامنة فك الارتباط مع بوابة الطالب.'
+            );
+            return;
+          }
+
+          if (elResetDeviceBtn) elResetDeviceBtn.disabled = true;
+          setAccessStatus('info', 'جارٍ فك ارتباط الجهاز في Google Sheets...');
+
+          fetch(url, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'unbindDevice',
+              studentId: targetStudent.studentId || targetStudent.studentCode,
+              studentName: targetStudent.studentName,
+              studentCode: targetStudent.studentCode
+            })
+          })
+            .then(function () {
+              setAccessStatus(
+                'ok',
+                'تم فك ارتباط الجهاز بنجاح! يمكن للطالب الآن تسجيل الدخول من جهازه الجديد.'
+              );
+              setTimeout(function () {
+                fetchStudentData();
+              }, 1600);
+            })
+            .catch(function () {
+              setAccessStatus(
+                'info',
+                'تم فك الارتباط محلياً، وتعذر الاتصال بـ Google Sheets حالياً. تأكد من الرابط وإعادة المحاولة.'
+              );
+            });
         }
 
         function setLoading(loading) {
@@ -2808,7 +3629,9 @@
             activeMinutes: 0,
             overallProgressPercent: 0,
             lastActive: nowIso,
-            chaptersBreakdown: makeMockBreakdown([])
+            chaptersBreakdown: makeMockBreakdown([]),
+            unlockedAccess: { chapters: [1], mocks: false },
+            boundDeviceId: ''
           };
 
           // حفظ فوري محلياً وتحديث الجدول والمؤشرات مباشرة
@@ -2840,7 +3663,9 @@
                 action: 'registerStudent',
                 studentId: studentId,
                 studentName: studentName,
-                studentCode: studentCode
+                studentCode: studentCode,
+                unlockedAccess: { chapters: [1], mocks: false },
+                boundDeviceId: ''
               })
             })
               .then(function () {
@@ -2997,10 +3822,35 @@
         }
 
         elTableBody.addEventListener('click', function (e) {
+          var accessBtn = e.target && e.target.closest ? e.target.closest('[data-manage-access-uid]') : null;
+          if (accessBtn) {
+            e.stopPropagation();
+            var uid = accessBtn.getAttribute('data-manage-access-uid');
+            var foundStudent = state.students.find(function (s) { return s.uid === uid; });
+            if (foundStudent) openAccessModal(foundStudent);
+            return;
+          }
           handleRowTrigger(e.target);
         });
 
         elTableBody.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            if (e.target && e.target.closest && e.target.closest('[data-manage-access-uid]')) {
+              return;
+            }
+            var row = e.target.closest ? e.target.closest('tr.student-row') : null;
+            if (row) {
+              e.preventDefault();
+              handleRowTrigger(row);
+            }
+          }
+        });
+
+        elHskStudentsTableBody.addEventListener('click', function (e) {
+          handleRowTrigger(e.target);
+        });
+
+        elHskStudentsTableBody.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             var row = e.target.closest ? e.target.closest('tr.student-row') : null;
             if (row) {
@@ -3010,6 +3860,37 @@
           }
         });
 
+        if (elModalManageAccessBtn) {
+          elModalManageAccessBtn.addEventListener('click', function () {
+            if (state.selectedStudent) {
+              openAccessModal(state.selectedStudent);
+            }
+          });
+        }
+
+        elCloseAccessModalBtn.addEventListener('click', closeAccessModal);
+        elCancelAccessModalBtn.addEventListener('click', closeAccessModal);
+        elAccessModalBackdrop.addEventListener('click', function (e) {
+          if (e.target === elAccessModalBackdrop) {
+            closeAccessModal();
+          }
+        });
+        elSelectAllChaptersBtn.addEventListener('click', function () {
+          var cbs = elAccessChaptersGrid.querySelectorAll('.access-ch-checkbox');
+          for (var i = 0; i < cbs.length; i++) cbs[i].checked = true;
+        });
+        elResetTrialChaptersBtn.addEventListener('click', function () {
+          var cbs = elAccessChaptersGrid.querySelectorAll('.access-ch-checkbox');
+          for (var i = 0; i < cbs.length; i++) {
+            cbs[i].checked = Number(cbs[i].value) === 1;
+          }
+          elAccessMocksCheckbox.checked = false;
+        });
+        elSaveAccessBtn.addEventListener('click', handleSaveAccess);
+        if (elResetDeviceBtn) {
+          elResetDeviceBtn.addEventListener('click', handleUnbindDevice);
+        }
+
         elCloseModalBtn.addEventListener('click', closeStudentModal);
         elModalBackdrop.addEventListener('click', function (e) {
           if (e.target === elModalBackdrop) {
@@ -3017,8 +3898,12 @@
           }
         });
         document.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape' && elModalBackdrop.classList.contains('open')) {
-            closeStudentModal();
+          if (e.key === 'Escape') {
+            if (elAccessModalBackdrop.classList.contains('open')) {
+              closeAccessModal();
+            } else if (elModalBackdrop.classList.contains('open')) {
+              closeStudentModal();
+            }
           }
         });
 
