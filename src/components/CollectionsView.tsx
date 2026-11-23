@@ -8,6 +8,7 @@ import {
   Grid2x2,
   LayoutGrid,
   Lock,
+  Maximize2,
   MessageSquareText,
   Printer,
   Search,
@@ -44,8 +45,8 @@ export function CollectionsView() {
   const [subTab, setSubTab] = useState<CollectionSubTab>('vocab');
   const [selectedChapterId, setSelectedChapterId] = useState<'all' | number>('all');
   const [sheetMode, setSheetMode] = useState<VocabSheetMode>('hanzi-only');
-  const [hanziCols, setHanziCols] = useState<5 | 6>(6);
-  const [reviewCols, setReviewCols] = useState<3 | 4>(3);
+  const [hanziCols, setHanziCols] = useState<5 | 6 | 10>(10);
+  const [reviewCols, setReviewCols] = useState<3 | 4 | 6>(3);
   const [searchQuery, setSearchQuery] = useState('');
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [wordExported, setWordExported] = useState(false);
@@ -127,6 +128,13 @@ export function CollectionsView() {
     [filteredEntries, activeColumns]
   );
 
+  // صفوف الطباعة المخصصة لورقة A3 أفقي واحدة: 10 أعمدة (رموز فقط) أو 6 أعمدة (مراجعة شاملة)
+  const printA3Columns = sheetMode === 'hanzi-only' ? 10 : 6;
+  const printA3Rows = useMemo(
+    () => chunkRows(filteredEntries, printA3Columns),
+    [filteredEntries, printA3Columns]
+  );
+
   const activeScopeLabelAr = useMemo(() => {
     if (selectedChapterId === 'all') {
       return unlockedChapters.length === CHAPTERS_DATA.length
@@ -167,7 +175,6 @@ export function CollectionsView() {
     downloadVocabularyWordDoc({
       entries: filteredEntries,
       mode: sheetMode,
-      columnsPerRow: activeColumns,
       scopeLabelAr: activeScopeLabelAr,
       fileScopeTag,
     });
@@ -333,8 +340,13 @@ export function CollectionsView() {
                 </div>
               </div>
 
-              {/* زرا التصدير الرئيسيان: Word (.doc) وطباعة / PDF */}
+              {/* زرا التصدير الرئيسيان وشارة مقاس الطباعة A3 أفقي */}
               <div className="flex flex-wrap items-center gap-2.5">
+                <div className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg border border-[#D97706]/35 dark:border-[#F59E0B]/35 bg-[#D97706]/8 dark:bg-[#F59E0B]/12 text-[#92400E] dark:text-[#F59E0B] text-xs font-bold whitespace-nowrap shrink-0">
+                  <Maximize2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>مقاس الطباعة: A3 أفقي (ورقة واحدة شاملة)</span>
+                </div>
+
                 <button
                   type="button"
                   disabled={filteredEntries.length === 0}
@@ -344,7 +356,7 @@ export function CollectionsView() {
                   {wordExported ? (
                     <>
                       <Check className="w-4 h-4 shrink-0" />
-                      <span>تم تحميل ملف Word</span>
+                      <span>تم تحميل ملف Word (A3)</span>
                     </>
                   ) : (
                     <>
@@ -376,10 +388,10 @@ export function CollectionsView() {
                 {/* تحكم بعدد الأعمدة + البحث السريع */}
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="inline-flex items-center gap-1.5 text-xs">
-                    <span className="text-[#57534E] dark:text-[#A8A29E]">الأعمدة:</span>
+                    <span className="text-[#57534E] dark:text-[#A8A29E]">أعمدة العرض:</span>
                     {sheetMode === 'hanzi-only' ? (
                       <div className="inline-flex rounded-md border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 p-0.5 bg-[#F9F6F0] dark:bg-[#121110]">
-                        {([5, 6] as const).map((n) => (
+                        {([5, 6, 10] as const).map((n) => (
                           <button
                             key={n}
                             type="button"
@@ -390,13 +402,13 @@ export function CollectionsView() {
                                 : 'text-[#57534E] dark:text-[#A8A29E]'
                             }`}
                           >
-                            {n}
+                            {n === 10 ? '10 (A3)' : n}
                           </button>
                         ))}
                       </div>
                     ) : (
                       <div className="inline-flex rounded-md border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 p-0.5 bg-[#F9F6F0] dark:bg-[#121110]">
-                        {([3, 4] as const).map((n) => (
+                        {([3, 4, 6] as const).map((n) => (
                           <button
                             key={n}
                             type="button"
@@ -407,7 +419,7 @@ export function CollectionsView() {
                                 : 'text-[#57534E] dark:text-[#A8A29E]'
                             }`}
                           >
-                            {n}
+                            {n === 6 ? '6 (A3)' : n}
                           </button>
                         ))}
                       </div>
@@ -495,139 +507,134 @@ export function CollectionsView() {
           </div>
 
           {/* ================================================================= */}
-          {/* الورقة القابلة للطباعة والعرض (A4 Master Vocabulary Sheet)         */}
+          {/* الورقة التفاعلية للعرض على الشاشة + نسخة الطباعة A3 أفقي ورقة واحدة */}
           {/* ================================================================= */}
           <div className="vocab-print-sheet rounded-xl border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] p-4 sm:p-6 shadow-xs">
-            {/* الترويسة الرسمية التي تظهر فقط في الطباعة / PDF بالأبيض والأسود */}
-            <div className="hidden print-only text-center border-b-2 border-black pb-2.5 mb-3">
-              <h2 className="text-lg font-bold text-black">
-                تجميعة مفردات المستوى الأول HSK 3.0 — المعلم Laohu
-              </h2>
-              <p className="text-xs text-black mt-1">
-                {sheetMode === 'hanzi-only'
-                  ? 'شيت اختبار الحفظ — الرموز الصينية فقط'
-                  : 'شيت المراجعة الشامل — الرموز والبينين والمعنى العربي'}{' '}
-                · {activeScopeLabelAr} · الإجمالي: {filteredEntries.length} مفردة
-              </p>
-            </div>
-
-            {filteredEntries.length === 0 ? (
-              <div className="py-12 text-center space-y-2">
-                <p className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-                  لا توجد مفردات مطابقة لبحثك
-                </p>
-                <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">
-                  جرّب مسح مربع البحث أو اختيار «كل الفصول المفتوحة».
-                </p>
-              </div>
-            ) : sheetMode === 'hanzi-only' ? (
-              /* ============================================================= */
-              /* الوضع أ: شيت اختبار الحفظ — شبكة 5 أو 6 أعمدة (رقم + رمز فقط) */
-              /* ============================================================= */
-              <div className="overflow-x-auto">
-                <table
-                  dir="ltr"
-                  className="vocab-print-table w-full min-w-[680px] border-collapse table-fixed"
-                >
-                  <tbody>
-                    {tableRows.map((row, rowIdx) => (
-                      <tr key={rowIdx}>
-                        {Array.from({ length: hanziCols }, (_, colIdx) => {
-                          const entry = row[colIdx];
-                          if (!entry) {
+            {/* نسخة العرض التفاعلي على الشاشة (تُخفى عند الطباعة لتُستبدل بنسخة A3 أفقي المخصصة) */}
+            <div className="no-print">
+              {filteredEntries.length === 0 ? (
+                <div className="py-12 text-center space-y-2">
+                  <p className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                    لا توجد مفردات مطابقة لبحثك
+                  </p>
+                  <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">
+                    جرّب مسح مربع البحث أو اختيار «كل الفصول المفتوحة».
+                  </p>
+                </div>
+              ) : sheetMode === 'hanzi-only' ? (
+                /* ============================================================= */
+                /* الوضع أ: شيت اختبار الحفظ — شبكة 5 أو 6 أو 10 أعمدة (رقم + رمز) */
+                /* ============================================================= */
+                <div className="overflow-x-auto">
+                  <table
+                    dir="ltr"
+                    className={`w-full border-collapse table-fixed ${
+                      hanziCols === 10 ? 'min-w-[920px]' : 'min-w-[680px]'
+                    }`}
+                  >
+                    <tbody>
+                      {tableRows.map((row, rowIdx) => (
+                        <tr key={rowIdx}>
+                          {Array.from({ length: hanziCols }, (_, colIdx) => {
+                            const entry = row[colIdx];
+                            if (!entry) {
+                              return (
+                                <td
+                                  key={`empty-${rowIdx}-${colIdx}`}
+                                  colSpan={2}
+                                  className="border border-[#1C1917]/20 dark:border-[#F5F2EB]/20 bg-[#F9F6F0]/45 dark:bg-[#141312]/45"
+                                />
+                              );
+                            }
+                            const isSpeaking = speakingId === entry.id;
+                            return (
+                              <Fragment key={entry.id}>
+                                <td
+                                  style={{ width: `${(25 / hanziCols).toFixed(2)}%` }}
+                                  className="border border-[#1C1917]/25 dark:border-[#F5F2EB]/25 bg-[#EFEAE0] dark:bg-[#292623] text-center text-[11px] font-bold text-[#1C1917] dark:text-[#F5F2EB] tabular-nums py-1.5 px-1 select-none"
+                                >
+                                  {entry.serial}
+                                </td>
+                                <td
+                                  style={{ width: `${(75 / hanziCols).toFixed(2)}%` }}
+                                  onClick={() => handlePlayWord(entry)}
+                                  title={`اضغط للاستماع لنطق: ${entry.hanzi}`}
+                                  className={`group border border-[#1C1917]/25 dark:border-[#F5F2EB]/25 text-center py-2 px-1 cursor-pointer transition-colors select-none ${
+                                    isSpeaking
+                                      ? 'bg-[#B91C1C]/12 dark:bg-[#EF4444]/18 text-[#B91C1C] dark:text-[#EF4444]'
+                                      : 'bg-white dark:bg-[#1E1C1A] hover:bg-[#F9F6F0] dark:hover:bg-[#25221F] text-[#1C1917] dark:text-[#F5F2EB]'
+                                  }`}
+                                >
+                                  <div className="relative flex items-center justify-center">
+                                    <span
+                                      className={`font-hanzi font-bold leading-snug ${
+                                        hanziCols === 10
+                                          ? 'text-sm sm:text-base'
+                                          : 'text-lg sm:text-xl'
+                                      }`}
+                                    >
+                                      {entry.hanzi}
+                                    </span>
+                                    <Volume2
+                                      className={`w-3 h-3 absolute right-0.5 transition-opacity ${
+                                        isSpeaking
+                                          ? 'opacity-100 text-[#B91C1C] dark:text-[#EF4444]'
+                                          : 'opacity-0 group-hover:opacity-65 text-[#57534E] dark:text-[#A8A29E]'
+                                      }`}
+                                    />
+                                  </div>
+                                </td>
+                              </Fragment>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                /* ============================================================= */
+                /* الوضع ب: شيت المراجعة الشامل — 3 أو 4 أو 6 أعمدة              */
+                /* ============================================================= */
+                <div className="overflow-x-auto">
+                  <table
+                    dir="ltr"
+                    className={`w-full border-collapse table-fixed ${
+                      reviewCols === 6 ? 'min-w-[1060px]' : 'min-w-[760px]'
+                    }`}
+                  >
+                    <tbody>
+                      {tableRows.map((row, rowIdx) => (
+                        <tr key={rowIdx}>
+                          {Array.from({ length: reviewCols }, (_, colIdx) => {
+                            const entry = row[colIdx];
+                            if (!entry) {
+                              return (
+                                <td
+                                  key={`empty-r-${rowIdx}-${colIdx}`}
+                                  className="border border-[#1C1917]/20 dark:border-[#F5F2EB]/20 bg-[#F9F6F0]/45 dark:bg-[#141312]/45"
+                                />
+                              );
+                            }
+                            const isSpeaking = speakingId === entry.id;
                             return (
                               <td
-                                key={`empty-${rowIdx}-${colIdx}`}
-                                colSpan={2}
-                                className="border border-[#1C1917]/20 dark:border-[#F5F2EB]/20 bg-[#F9F6F0]/45 dark:bg-[#141312]/45"
-                              />
-                            );
-                          }
-                          const isSpeaking = speakingId === entry.id;
-                          return (
-                            <Fragment key={entry.id}>
-                              <td
-                                style={{ width: `${(28 / hanziCols).toFixed(2)}%` }}
-                                className="vocab-serial-cell border border-[#1C1917]/25 dark:border-[#F5F2EB]/25 bg-[#EFEAE0] dark:bg-[#292623] text-center text-xs font-bold text-[#1C1917] dark:text-[#F5F2EB] tabular-nums py-2 px-1 select-none"
-                              >
-                                {entry.serial}
-                              </td>
-                              <td
-                                style={{ width: `${(72 / hanziCols).toFixed(2)}%` }}
+                                key={`rev-${entry.id}`}
                                 onClick={() => handlePlayWord(entry)}
                                 title={`اضغط للاستماع لنطق: ${entry.hanzi}`}
-                                className={`group border border-[#1C1917]/25 dark:border-[#F5F2EB]/25 text-center py-2.5 px-1.5 cursor-pointer transition-colors select-none ${
+                                className={`group border border-[#1C1917]/25 dark:border-[#F5F2EB]/25 p-0 align-middle cursor-pointer transition-colors ${
                                   isSpeaking
-                                    ? 'bg-[#B91C1C]/12 dark:bg-[#EF4444]/18 text-[#B91C1C] dark:text-[#EF4444]'
-                                    : 'bg-white dark:bg-[#1E1C1A] hover:bg-[#F9F6F0] dark:hover:bg-[#25221F] text-[#1C1917] dark:text-[#F5F2EB]'
+                                    ? 'bg-[#B91C1C]/10 dark:bg-[#EF4444]/16'
+                                    : 'bg-white dark:bg-[#1E1C1A] hover:bg-[#F9F6F0] dark:hover:bg-[#25221F]'
                                 }`}
                               >
-                                <div className="relative flex items-center justify-center">
-                                  <span className="font-hanzi text-lg sm:text-xl font-bold leading-snug">
-                                    {entry.hanzi}
-                                  </span>
-                                  <Volume2
-                                    className={`no-print w-3 h-3 absolute right-0.5 transition-opacity ${
-                                      isSpeaking
-                                        ? 'opacity-100 text-[#B91C1C] dark:text-[#EF4444]'
-                                        : 'opacity-0 group-hover:opacity-65 text-[#57534E] dark:text-[#A8A29E]'
-                                    }`}
-                                  />
-                                </div>
-                              </td>
-                            </Fragment>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              /* ============================================================= */
-              /* الوضع ب: شيت المراجعة الشامل — 3 أو 4 أعمدة (رقم/رمز/بينين/عربي) */
-              /* ============================================================= */
-              <div className="overflow-x-auto">
-                <table
-                  dir="ltr"
-                  className="vocab-print-table w-full min-w-[760px] border-collapse table-fixed"
-                >
-                  <tbody>
-                    {tableRows.map((row, rowIdx) => (
-                      <tr key={rowIdx}>
-                        {Array.from({ length: reviewCols }, (_, colIdx) => {
-                          const entry = row[colIdx];
-                          if (!entry) {
-                            return (
-                              <td
-                                key={`empty-r-${rowIdx}-${colIdx}`}
-                                className="border border-[#1C1917]/20 dark:border-[#F5F2EB]/20 bg-[#F9F6F0]/45 dark:bg-[#141312]/45"
-                              />
-                            );
-                          }
-                          const isSpeaking = speakingId === entry.id;
-                          return (
-                            <td
-                              key={`rev-${entry.id}`}
-                              onClick={() => handlePlayWord(entry)}
-                              title={`اضغط للاستماع لنطق: ${entry.hanzi}`}
-                              className={`group border border-[#1C1917]/25 dark:border-[#F5F2EB]/25 p-0 align-middle cursor-pointer transition-colors ${
-                                isSpeaking
-                                  ? 'bg-[#B91C1C]/10 dark:bg-[#EF4444]/16'
-                                  : 'bg-white dark:bg-[#1E1C1A] hover:bg-[#F9F6F0] dark:hover:bg-[#25221F]'
-                              }`}
-                            >
-                              <div className="flex items-stretch min-h-[46px]">
-                                {/* خلية الرقم التسلسلي المظللة */}
-                                <div className="vocab-serial-cell w-9 shrink-0 bg-[#EFEAE0] dark:bg-[#292623] border-r border-[#1C1917]/20 dark:border-[#F5F2EB]/20 flex items-center justify-center text-[11px] font-bold text-[#1C1917] dark:text-[#F5F2EB] tabular-nums">
-                                  {entry.serial}
-                                </div>
-
-                                {/* الرمز + البينين + المعنى العربي */}
-                                <div className="flex-1 grid grid-cols-12 items-center gap-1 px-2 py-1.5">
-                                  <div className="col-span-4 text-center">
+                                {reviewCols === 6 ? (
+                                  <div className="flex items-center gap-1 px-1.5 py-1 text-[10px] whitespace-nowrap overflow-hidden">
+                                    <span className="inline-flex items-center justify-center min-w-[20px] px-1 py-0.5 bg-[#EFEAE0] dark:bg-[#292623] text-[#1C1917] dark:text-[#F5F2EB] font-bold tabular-nums rounded-[2px] shrink-0">
+                                      {entry.serial}
+                                    </span>
                                     <span
-                                      className={`font-hanzi text-base font-bold leading-tight block ${
+                                      className={`font-hanzi text-xs font-bold shrink-0 ${
                                         isSpeaking
                                           ? 'text-[#B91C1C] dark:text-[#EF4444]'
                                           : 'text-[#1C1917] dark:text-[#F5F2EB]'
@@ -635,45 +642,166 @@ export function CollectionsView() {
                                     >
                                       {entry.hanzi}
                                     </span>
-                                  </div>
-
-                                  <div className="col-span-4 text-center border-x border-[#1C1917]/10 dark:border-[#F5F2EB]/10 px-1">
-                                    <span className="vocab-pinyin-text font-pinyin text-[11px] font-semibold text-[#57534E] dark:text-[#A8A29E] leading-tight block break-words">
+                                    <span className="font-pinyin text-[10px] text-[#57534E] dark:text-[#A8A29E] shrink-0">
                                       {entry.pinyin}
                                     </span>
-                                  </div>
-
-                                  <div
-                                    dir="rtl"
-                                    className="col-span-4 text-right pr-1 flex items-center justify-between gap-1"
-                                  >
-                                    <span className="vocab-arabic-text text-[11px] sm:text-xs font-semibold text-[#1C1917] dark:text-[#F5F2EB] leading-snug">
+                                    <span
+                                      dir="rtl"
+                                      className="ml-auto text-[10px] font-semibold text-[#1C1917] dark:text-[#F5F2EB] truncate text-right"
+                                    >
                                       {entry.arabic}
                                     </span>
-                                    <Volume2
-                                      className={`no-print w-3 h-3 shrink-0 transition-opacity ${
-                                        isSpeaking
-                                          ? 'opacity-100 text-[#B91C1C] dark:text-[#EF4444]'
-                                          : 'opacity-0 group-hover:opacity-65 text-[#57534E] dark:text-[#A8A29E]'
-                                      }`}
-                                    />
                                   </div>
+                                ) : (
+                                  <div className="flex items-stretch min-h-[46px]">
+                                    <div className="w-9 shrink-0 bg-[#EFEAE0] dark:bg-[#292623] border-r border-[#1C1917]/20 dark:border-[#F5F2EB]/20 flex items-center justify-center text-[11px] font-bold text-[#1C1917] dark:text-[#F5F2EB] tabular-nums">
+                                      {entry.serial}
+                                    </div>
+
+                                    <div className="flex-1 grid grid-cols-12 items-center gap-1 px-2 py-1.5">
+                                      <div className="col-span-4 text-center">
+                                        <span
+                                          className={`font-hanzi text-base font-bold leading-tight block ${
+                                            isSpeaking
+                                              ? 'text-[#B91C1C] dark:text-[#EF4444]'
+                                              : 'text-[#1C1917] dark:text-[#F5F2EB]'
+                                          }`}
+                                        >
+                                          {entry.hanzi}
+                                        </span>
+                                      </div>
+
+                                      <div className="col-span-4 text-center border-x border-[#1C1917]/10 dark:border-[#F5F2EB]/10 px-1">
+                                        <span className="font-pinyin text-[11px] font-semibold text-[#57534E] dark:text-[#A8A29E] leading-tight block break-words">
+                                          {entry.pinyin}
+                                        </span>
+                                      </div>
+
+                                      <div
+                                        dir="rtl"
+                                        className="col-span-4 text-right pr-1 flex items-center justify-between gap-1"
+                                      >
+                                        <span className="text-[11px] sm:text-xs font-semibold text-[#1C1917] dark:text-[#F5F2EB] leading-snug">
+                                          {entry.arabic}
+                                        </span>
+                                        <Volume2
+                                          className={`w-3 h-3 shrink-0 transition-opacity ${
+                                            isSpeaking
+                                              ? 'opacity-100 text-[#B91C1C] dark:text-[#EF4444]'
+                                              : 'opacity-0 group-hover:opacity-65 text-[#57534E] dark:text-[#A8A29E]'
+                                          }`}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* ================================================================= */}
+            {/* نسخة الطباعة / PDF المخصصة: ورقة A3 أفقي واحدة (420mm × 297mm)    */}
+            {/* ================================================================= */}
+            {filteredEntries.length > 0 && (
+              <div className="hidden print-only vocab-a3-print-sheet">
+                <div className="vocab-a3-print-header" dir="rtl">
+                  <h2>تجميعة مفردات المستوى الأول HSK 3.0 — المعلم Laohu</h2>
+                  <p>
+                    {sheetMode === 'hanzi-only'
+                      ? 'شيت اختبار الحفظ — الرموز الصينية فقط (10 أعمدة)'
+                      : 'شيت المراجعة الشامل — الرموز والبينين والمعنى العربي (6 أعمدة)'}{' '}
+                    · {activeScopeLabelAr} · الإجمالي: {filteredEntries.length} مفردة · مقاس الطباعة:
+                    A3 أفقي (ورقة واحدة شاملة)
+                  </p>
+                </div>
+
+                {sheetMode === 'hanzi-only' ? (
+                  <table dir="ltr" className="vocab-a3-table-hanzi">
+                    <colgroup>
+                      {Array.from({ length: 10 }, (_, idx) => (
+                        <Fragment key={idx}>
+                          <col style={{ width: '2.4%' }} />
+                          <col style={{ width: '7.6%' }} />
+                        </Fragment>
+                      ))}
+                    </colgroup>
+                    <tbody>
+                      {printA3Rows.map((row, rowIdx) => (
+                        <tr key={rowIdx}>
+                          {Array.from({ length: 10 }, (_, colIdx) => {
+                            const entry = row[colIdx];
+                            if (!entry) {
+                              return (
+                                <Fragment key={`p-empty-${rowIdx}-${colIdx}`}>
+                                  <td className="a3-serial-cell a3-empty-cell">&nbsp;</td>
+                                  <td className="a3-hanzi-cell a3-empty-cell">&nbsp;</td>
+                                </Fragment>
+                              );
+                            }
+                            return (
+                              <Fragment key={`p-${entry.id}`}>
+                                <td className="a3-serial-cell tabular-nums">{entry.serial}</td>
+                                <td className="a3-hanzi-cell font-hanzi">{entry.hanzi}</td>
+                              </Fragment>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <table dir="ltr" className="vocab-a3-table-full">
+                    <colgroup>
+                      {Array.from({ length: 6 }, (_, idx) => (
+                        <col key={idx} style={{ width: '16.6667%' }} />
+                      ))}
+                    </colgroup>
+                    <tbody>
+                      {printA3Rows.map((row, rowIdx) => (
+                        <tr key={rowIdx}>
+                          {Array.from({ length: 6 }, (_, colIdx) => {
+                            const entry = row[colIdx];
+                            if (!entry) {
+                              return (
+                                <td key={`pf-empty-${rowIdx}-${colIdx}`} className="a3-empty-cell">
+                                  &nbsp;
+                                </td>
+                              );
+                            }
+                            return (
+                              <td key={`pf-${entry.id}`}>
+                                <div className="a3-full-line">
+                                  <span className="a3-full-serial tabular-nums">
+                                    {entry.serial}
+                                  </span>
+                                  <span className="a3-full-hanzi font-hanzi">{entry.hanzi}</span>
+                                  <span className="a3-full-pinyin font-pinyin">{entry.pinyin}</span>
+                                  <span className="a3-full-arabic" dir="rtl">
+                                    {entry.arabic}
+                                  </span>
                                 </div>
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+
+                <div className="vocab-a3-print-footer" dir="rtl">
+                  بوابة اللغة الصينية - المستوى الأول (HSK 3.0) · إعداد المعلم Laohu · ورقة طباعة A3
+                  أفقي شاملة
+                </div>
               </div>
             )}
-
-            {/* تذييل الطباعة فقط */}
-            <div className="hidden print-only text-center text-[10px] text-black mt-3 pt-2 border-t border-black">
-              بوابة اللغة الصينية - المستوى الأول (HSK 3.0) · إعداد المعلم Laohu
-            </div>
           </div>
         </div>
       )}
