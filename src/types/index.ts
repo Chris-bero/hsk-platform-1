@@ -1,7 +1,8 @@
 export interface UnlockedAccess {
-  chapters: 'ALL' | number[];
-  mocks: boolean;
-  patterns?: boolean;
+  chapters: number[];
+  intlMocks: number[];
+  arabicMocks: number[];
+  patterns: number[];
 }
 
 export interface Student {

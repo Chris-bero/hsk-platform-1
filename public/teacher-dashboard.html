@@ -983,15 +983,70 @@
       }
 
       /* ===================== نافذة التحكم في الصلاحيات والجهاز ===================== */
+      .access-group-card {
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background-color: var(--canvas);
+      }
+
       .access-section-title {
         margin: 0 0 10px;
         font-size: 13.5px;
         font-weight: 800;
         color: var(--ink);
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
+      }
+
+      .access-section-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .access-counter-pill {
+        font-size: 12px;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 5px;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+      }
+
+      .mini-bulk-btn {
+        height: 27px;
+        padding: 0 10px;
+        border-radius: 5px;
+        border: 1px solid var(--border-strong);
+        background-color: var(--surface);
+        color: var(--ink-secondary);
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+      }
+
+      .mini-bulk-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background-color: var(--accent-soft);
+      }
+
+      .mini-bulk-btn.unlock:hover {
+        border-color: var(--jade);
+        color: var(--jade);
+        background-color: var(--jade-soft);
+      }
+
+      .mini-bulk-btn.lock:hover {
+        border-color: var(--crimson);
+        color: var(--crimson);
+        background-color: var(--crimson-soft);
       }
 
       .presets-grid {
@@ -1041,19 +1096,31 @@
         color: var(--ink-muted);
       }
 
-      /* شبكة الأزرار الـ 15 للفصول */
+      /* شبكة الأزرار الـ 15 للفصول + شبكات الامتحانات والأنماط */
       .chapters-toggle-grid {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 8px;
       }
 
+      .mocks-toggle-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .patterns-toggle-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
       .ch-tile {
-        min-height: 62px;
+        min-height: 60px;
         padding: 8px 10px;
         border-radius: var(--radius-sm);
         border: 1px solid var(--border-strong);
-        background-color: var(--surface-subtle);
+        background-color: var(--surface);
         color: var(--ink-muted);
         cursor: pointer;
         display: flex;
@@ -1063,6 +1130,11 @@
         gap: 4px;
         text-align: right;
         transition: background-color 130ms ease, border-color 130ms ease, color 130ms ease;
+      }
+
+      .ch-tile.compact {
+        min-height: 54px;
+        padding: 7px 10px;
       }
 
       .ch-tile:hover {
@@ -1084,17 +1156,18 @@
       }
 
       .ch-tile-zh {
-        font-size: 13.5px;
-        font-weight: 700;
+        font-size: 13px;
+        font-weight: 800;
       }
 
       .ch-tile-state {
         font-size: 11px;
         font-weight: 700;
+        flex-shrink: 0;
       }
 
       .ch-tile-ar {
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 700;
         color: var(--ink);
         white-space: nowrap;
@@ -1105,88 +1178,6 @@
 
       .ch-tile:not(.unlocked) .ch-tile-ar {
         color: var(--ink-muted);
-      }
-
-      /* مفاتيح التبديل (Toggle Switches) */
-      .toggles-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .toggle-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 13px 16px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
-        background-color: var(--canvas);
-        cursor: pointer;
-      }
-
-      .toggle-row:hover {
-        border-color: var(--border-strong);
-      }
-
-      .toggle-info-title {
-        font-size: 13.5px;
-        font-weight: 800;
-        color: var(--ink);
-      }
-
-      .toggle-info-desc {
-        font-size: 12px;
-        color: var(--ink-muted);
-        margin-top: 2px;
-      }
-
-      .switch {
-        position: relative;
-        width: 46px;
-        height: 26px;
-        flex-shrink: 0;
-      }
-
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-        position: absolute;
-      }
-
-      .switch-slider {
-        position: absolute;
-        inset: 0;
-        border-radius: 999px;
-        background-color: var(--border-strong);
-        transition: background-color 150ms ease;
-      }
-
-      .switch-slider::before {
-        content: '';
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        top: 3px;
-        left: 3px;
-        border-radius: 50%;
-        background-color: #FFFFFF;
-        transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
-      }
-
-      .switch input:checked + .switch-slider {
-        background-color: var(--jade);
-      }
-
-      .switch input:checked + .switch-slider::before {
-        transform: translateX(20px);
-      }
-
-      .switch input:focus-visible + .switch-slider {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
       }
 
       /* صندوق ربط الجهاز */
@@ -1318,8 +1309,12 @@
         .presets-grid {
           grid-template-columns: 1fr;
         }
-        .chapters-toggle-grid {
+        .chapters-toggle-grid,
+        .mocks-toggle-grid {
           grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .patterns-toggle-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
 
@@ -1327,8 +1322,12 @@
         .kpi-grid {
           grid-template-columns: 1fr;
         }
-        .chapters-toggle-grid {
+        .chapters-toggle-grid,
+        .mocks-toggle-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .patterns-toggle-grid {
+          grid-template-columns: 1fr;
         }
         .hsk-patterns-summary-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1558,7 +1557,7 @@
                     <tr>
                       <th data-sort="studentName">الطالب والكود<span class="sort-arrow"></span></th>
                       <th>الفصول المفتوحة</th>
-                      <th>الامتحانات الشاملة</th>
+                      <th>الامتحانات والأنماط</th>
                       <th>حالة الجهاز</th>
                       <th data-sort="accuracyPercent">الدقة العامة<span class="sort-arrow"></span></th>
                       <th data-sort="lastActive">آخر نشاط<span class="sort-arrow"></span></th>
@@ -1774,10 +1773,10 @@
       aria-modal="true"
       aria-labelledby="accessModalTitle"
     >
-      <div class="modal-dialog">
+      <div class="modal-dialog wide">
         <div class="modal-header">
           <div>
-            <h2 id="accessModalTitle" class="modal-title">التحكم في الصلاحيات والجهاز</h2>
+            <h2 id="accessModalTitle" class="modal-title">التحكم الفردي في الصلاحيات والجهاز</h2>
             <div class="modal-meta tabular-nums">
               <span>الطالب: <strong id="accessStudentName" style="color:var(--ink)">—</strong></span>
               <span aria-hidden="true">·</span>
@@ -1797,63 +1796,76 @@
             </h3>
             <div class="presets-grid">
               <button type="button" id="presetFreeTrialBtn" class="preset-btn">
-                <span class="preset-btn-title">باقة التجربة المجانية (الفصل 1 فقط)</span>
-                <span class="preset-btn-sub">فصل ١ · الأنماط مفتوحة · الامتحانات مقفلة</span>
+                <span class="preset-btn-title">باقة التجربة المجانية</span>
+                <span class="preset-btn-sub">فصل ١ فقط · نمط ١ فقط · بدون امتحانات</span>
               </button>
               <button type="button" id="presetAvailable15Btn" class="preset-btn">
-                <span class="preset-btn-title">تفعيل الفصول المتاحة حالياً (1–5)</span>
-                <span class="preset-btn-sub">فصول ١–٥ مفتوحة · الأنماط مفتوحة</span>
+                <span class="preset-btn-title">الفصول المتاحة (1–5) + الأنماط</span>
+                <span class="preset-btn-sub">فصول ١–٥ · الأنماط ٧/٧ · نموذج ١ دولي وعربي</span>
               </button>
               <button type="button" id="presetVipFullBtn" class="preset-btn vip">
-                <span class="preset-btn-title tone-jade">تفعيل الباقة الكاملة VIP</span>
-                <span class="preset-btn-sub">كل الفصول 1–15 + الامتحانات الشاملة + الأنماط</span>
+                <span class="preset-btn-title tone-jade">الباقة الكاملة VIP</span>
+                <span class="preset-btn-sub">15 فصل + 10 دولي + 5 عربي + 7 أنماط</span>
               </button>
             </div>
           </div>
 
-          <!-- ٢. شبكة التحكم الفردي بالفصول ١–١٥ -->
-          <div>
+          <!-- ٢. شبكة الدروس الـ 15 -->
+          <div class="access-group-card">
             <div class="access-section-title">
-              <span>٢. الفصول الدراسية (اضغط على أي فصل لفتحه أو قفله)</span>
-              <span id="accessChaptersCounter" class="tabular-nums tone-jade" style="font-size:12px">1 / 15 مفتوح</span>
+              <span>٢. الدروس الـ 15 (第1课 – 第15课)</span>
+              <div class="access-section-controls">
+                <span id="accessChaptersCounter" class="access-counter-pill tabular-nums tone-muted">1 / 15 مفتوح</span>
+                <button type="button" id="chaptersSelectAllBtn" class="mini-bulk-btn unlock">تحديد الكل</button>
+                <button type="button" id="chaptersClearAllBtn" class="mini-bulk-btn lock">إلغاء الكل</button>
+              </div>
             </div>
             <div id="accessChaptersGrid" class="chapters-toggle-grid"></div>
           </div>
 
-          <!-- ٣. مفاتيح بوابة الامتحانات الدولية -->
-          <div>
-            <h3 class="access-section-title">
-              <span>٣. صلاحيات بوابة الامتحانات الدولية HSK 3.0</span>
-            </h3>
-            <div class="toggles-stack">
-              <label class="toggle-row" for="accessMocksToggle">
-                <div>
-                  <div class="toggle-info-title">الامتحانات الشاملة الـ 15 (10 دولي + 5 عربي)</div>
-                  <div class="toggle-info-desc">فتح جميع النماذج المؤقتة الموحدة (٤٠ سؤالاً · ٢٠٠ درجة)</div>
-                </div>
-                <span class="switch">
-                  <input type="checkbox" id="accessMocksToggle" role="switch" />
-                  <span class="switch-slider" aria-hidden="true"></span>
-                </span>
-              </label>
-
-              <label class="toggle-row" for="accessPatternsToggle">
-                <div>
-                  <div class="toggle-info-title">تدريبات الأنماط الدولية الـ 7</div>
-                  <div class="toggle-info-desc">إتاحة تدريبات أنماط الاستماع والقراءة غير المؤقتة (听力 / 阅读)</div>
-                </div>
-                <span class="switch">
-                  <input type="checkbox" id="accessPatternsToggle" role="switch" />
-                  <span class="switch-slider" aria-hidden="true"></span>
-                </span>
-              </label>
+          <!-- ٣. شبكة امتحانات HSK 3.0 الدولية المعتمدة (10 نماذج) -->
+          <div class="access-group-card">
+            <div class="access-section-title">
+              <span>٣. امتحانات HSK 3.0 الدولية المعتمدة (10 نماذج)</span>
+              <div class="access-section-controls">
+                <span id="accessIntlCounter" class="access-counter-pill tabular-nums tone-muted">0 / 10 مفتوح</span>
+                <button type="button" id="intlOpenAllBtn" class="mini-bulk-btn unlock">فتح الكل</button>
+                <button type="button" id="intlLockAllBtn" class="mini-bulk-btn lock">قفل الكل</button>
+              </div>
             </div>
+            <div id="accessIntlMocksGrid" class="mocks-toggle-grid"></div>
           </div>
 
-          <!-- ٤. التحكم في ربط الجهاز الواحد -->
+          <!-- ٤. شبكة الامتحانات التطبيقية بالعربية (5 نماذج) -->
+          <div class="access-group-card">
+            <div class="access-section-title">
+              <span>٤. الامتحانات التطبيقية بالعربية (5 نماذج)</span>
+              <div class="access-section-controls">
+                <span id="accessArabicCounter" class="access-counter-pill tabular-nums tone-muted">0 / 5 مفتوح</span>
+                <button type="button" id="arabicOpenAllBtn" class="mini-bulk-btn unlock">فتح الكل</button>
+                <button type="button" id="arabicLockAllBtn" class="mini-bulk-btn lock">قفل الكل</button>
+              </div>
+            </div>
+            <div id="accessArabicMocksGrid" class="mocks-toggle-grid"></div>
+          </div>
+
+          <!-- ٥. شبكة تدريبات الأنماط الدولية (7 أنماط) -->
+          <div class="access-group-card">
+            <div class="access-section-title">
+              <span>٥. تدريبات الأنماط الدولية (7 أنماط)</span>
+              <div class="access-section-controls">
+                <span id="accessPatternsCounter" class="access-counter-pill tabular-nums tone-muted">1 / 7 مفتوح</span>
+                <button type="button" id="patternsOpenAllBtn" class="mini-bulk-btn unlock">فتح الكل</button>
+                <button type="button" id="patternsLockAllBtn" class="mini-bulk-btn lock">قفل الكل</button>
+              </div>
+            </div>
+            <div id="accessPatternsGrid" class="patterns-toggle-grid"></div>
+          </div>
+
+          <!-- ٦. التحكم في ربط الجهاز الواحد -->
           <div>
             <h3 class="access-section-title">
-              <span>٤. حماية ربط الجهاز الواحد (Single-Device Lock)</span>
+              <span>٦. حماية ربط الجهاز الواحد (Single-Device Lock)</span>
             </h3>
             <div class="device-control-box">
               <div style="flex:1;min-width:220px">
@@ -1875,7 +1887,7 @@
 
         <div class="modal-footer">
           <span id="accessSyncHint" style="font-size:12px;color:var(--ink-muted)">
-            تُحفظ التغييرات فوراً في العمود ١٤ و ١٥ بـ Google Sheets
+            تُحفظ الصلاحيات الفردية فوراً بصيغة JSON في العمود ١٤ بـ Google Sheets
           </span>
           <div style="display:flex;align-items:center;gap:10px">
             <button type="button" id="cancelAccessModalBtn" class="btn">إلغاء</button>
@@ -2069,14 +2081,19 @@
         ];
 
         var HSK_PATTERN_LABELS = [
-          { id: 'listening-p1', short: '听1', codeZh: '听力第一部分', titleAr: 'الاستماع ١ · مطابقة الجملة بالصورة' },
-          { id: 'listening-p2', short: '听2', codeZh: '听力第二部分', titleAr: 'الاستماع ٢ · اختيار الرد الصحيح' },
-          { id: 'listening-p3', short: '听3', codeZh: '听力第三部分', titleAr: 'الاستماع ٣ · مطابقة الحوار بالصورة' },
-          { id: 'listening-p4', short: '听4', codeZh: '听力第四部分', titleAr: 'الاستماع ٤ · فهم الحوار القصير' },
-          { id: 'reading-p1', short: '阅1', codeZh: '阅读第一部分', titleAr: 'القراءة ١ · مطابقة الجملة بالصورة' },
-          { id: 'reading-p2', short: '阅2', codeZh: '阅读第二部分', titleAr: 'القراءة ٢ · مطابقة الأسئلة والأجوبة' },
-          { id: 'reading-p3-4', short: '阅3-4', codeZh: '阅读第三部分 & 第四部分', titleAr: 'القراءة ٣ و ٤ · إكمال الجمل والاستنتاج' }
+          { id: 'listening-p1', num: 1, short: '听1', shortTile: 'نمط 1: 听力一', shortSub: 'استماع ١ · الجملة والصورة', codeZh: '听力第一部分', titleAr: 'الاستماع ١ · مطابقة الجملة بالصورة' },
+          { id: 'listening-p2', num: 2, short: '听2', shortTile: 'نمط 2: 听力二', shortSub: 'استماع ٢ · الرد الصحيح', codeZh: '听力第二部分', titleAr: 'الاستماع ٢ · اختيار الرد الصحيح' },
+          { id: 'listening-p3', num: 3, short: '听3', shortTile: 'نمط 3: 听力三', shortSub: 'استماع ٣ · الحوار والصورة', codeZh: '听力第三部分', titleAr: 'الاستماع ٣ · مطابقة الحوار بالصورة' },
+          { id: 'listening-p4', num: 4, short: '听4', shortTile: 'نمط 4: 听力四', shortSub: 'استماع ٤ · فهم الحوار', codeZh: '听力第四部分', titleAr: 'الاستماع ٤ · فهم الحوار القصير' },
+          { id: 'reading-p1', num: 5, short: '阅1', shortTile: 'نمط 5: 阅读一', shortSub: 'قراءة ١ · الجملة والصورة', codeZh: '阅读第一部分', titleAr: 'القراءة ١ · مطابقة الجملة بالصورة' },
+          { id: 'reading-p2', num: 6, short: '阅2', shortTile: 'نمط 6: 阅读二', shortSub: 'قراءة ٢ · مطابقة الأجوبة', codeZh: '阅读第二部分', titleAr: 'القراءة ٢ · مطابقة الأسئلة والأجوبة' },
+          { id: 'reading-p3-4', num: 7, short: '阅3-4', shortTile: 'نمط 7: 阅读三/四', shortSub: 'قراءة ٣ و ٤ · الفراغ والاستنتاج', codeZh: '阅读第三部分 & 第四部分', titleAr: 'القراءة ٣ و ٤ · إكمال الجمل والاستنتاج' }
         ];
+
+        var ALL_CHAPTER_NUMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        var ALL_INTL_MOCK_NUMS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        var ALL_ARABIC_MOCK_NUMS = [1, 2, 3, 4, 5];
+        var ALL_PATTERN_NUMS = [1, 2, 3, 4, 5, 6, 7];
 
         var TAB_TITLES = {
           students: 'إدارة الطلاب والصلاحيات',
@@ -2143,7 +2160,7 @@
               'reading-p2': { solved: 5, correct: 4, wrong: 1, accuracyPercent: 80 },
               'reading-p3-4': { solved: 10, correct: 7, wrong: 3, accuracyPercent: 70 }
             },
-            unlockedAccess: { chapters: [1, 2, 3, 4, 5], mocks: false, patterns: true },
+            unlockedAccess: { chapters: [1, 2, 3, 4, 5], intlMocks: [1, 2], arabicMocks: [1], patterns: [1, 2, 3, 4, 5, 6, 7] },
             boundDeviceId: 'DEV-A9F214C8E301'
           },
           {
@@ -2201,7 +2218,7 @@
               'reading-p2': { solved: 10, correct: 9, wrong: 1, accuracyPercent: 90 },
               'reading-p3-4': { solved: 10, correct: 9, wrong: 1, accuracyPercent: 90 }
             },
-            unlockedAccess: { chapters: 'ALL', mocks: true, patterns: true },
+            unlockedAccess: { chapters: ALL_CHAPTER_NUMS.slice(), intlMocks: ALL_INTL_MOCK_NUMS.slice(), arabicMocks: ALL_ARABIC_MOCK_NUMS.slice(), patterns: ALL_PATTERN_NUMS.slice() },
             boundDeviceId: 'DEV-B4C198D277A0'
           },
           {
@@ -2240,7 +2257,7 @@
               'listening-p2': { solved: 5, correct: 3, wrong: 2, accuracyPercent: 60 },
               'reading-p1': { solved: 5, correct: 4, wrong: 1, accuracyPercent: 80 }
             },
-            unlockedAccess: { chapters: [1], mocks: false, patterns: true },
+            unlockedAccess: { chapters: [1], intlMocks: [], arabicMocks: [], patterns: [1] },
             boundDeviceId: ''
           },
           {
@@ -2260,7 +2277,7 @@
               { chapterId: 3, solved: 18, correct: 15, wrong: 3 },
               { chapterId: 4, solved: 18, correct: 12, wrong: 6 }
             ]),
-            unlockedAccess: { chapters: [1], mocks: false, patterns: true },
+            unlockedAccess: { chapters: [1], intlMocks: [], arabicMocks: [], patterns: [1] },
             boundDeviceId: ''
           }
         ];
@@ -2276,6 +2293,9 @@
           selectedReportStudent: null,
           editingAccessStudent: null,
           editingChaptersSet: {},
+          editingIntlMocksSet: {},
+          editingArabicMocksSet: {},
+          editingPatternsSet: {},
           lastGenerated: null,
           hskExamBank: []
         };
@@ -2355,8 +2375,20 @@
         var elAccessHeaderDeviceSummary = document.getElementById('accessHeaderDeviceSummary');
         var elAccessChaptersGrid = document.getElementById('accessChaptersGrid');
         var elAccessChaptersCounter = document.getElementById('accessChaptersCounter');
-        var elAccessMocksToggle = document.getElementById('accessMocksToggle');
-        var elAccessPatternsToggle = document.getElementById('accessPatternsToggle');
+        var elChaptersSelectAllBtn = document.getElementById('chaptersSelectAllBtn');
+        var elChaptersClearAllBtn = document.getElementById('chaptersClearAllBtn');
+        var elAccessIntlMocksGrid = document.getElementById('accessIntlMocksGrid');
+        var elAccessIntlCounter = document.getElementById('accessIntlCounter');
+        var elIntlOpenAllBtn = document.getElementById('intlOpenAllBtn');
+        var elIntlLockAllBtn = document.getElementById('intlLockAllBtn');
+        var elAccessArabicMocksGrid = document.getElementById('accessArabicMocksGrid');
+        var elAccessArabicCounter = document.getElementById('accessArabicCounter');
+        var elArabicOpenAllBtn = document.getElementById('arabicOpenAllBtn');
+        var elArabicLockAllBtn = document.getElementById('arabicLockAllBtn');
+        var elAccessPatternsGrid = document.getElementById('accessPatternsGrid');
+        var elAccessPatternsCounter = document.getElementById('accessPatternsCounter');
+        var elPatternsOpenAllBtn = document.getElementById('patternsOpenAllBtn');
+        var elPatternsLockAllBtn = document.getElementById('patternsLockAllBtn');
         var elAccessDeviceStatusText = document.getElementById('accessDeviceStatusText');
         var elAccessDeviceIdCode = document.getElementById('accessDeviceIdCode');
         var elResetDeviceBtn = document.getElementById('resetDeviceBtn');
@@ -2490,58 +2522,107 @@
           return fallback;
         }
 
+        function sanitizeNumList(rawList, maxNum) {
+          if (!Array.isArray(rawList)) return [];
+          var seen = {};
+          var out = [];
+          for (var i = 0; i < rawList.length; i++) {
+            var n = Number(rawList[i]);
+            if (n >= 1 && n <= maxNum && Math.floor(n) === n && !seen[n]) {
+              seen[n] = true;
+              out.push(n);
+            }
+          }
+          out.sort(function (a, b) { return a - b; });
+          return out;
+        }
+
+        function createDefaultFreeTrialAccess() {
+          return { chapters: [1], intlMocks: [], arabicMocks: [], patterns: [1] };
+        }
+
         function parseUnlockedAccess(raw) {
-          var fallback = { chapters: [1], mocks: false, patterns: true };
+          var fallback = createDefaultFreeTrialAccess();
           if (!raw) return fallback;
           var obj = parseJsonSafe(raw, null);
           if (!obj || typeof obj !== 'object') return fallback;
 
+          // ١. الفصول (توافق كامل مع "ALL" القديمة)
           var chapters = [1];
           if (typeof obj.chapters === 'string' && obj.chapters.trim().toUpperCase() === 'ALL') {
-            chapters = 'ALL';
+            chapters = ALL_CHAPTER_NUMS.slice();
           } else if (Array.isArray(obj.chapters)) {
-            var seen = {};
-            chapters = [];
-            for (var i = 0; i < obj.chapters.length; i++) {
-              var n = Number(obj.chapters[i]);
-              if (n >= 1 && n <= 15 && Math.floor(n) === n && !seen[n]) {
-                seen[n] = true;
-                chapters.push(n);
-              }
-            }
-            chapters.sort(function (a, b) { return a - b; });
+            chapters = sanitizeNumList(obj.chapters, 15);
+          }
+
+          // ٢. النماذج الدولية المعتمدة (1..10) مع توافق مع mocks القديمة
+          var intlMocks = [];
+          if (typeof obj.intlMocks === 'string' && obj.intlMocks.trim().toUpperCase() === 'ALL') {
+            intlMocks = ALL_INTL_MOCK_NUMS.slice();
+          } else if (Array.isArray(obj.intlMocks)) {
+            intlMocks = sanitizeNumList(obj.intlMocks, 10);
+          } else if (obj.mocks === true) {
+            intlMocks = ALL_INTL_MOCK_NUMS.slice();
+          }
+
+          // ٣. النماذج التطبيقية بالعربية (1..5) مع توافق مع mocks القديمة
+          var arabicMocks = [];
+          if (typeof obj.arabicMocks === 'string' && obj.arabicMocks.trim().toUpperCase() === 'ALL') {
+            arabicMocks = ALL_ARABIC_MOCK_NUMS.slice();
+          } else if (Array.isArray(obj.arabicMocks)) {
+            arabicMocks = sanitizeNumList(obj.arabicMocks, 5);
+          } else if (obj.mocks === true) {
+            arabicMocks = ALL_ARABIC_MOCK_NUMS.slice();
+          }
+
+          // ٤. تدريبات الأنماط الدولية (1..7) مع توافق مع patterns القديمة (boolean)
+          var patterns = [1];
+          if (typeof obj.patterns === 'string' && obj.patterns.trim().toUpperCase() === 'ALL') {
+            patterns = ALL_PATTERN_NUMS.slice();
+          } else if (Array.isArray(obj.patterns)) {
+            patterns = sanitizeNumList(obj.patterns, 7);
+          } else if (typeof obj.patterns === 'boolean') {
+            patterns = obj.patterns ? ALL_PATTERN_NUMS.slice() : [];
           }
 
           return {
             chapters: chapters,
-            mocks: Boolean(obj.mocks),
-            patterns: obj.patterns === undefined ? true : Boolean(obj.patterns)
+            intlMocks: intlMocks,
+            arabicMocks: arabicMocks,
+            patterns: patterns
           };
         }
 
         function classifyAccessTier(access) {
           var norm = parseUnlockedAccess(access);
-          var isAllCh = norm.chapters === 'ALL' || (Array.isArray(norm.chapters) && norm.chapters.length >= 15);
-          if (isAllCh && norm.mocks) return 'vip';
-          var isFree =
-            Array.isArray(norm.chapters) &&
-            norm.chapters.length === 1 &&
-            norm.chapters[0] === 1 &&
-            !norm.mocks;
-          if (isFree) return 'free';
+          var isVip =
+            norm.chapters.length >= 15 &&
+            norm.intlMocks.length >= 10 &&
+            norm.arabicMocks.length >= 5 &&
+            norm.patterns.length >= 7;
+          if (isVip) return 'vip';
+
+          var isFreeCh =
+            norm.chapters.length === 0 ||
+            (norm.chapters.length === 1 && norm.chapters[0] === 1);
+          var isFreePat =
+            norm.patterns.length === 0 ||
+            (norm.patterns.length === 1 && norm.patterns[0] === 1);
+          if (isFreeCh && norm.intlMocks.length === 0 && norm.arabicMocks.length === 0 && isFreePat) {
+            return 'free';
+          }
           return 'partial';
         }
 
         function formatChaptersSummary(access) {
           var norm = parseUnlockedAccess(access);
-          if (norm.chapters === 'ALL' || (Array.isArray(norm.chapters) && norm.chapters.length >= 15)) {
+          var arr = norm.chapters;
+          if (arr.length >= 15) {
             return { text: '15/15 (الكل)', tone: 'tone-jade' };
           }
-          var arr = Array.isArray(norm.chapters) ? norm.chapters : [];
           if (arr.length === 0) return { text: 'مقفل (0/15)', tone: 'tone-crimson' };
           if (arr.length === 1 && arr[0] === 1) return { text: 'فصل 1 فقط', tone: 'tone-muted' };
 
-          // التحقق إن كانت الفصول متسلسلة مثل 1–5
           var contiguous = true;
           for (var i = 1; i < arr.length; i++) {
             if (arr[i] !== arr[i - 1] + 1) {
@@ -2553,6 +2634,27 @@
             return { text: 'فصول ' + arr[0] + '–' + arr[arr.length - 1] + ' (' + arr.length + '/15)', tone: 'tone-amber' };
           }
           return { text: arr.length + ' / 15 فصل', tone: 'tone-amber' };
+        }
+
+        function formatExamsSummary(access) {
+          var norm = parseUnlockedAccess(access);
+          var intlCount = norm.intlMocks.length;
+          var arCount = norm.arabicMocks.length;
+          var totalMocks = intlCount + arCount;
+          var patCount = norm.patterns.length;
+
+          var mainText = 'مقفل 🔒 (0/15)';
+          var tone = 'tone-muted';
+          if (totalMocks >= 15) {
+            mainText = 'الكل مفتوح 🔓 (15/15)';
+            tone = 'tone-jade';
+          } else if (totalMocks > 0) {
+            mainText = 'دولي ' + intlCount + '/10 · عربي ' + arCount + '/5';
+            tone = 'tone-amber';
+          }
+
+          var patText = 'الأنماط: ' + patCount + '/7';
+          return { mainText: mainText, tone: tone, patText: patText };
         }
 
         function isSameLocalDay(isoString) {
@@ -2861,8 +2963,7 @@
 
           elTableBody.innerHTML = filtered.map(function (s) {
             var chSummary = formatChaptersSummary(s.unlockedAccess);
-            var mocksOn = Boolean(s.unlockedAccess.mocks);
-            var patternsOn = s.unlockedAccess.patterns !== false;
+            var examSummary = formatExamsSummary(s.unlockedAccess);
             var isBound = Boolean(s.boundDeviceId);
             var grade = getOverallGrade(s.accuracyPercent, s.totalSolved);
 
@@ -2877,11 +2978,9 @@
               '<td>' +
               '<span class="status-line tabular-nums ' + chSummary.tone + '">' + escapeHtml(chSummary.text) + '</span>' +
               '</td>' +
-              '<td>' +
-              '<span class="status-line ' + (mocksOn ? 'tone-jade' : 'tone-muted') + '">' +
-              (mocksOn ? 'مفتوح 🔓' : 'مقفل 🔒') +
-              '</span>' +
-              '<span class="sub-meta">' + (patternsOn ? 'الأنماط الـ ٧: مفتوحة' : 'الأنماط الـ ٧: مقفلة') + '</span>' +
+              '<td class="tabular-nums">' +
+              '<span class="status-line ' + examSummary.tone + '">' + escapeHtml(examSummary.mainText) + '</span>' +
+              '<span class="sub-meta">' + escapeHtml(examSummary.patText) + '</span>' +
               '</td>' +
               '<td>' +
               '<span class="status-line ' + (isBound ? 'tone-jade' : 'tone-muted') + '">' +
@@ -3419,7 +3518,14 @@
             });
         }
 
-        /* ===================== نافذة التحكم في الصلاحيات والجهاز ===================== */
+        /* ===================== نافذة التحكم الفردي في الصلاحيات والجهاز ===================== */
+        function setCounterTone(el, count, maxCount) {
+          el.textContent = count + ' / ' + maxCount + ' مفتوح';
+          el.className =
+            'access-counter-pill tabular-nums ' +
+            (count >= maxCount ? 'tone-jade' : count > 0 ? 'tone-amber' : 'tone-muted');
+        }
+
         function renderAccessChaptersGrid() {
           var selectedCount = 0;
           elAccessChaptersGrid.innerHTML = CHAPTERS_META.map(function (ch) {
@@ -3435,10 +3541,82 @@
               '</button>'
             );
           }).join('');
+          setCounterTone(elAccessChaptersCounter, selectedCount, 15);
+        }
 
-          elAccessChaptersCounter.textContent = selectedCount + ' / 15 مفتوح';
-          elAccessChaptersCounter.className =
-            'tabular-nums ' + (selectedCount >= 15 ? 'tone-jade' : selectedCount > 1 ? 'tone-amber' : 'tone-muted');
+        function renderAccessIntlMocksGrid() {
+          var selectedCount = 0;
+          elAccessIntlMocksGrid.innerHTML = ALL_INTL_MOCK_NUMS.map(function (num) {
+            var isOn = Boolean(state.editingIntlMocksSet[num]);
+            if (isOn) selectedCount += 1;
+            return (
+              '<button type="button" class="ch-tile compact ' + (isOn ? 'unlocked' : '') + '" data-toggle-intl="' + num + '" aria-pressed="' + String(isOn) + '">' +
+              '<div class="ch-tile-top">' +
+              '<span class="ch-tile-zh">دولي ' + num + '</span>' +
+              '<span class="ch-tile-state">' + (isOn ? '🔓' : '🔒') + '</span>' +
+              '</div>' +
+              '<span class="ch-tile-ar">' + (isOn ? 'مفتوح' : 'مقفل') + ' · HSK 3.0</span>' +
+              '</button>'
+            );
+          }).join('');
+          setCounterTone(elAccessIntlCounter, selectedCount, 10);
+        }
+
+        function renderAccessArabicMocksGrid() {
+          var selectedCount = 0;
+          elAccessArabicMocksGrid.innerHTML = ALL_ARABIC_MOCK_NUMS.map(function (num) {
+            var isOn = Boolean(state.editingArabicMocksSet[num]);
+            if (isOn) selectedCount += 1;
+            return (
+              '<button type="button" class="ch-tile compact ' + (isOn ? 'unlocked' : '') + '" data-toggle-arabic="' + num + '" aria-pressed="' + String(isOn) + '">' +
+              '<div class="ch-tile-top">' +
+              '<span class="ch-tile-zh">عربي ' + num + '</span>' +
+              '<span class="ch-tile-state">' + (isOn ? '🔓' : '🔒') + '</span>' +
+              '</div>' +
+              '<span class="ch-tile-ar">' + (isOn ? 'مفتوح' : 'مقفل') + ' · تطبيقي</span>' +
+              '</button>'
+            );
+          }).join('');
+          setCounterTone(elAccessArabicCounter, selectedCount, 5);
+        }
+
+        function renderAccessPatternsGrid() {
+          var selectedCount = 0;
+          elAccessPatternsGrid.innerHTML = HSK_PATTERN_LABELS.map(function (pat) {
+            var isOn = Boolean(state.editingPatternsSet[pat.num]);
+            if (isOn) selectedCount += 1;
+            return (
+              '<button type="button" class="ch-tile compact ' + (isOn ? 'unlocked' : '') + '" data-toggle-pattern="' + pat.num + '" aria-pressed="' + String(isOn) + '">' +
+              '<div class="ch-tile-top">' +
+              '<span class="ch-tile-zh font-hanzi">' + escapeHtml(pat.shortTile) + '</span>' +
+              '<span class="ch-tile-state">' + (isOn ? '🔓' : '🔒') + '</span>' +
+              '</div>' +
+              '<span class="ch-tile-ar">' + escapeHtml(pat.shortSub) + '</span>' +
+              '</button>'
+            );
+          }).join('');
+          setCounterTone(elAccessPatternsCounter, selectedCount, 7);
+        }
+
+        function renderAllAccessGrids() {
+          renderAccessChaptersGrid();
+          renderAccessIntlMocksGrid();
+          renderAccessArabicMocksGrid();
+          renderAccessPatternsGrid();
+        }
+
+        function fillEditingSetFromList(list) {
+          var map = {};
+          (list || []).forEach(function (n) { map[n] = true; });
+          return map;
+        }
+
+        function extractSortedIdsFromSet(mapObj, maxNum) {
+          var out = [];
+          for (var i = 1; i <= maxNum; i++) {
+            if (mapObj[i]) out.push(i);
+          }
+          return out;
         }
 
         function renderAccessDevicePanel(deviceId) {
@@ -3462,19 +3640,15 @@
           state.editingAccessStudent = student;
           var norm = parseUnlockedAccess(student.unlockedAccess);
 
-          state.editingChaptersSet = {};
-          if (norm.chapters === 'ALL') {
-            for (var i = 1; i <= 15; i++) state.editingChaptersSet[i] = true;
-          } else if (Array.isArray(norm.chapters)) {
-            norm.chapters.forEach(function (cid) { state.editingChaptersSet[cid] = true; });
-          }
+          state.editingChaptersSet = fillEditingSetFromList(norm.chapters);
+          state.editingIntlMocksSet = fillEditingSetFromList(norm.intlMocks);
+          state.editingArabicMocksSet = fillEditingSetFromList(norm.arabicMocks);
+          state.editingPatternsSet = fillEditingSetFromList(norm.patterns);
 
           elAccessStudentName.textContent = student.studentName;
           elAccessStudentCode.textContent = student.studentCode;
-          elAccessMocksToggle.checked = Boolean(norm.mocks);
-          elAccessPatternsToggle.checked = norm.patterns !== false;
 
-          renderAccessChaptersGrid();
+          renderAllAccessGrids();
           renderAccessDevicePanel(student.boundDeviceId);
 
           elAccessBackdrop.classList.add('open');
@@ -3490,16 +3664,12 @@
           }
         }
 
-        function applyPreset(chaptersArrayOrAll, mocksBool, patternsBool, label) {
-          state.editingChaptersSet = {};
-          if (chaptersArrayOrAll === 'ALL') {
-            for (var i = 1; i <= 15; i++) state.editingChaptersSet[i] = true;
-          } else {
-            chaptersArrayOrAll.forEach(function (n) { state.editingChaptersSet[n] = true; });
-          }
-          elAccessMocksToggle.checked = Boolean(mocksBool);
-          elAccessPatternsToggle.checked = Boolean(patternsBool);
-          renderAccessChaptersGrid();
+        function applyGranularPreset(chaptersList, intlList, arabicList, patternsList, label) {
+          state.editingChaptersSet = fillEditingSetFromList(chaptersList);
+          state.editingIntlMocksSet = fillEditingSetFromList(intlList);
+          state.editingArabicMocksSet = fillEditingSetFromList(arabicList);
+          state.editingPatternsSet = fillEditingSetFromList(patternsList);
+          renderAllAccessGrids();
           showToast('تم تجهيز: ' + label + ' — اضغط «حفظ وتطبيق الصلاحيات» للتأكيد.');
         }
 
@@ -3507,15 +3677,11 @@
           var target = state.editingAccessStudent;
           if (!target) return;
 
-          var selectedIds = [];
-          for (var i = 1; i <= 15; i++) {
-            if (state.editingChaptersSet[i]) selectedIds.push(i);
-          }
-
           var nextAccess = {
-            chapters: selectedIds.length >= 15 ? 'ALL' : selectedIds,
-            mocks: Boolean(elAccessMocksToggle.checked),
-            patterns: Boolean(elAccessPatternsToggle.checked)
+            chapters: extractSortedIdsFromSet(state.editingChaptersSet, 15),
+            intlMocks: extractSortedIdsFromSet(state.editingIntlMocksSet, 10),
+            arabicMocks: extractSortedIdsFromSet(state.editingArabicMocksSet, 5),
+            patterns: extractSortedIdsFromSet(state.editingPatternsSet, 7)
           };
 
           target.unlockedAccess = nextAccess;
@@ -3554,7 +3720,7 @@
             })
           })
             .then(function () {
-              showToast('تم حفظ وتطبيق صلاحيات «' + target.studentName + '» في Google Sheets بنجاح.', 'ok');
+              showToast('تم حفظ وتطبيق صلاحيات «' + target.studentName + '» الفردية في Google Sheets بنجاح.', 'ok');
               closeAccessModal();
               setTimeout(function () { fetchStudentData(true); }, 1600);
             })
@@ -3619,12 +3785,13 @@
 
           var grade = getOverallGrade(student.accuracyPercent, student.totalSolved);
           var chSum = formatChaptersSummary(student.unlockedAccess);
+          var exSum = formatExamsSummary(student.unlockedAccess);
 
           elReportTitle.textContent = student.studentName;
           elReportCode.textContent = 'الكود: ' + student.studentCode;
           elReportLastActive.textContent = 'آخر نشاط: ' + formatLastActive(student.lastActive);
           elReportAccessLine.textContent =
-            'الصلاحية: ' + chSum.text + (student.unlockedAccess.mocks ? ' + الامتحانات الشاملة' : '');
+            'الصلاحية: ' + chSum.text + ' · ' + exSum.mainText + ' · ' + exSum.patText;
 
           elReportGrade.textContent = grade.label;
           elReportGrade.className = 'kpi-value ' + grade.tone;
@@ -3699,7 +3866,7 @@
           }
 
           var code = generateUniqueStudentCode();
-          var defaultAccess = { chapters: [1], mocks: false, patterns: true };
+          var defaultAccess = createDefaultFreeTrialAccess();
           var record = {
             studentId: code,
             studentName: name,
@@ -3962,7 +4129,7 @@
           speakTeacherChinese(btn.getAttribute('data-speak-text'));
         });
 
-        // أحداث نافذة الصلاحيات والجهاز
+        // أحداث نافذة الصلاحيات والجهاز (الشبكات الأربعة + أزرار الكل + الباقات)
         elAccessChaptersGrid.addEventListener('click', function (e) {
           var tile = e.target && e.target.closest ? e.target.closest('[data-toggle-ch]') : null;
           if (!tile) return;
@@ -3971,14 +4138,80 @@
           renderAccessChaptersGrid();
         });
 
+        elAccessIntlMocksGrid.addEventListener('click', function (e) {
+          var tile = e.target && e.target.closest ? e.target.closest('[data-toggle-intl]') : null;
+          if (!tile) return;
+          var num = Number(tile.getAttribute('data-toggle-intl'));
+          state.editingIntlMocksSet[num] = !state.editingIntlMocksSet[num];
+          renderAccessIntlMocksGrid();
+        });
+
+        elAccessArabicMocksGrid.addEventListener('click', function (e) {
+          var tile = e.target && e.target.closest ? e.target.closest('[data-toggle-arabic]') : null;
+          if (!tile) return;
+          var num = Number(tile.getAttribute('data-toggle-arabic'));
+          state.editingArabicMocksSet[num] = !state.editingArabicMocksSet[num];
+          renderAccessArabicMocksGrid();
+        });
+
+        elAccessPatternsGrid.addEventListener('click', function (e) {
+          var tile = e.target && e.target.closest ? e.target.closest('[data-toggle-pattern]') : null;
+          if (!tile) return;
+          var num = Number(tile.getAttribute('data-toggle-pattern'));
+          state.editingPatternsSet[num] = !state.editingPatternsSet[num];
+          renderAccessPatternsGrid();
+        });
+
+        elChaptersSelectAllBtn.addEventListener('click', function () {
+          state.editingChaptersSet = fillEditingSetFromList(ALL_CHAPTER_NUMS);
+          renderAccessChaptersGrid();
+        });
+        elChaptersClearAllBtn.addEventListener('click', function () {
+          state.editingChaptersSet = {};
+          renderAccessChaptersGrid();
+        });
+
+        elIntlOpenAllBtn.addEventListener('click', function () {
+          state.editingIntlMocksSet = fillEditingSetFromList(ALL_INTL_MOCK_NUMS);
+          renderAccessIntlMocksGrid();
+        });
+        elIntlLockAllBtn.addEventListener('click', function () {
+          state.editingIntlMocksSet = {};
+          renderAccessIntlMocksGrid();
+        });
+
+        elArabicOpenAllBtn.addEventListener('click', function () {
+          state.editingArabicMocksSet = fillEditingSetFromList(ALL_ARABIC_MOCK_NUMS);
+          renderAccessArabicMocksGrid();
+        });
+        elArabicLockAllBtn.addEventListener('click', function () {
+          state.editingArabicMocksSet = {};
+          renderAccessArabicMocksGrid();
+        });
+
+        elPatternsOpenAllBtn.addEventListener('click', function () {
+          state.editingPatternsSet = fillEditingSetFromList(ALL_PATTERN_NUMS);
+          renderAccessPatternsGrid();
+        });
+        elPatternsLockAllBtn.addEventListener('click', function () {
+          state.editingPatternsSet = {};
+          renderAccessPatternsGrid();
+        });
+
         elPresetFreeTrialBtn.addEventListener('click', function () {
-          applyPreset([1], false, true, 'باقة التجربة المجانية (الفصل 1 فقط)');
+          applyGranularPreset([1], [], [], [1], 'باقة التجربة المجانية');
         });
         elPresetAvailable15Btn.addEventListener('click', function () {
-          applyPreset([1, 2, 3, 4, 5], false, true, 'الفصول المتاحة حالياً (1–5)');
+          applyGranularPreset([1, 2, 3, 4, 5], [1], [1], ALL_PATTERN_NUMS, 'الفصول المتاحة (1–5) + الأنماط');
         });
         elPresetVipFullBtn.addEventListener('click', function () {
-          applyPreset('ALL', true, true, 'الباقة الكاملة VIP');
+          applyGranularPreset(
+            ALL_CHAPTER_NUMS,
+            ALL_INTL_MOCK_NUMS,
+            ALL_ARABIC_MOCK_NUMS,
+            ALL_PATTERN_NUMS,
+            'الباقة الكاملة VIP'
+          );
         });
 
         elSaveAccessBtn.addEventListener('click', handleSaveAccess);

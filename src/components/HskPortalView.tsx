@@ -22,7 +22,7 @@ import {
   INTERNATIONAL_MOCK_EXAMS,
 } from '../data/mockExamsData';
 import { HskPatternId } from '../types';
-import { isMocksUnlocked, isPatternsUnlocked } from '../utils/accessControl';
+import { isMockExamUnlocked, isPatternUnlocked } from '../utils/accessControl';
 import { HskFixedMockExamRunner } from './HskFixedMockExamRunner';
 import { HskPatternPracticeRunner } from './HskPatternPracticeRunner';
 import { LockedAccessModal } from './LockedAccessModal';
@@ -136,8 +136,9 @@ export function HskPortalView() {
   const [lockedPaperModal, setLockedPaperModal] = useState<FixedMockExamPaper | null>(null);
   const [lockedPatternModal, setLockedPatternModal] = useState<HskPatternModule | null>(null);
   const [examTrackTab, setExamTrackTab] = useState<'international' | 'arabic'>('international');
-  const mocksAllowed = isMocksUnlocked(unlockedAccess);
-  const patternsAllowed = isPatternsUnlocked(unlockedAccess);
+  const unlockedPatternsCount = unlockedAccess.patterns.length;
+  const unlockedIntlCount = unlockedAccess.intlMocks.length;
+  const unlockedArabicCount = unlockedAccess.arabicMocks.length;
 
   if (activePattern) {
     return (
@@ -324,13 +325,16 @@ export function HskPortalView() {
               </h2>
             </div>
           </div>
-          <p className="text-xs text-[#57534E] dark:text-[#A8A29E]">
-            ٤ أنماط للاستماع (听力) · ٣ أنماط للقراءة والاستنتاج (阅读)
+          <p className="text-xs text-[#57534E] dark:text-[#A8A29E] tabular-nums">
+            ٤ أنماط للاستماع (听力) · ٣ أنماط للقراءة (阅读) · مفتوح لك{' '}
+            <strong className="text-[#15803D] dark:text-[#22C55E]">{unlockedPatternsCount}/7</strong>
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {HSK_PATTERN_MODULES.map((mod) => {
+          {HSK_PATTERN_MODULES.map((mod, idx) => {
+            const patternNum = idx + 1;
+            const isPatternOpen = isPatternUnlocked(unlockedAccess, patternNum);
             const st = patternStats?.[mod.id];
             const solved = st ? (st.solved ?? st.attempted ?? 0) : 0;
             const correct = st ? (st.correct ?? 0) : 0;
@@ -346,14 +350,14 @@ export function HskPortalView() {
                 key={mod.id}
                 type="button"
                 onClick={() => {
-                  if (!patternsAllowed) {
+                  if (!isPatternOpen) {
                     setLockedPatternModal(mod);
                     return;
                   }
                   setActivePattern(mod);
                 }}
                 className={`text-right rounded-xl border p-5 flex flex-col justify-between gap-4 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] ${
-                  patternsAllowed
+                  isPatternOpen
                     ? 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] hover:border-[#B91C1C]/45 dark:hover:border-[#EF4444]/45 hover:-translate-y-0.5'
                     : 'border-[#D97706]/25 dark:border-[#F59E0B]/25 bg-[#F4EFE6]/85 dark:bg-[#191715]'
                 }`}
@@ -372,14 +376,21 @@ export function HskPortalView() {
                       </span>
                     </div>
 
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#57534E] dark:text-[#A8A29E]">
-                      {mod.section === 'listening' ? (
-                        <Headphones className="w-3.5 h-3.5 text-[#B91C1C] dark:text-[#EF4444]" />
-                      ) : (
-                        <BookOpen className="w-3.5 h-3.5 text-[#D97706] dark:text-[#F59E0B]" />
-                      )}
-                      <span>{mod.section === 'listening' ? 'استماع' : 'قراءة'}</span>
-                    </span>
+                    {isPatternOpen ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#57534E] dark:text-[#A8A29E]">
+                        {mod.section === 'listening' ? (
+                          <Headphones className="w-3.5 h-3.5 text-[#B91C1C] dark:text-[#EF4444]" />
+                        ) : (
+                          <BookOpen className="w-3.5 h-3.5 text-[#D97706] dark:text-[#F59E0B]" />
+                        )}
+                        <span>{mod.section === 'listening' ? 'استماع' : 'قراءة'}</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-[#D97706]/35 dark:border-[#F59E0B]/35 bg-[#D97706]/10 dark:bg-[#F59E0B]/15 font-bold text-[#B45309] dark:text-[#F59E0B] text-[11px]">
+                        <Lock className="w-3 h-3" />
+                        <span>مقفل</span>
+                      </span>
+                    )}
                   </div>
 
                   <div>
@@ -428,13 +439,13 @@ export function HskPortalView() {
 
                 <div className="flex items-center justify-between pt-3 border-t border-[#1C1917]/8 dark:border-[#F5F2EB]/8 text-xs tabular-nums">
                   <span className="text-[#57534E] dark:text-[#A8A29E]">
-                    {!patternsAllowed
+                    {!isPatternOpen
                       ? 'يتطلب التفعيل من المعلم'
                       : solved > 0
                         ? 'مواصلة التدريب'
                         : 'تدريب غير مؤقت'}
                   </span>
-                  {patternsAllowed ? (
+                  {isPatternOpen ? (
                     <span className="font-bold text-[#B91C1C] dark:text-[#EF4444] inline-flex items-center gap-1">
                       <span>ابدأ النمط</span>
                       <ArrowLeft className="w-3.5 h-3.5" />
@@ -442,7 +453,7 @@ export function HskPortalView() {
                   ) : (
                     <span className="font-bold text-[#B45309] dark:text-[#F59E0B] inline-flex items-center gap-1">
                       <Lock className="w-3.5 h-3.5" />
-                      <span>مغلق</span>
+                      <span>🔒 تفعيل النمط</span>
                     </span>
                   )}
                 </div>
@@ -487,28 +498,28 @@ export function HskPortalView() {
               role="tab"
               aria-selected={examTrackTab === 'international'}
               onClick={() => setExamTrackTab('international')}
-              className={`inline-flex items-center gap-2 px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${
+              className={`inline-flex items-center gap-2 px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap tabular-nums ${
                 examTrackTab === 'international'
                   ? 'bg-white dark:bg-[#292623] text-[#B91C1C] dark:text-[#EF4444] shadow-xs'
                   : 'text-[#57534E] dark:text-[#A8A29E] hover:text-[#1C1917] dark:hover:text-[#F5F2EB]'
               }`}
             >
               <Globe2 className="w-4 h-4 shrink-0" />
-              <span>النماذج الدولية المعتمدة (١٠)</span>
+              <span>النماذج الدولية ({unlockedIntlCount}/10)</span>
             </button>
             <button
               type="button"
               role="tab"
               aria-selected={examTrackTab === 'arabic'}
               onClick={() => setExamTrackTab('arabic')}
-              className={`inline-flex items-center gap-2 px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap ${
+              className={`inline-flex items-center gap-2 px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap tabular-nums ${
                 examTrackTab === 'arabic'
                   ? 'bg-white dark:bg-[#292623] text-[#15803D] dark:text-[#22C55E] shadow-xs'
                   : 'text-[#57534E] dark:text-[#A8A29E] hover:text-[#1C1917] dark:hover:text-[#F5F2EB]'
               }`}
             >
               <BookOpen className="w-4 h-4 shrink-0" />
-              <span>النماذج التطبيقية العربية (٥)</span>
+              <span>النماذج العربية ({unlockedArabicCount}/5)</span>
             </button>
           </div>
         </div>
@@ -516,7 +527,7 @@ export function HskPortalView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayedPapers.map((paper) => {
             const isReady = paper.status === 'ready';
-            const isLocked = !mocksAllowed;
+            const isLocked = !isMockExamUnlocked(unlockedAccess, paper.track, paper.modelNumber);
             const best = getBestResultForPaper(paper.id);
 
             return (
