@@ -1,5 +1,10 @@
 import { HskSceneId } from '../components/SceneCardVisual';
 import { HskPatternId } from '../types';
+import { INTERNATIONAL_MODEL_2_QUESTIONS } from './intlMockExam2';
+import { INTERNATIONAL_MODEL_3_QUESTIONS } from './intlMockExam3';
+import { INTERNATIONAL_MODEL_4_QUESTIONS } from './intlMockExam4';
+import { INTERNATIONAL_MODEL_5_QUESTIONS } from './intlMockExam5';
+import { INTERNATIONAL_MODEL_6_QUESTIONS } from './intlMockExam6';
 
 export type HskExamPartId =
   | 'listening-p1'
@@ -1681,14 +1686,84 @@ export const INTERNATIONAL_MOCK_EXAMS: FixedMockExamPaper[] = [
     passScore: 120,
     questions: INTERNATIONAL_MODEL_1_QUESTIONS,
   },
-  ...Array.from({ length: 9 }, (_, i) => {
-    const num = i + 2;
+  {
+    id: 'intl-model-2',
+    track: 'international',
+    modelNumber: 2,
+    titleAr: 'النموذج الدولي ٢ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（二）',
+    subtitleAr: '٤٠ سؤالاً موحداً (التسوق، المواصلات، الساعة والحصص، السينما والمستشفى) · الفصول ١–٧',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_2_QUESTIONS,
+  },
+  {
+    id: 'intl-model-3',
+    track: 'international',
+    modelNumber: 3,
+    titleAr: 'النموذج الدولي ٣ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（三）',
+    subtitleAr: '٤٠ سؤالاً موحداً (ظروف المكان، المكتبة والطبيب، الغناء والتلفاز، الفاكهة والملابس والأسعار) · الفصول ١–١٠',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_3_QUESTIONS,
+  },
+  {
+    id: 'intl-model-4',
+    track: 'international',
+    modelNumber: 4,
+    titleAr: 'النموذج الدولي ٤ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（四）',
+    subtitleAr: '٤٠ سؤالاً موحداً (المضارع المستمر 正在، القيادة والجامعة، الطقس والمرض والدواء 了) · الفصول ١–١٢',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_4_QUESTIONS,
+  },
+  {
+    id: 'intl-model-5',
+    track: 'international',
+    modelNumber: 5,
+    titleAr: 'النموذج الدولي ٥ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（五）',
+    subtitleAr: '٤٠ سؤالاً موحداً (الطلب المهذب 可以/一下، المطعم والإفطار، القطار، كتابة الرموز و都) · الفصول ١–١٤',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_5_QUESTIONS,
+  },
+  {
+    id: 'intl-model-6',
+    track: 'international',
+    modelNumber: 6,
+    titleAr: 'النموذج الدولي ٦ — HSK 3.0 المعتمد',
+    titleZh: 'HSK 3.0 国际模拟试卷（六）',
+    subtitleAr: '٤٠ سؤالاً موحداً (السفر لبكين وشيآن، الطائرة ومطار داشينغ والمراجعة الشاملة) · الفصول ١–١٥',
+    status: 'ready',
+    listeningDurationSeconds: 12 * 60,
+    readingDurationSeconds: 20 * 60,
+    maxScore: 200,
+    passScore: 120,
+    questions: INTERNATIONAL_MODEL_6_QUESTIONS,
+  },
+  ...Array.from({ length: 4 }, (_, i) => {
+    const num = i + 7;
     return {
       id: `intl-model-${num}`,
       track: 'international' as const,
       modelNumber: num,
       titleAr: `النموذج الدولي ${num} — HSK 3.0`,
-      titleZh: `HSK 3.0 国际模拟试卷（${['二', '三', '四', '五', '六', '七', '八', '九', '十'][i]}）`,
+      titleZh: `HSK 3.0 国际模拟试卷（${['七', '八', '九', '十'][i]}）`,
       subtitleAr: 'نموذج موحّد مهيّأ للإدراج (٤٠ سؤالاً · ٢٠٠ درجة)',
       status: 'coming-soon' as const,
       listeningDurationSeconds: 12 * 60,

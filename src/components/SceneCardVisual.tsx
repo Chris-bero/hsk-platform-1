@@ -18,7 +18,25 @@ export type HskSceneId =
   | 'birthday-cake'
   | 'tennis-sport'
   | 'writing-hanzi'
-  | 'friends-cafe';
+  | 'friends-cafe'
+  | 'supermarket-shopping'
+  | 'taxi-ride'
+  | 'cinema-movie'
+  | 'cat-under-table'
+  | 'dog-playing'
+  | 'apples-fruit'
+  | 'clothing-shop'
+  | 'driving-car'
+  | 'sleeping-bed'
+  | 'rainy-weather'
+  | 'snowy-weather'
+  | 'taking-medicine'
+  | 'breakfast-bread-egg'
+  | 'train-station'
+  | 'airport-plane'
+  | 'singing-song'
+  | 'steamed-buns'
+  | 'watching-tv';
 
 interface SceneCardVisualProps {
   sceneId: HskSceneId;
@@ -811,6 +829,501 @@ export function SceneCardVisual({ sceneId, className = 'w-full h-32' }: SceneCar
 
           <path d="M216 18 L166 86 L174 92 L224 24 Z" fill="#D97706" stroke="#78350F" strokeWidth="1.6" />
           <path d="M166 86 L154 106 L174 92 Z" fill="#1C1917" />
+        </svg>
+      );
+
+    case 'supermarket-shopping':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#F0FDF4" />
+          <rect y="114" width="240" height="36" fill="#DCFCE7" />
+          {/* Supermarket shelves */}
+          <rect x="18" y="16" width="120" height="86" rx="5" fill="#FFFFFF" stroke="#86EFAC" strokeWidth="2.4" />
+          <line x1="18" y1="44" x2="138" y2="44" stroke="#CBD5E1" strokeWidth="3" />
+          <line x1="18" y1="74" x2="138" y2="74" stroke="#CBD5E1" strokeWidth="3" />
+          {/* Milk cartons & grocery boxes */}
+          <rect x="28" y="23" width="16" height="20" rx="2" fill="#38BDF8" />
+          <polygon points="28,23 36,18 44,23" fill="#0284C7" />
+          <rect x="50" y="23" width="16" height="20" rx="2" fill="#38BDF8" />
+          <polygon points="50,23 58,18 66,23" fill="#0284C7" />
+          <circle cx="88" cy="34" r="8" fill="#EF4444" />
+          <circle cx="106" cy="34" r="8" fill="#F59E0B" />
+          <circle cx="122" cy="34" r="7" fill="#22C55E" />
+          <rect x="28" y="52" width="22" height="20" rx="3" fill="#F97316" />
+          <rect x="56" y="54" width="18" height="18" rx="3" fill="#EAB308" />
+          <rect x="82" y="50" width="16" height="22" rx="3" fill="#EC4899" />
+          <rect x="104" y="54" width="24" height="18" rx="3" fill="#14B8A6" />
+          {/* Shopping cart */}
+          <path d="M126 78 H198 L190 112 H136 Z" fill="#E2E8F0" stroke="#475569" strokeWidth="2.6" strokeLinejoin="round" />
+          <line x1="148" y1="78" x2="150" y2="112" stroke="#64748B" strokeWidth="1.8" />
+          <line x1="168" y1="78" x2="168" y2="112" stroke="#64748B" strokeWidth="1.8" />
+          <line x1="186" y1="78" x2="182" y2="112" stroke="#64748B" strokeWidth="1.8" />
+          <line x1="130" y1="95" x2="194" y2="95" stroke="#64748B" strokeWidth="1.8" />
+          {/* Items inside cart */}
+          <rect x="140" y="62" width="18" height="22" rx="2" fill="#38BDF8" stroke="#0284C7" strokeWidth="1.5" />
+          <circle cx="170" cy="72" r="9" fill="#DC2626" />
+          <path d="M170 63 Q174 58 178 61" fill="none" stroke="#15803D" strokeWidth="2" />
+          <ellipse cx="186" cy="74" rx="8" ry="11" fill="#F59E0B" />
+          {/* Cart handle & wheels */}
+          <path d="M198 78 L208 62 H222" fill="none" stroke="#B91C1C" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="144" cy="124" r="8" fill="#1E293B" />
+          <circle cx="144" cy="124" r="3" fill="#CBD5E1" />
+          <circle cx="184" cy="124" r="8" fill="#1E293B" />
+          <circle cx="184" cy="124" r="3" fill="#CBD5E1" />
+        </svg>
+      );
+
+    case 'taxi-ride':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#E0F2FE" />
+          {/* City skyline silhouette */}
+          <rect x="16" y="40" width="28" height="62" fill="#BAE6FD" />
+          <rect x="50" y="24" width="34" height="78" fill="#93C5FD" />
+          <rect x="158" y="34" width="32" height="68" fill="#BAE6FD" />
+          <rect x="196" y="48" width="28" height="54" fill="#93C5FD" />
+          {/* Asphalt road */}
+          <rect y="102" width="240" height="48" fill="#334155" />
+          <line x1="14" y1="128" x2="54" y2="128" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
+          <line x1="94" y1="128" x2="144" y2="128" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
+          <line x1="184" y1="128" x2="226" y2="128" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
+          {/* Taxi roof light */}
+          <rect x="102" y="48" width="32" height="11" rx="3" fill="#FDE047" stroke="#92400E" strokeWidth="2" />
+          {/* Taxi body */}
+          <path d="M56 80 L76 58 H162 L184 80 H208 C216 80, 220 86, 220 94 V110 H24 V94 C24 85, 32 80, 42 80 Z" fill="#FACC15" stroke="#854D0E" strokeWidth="2.4" />
+          {/* Windows */}
+          <path d="M80 63 H116 V80 H64 Z" fill="#E0F2FE" stroke="#475569" strokeWidth="1.6" />
+          <path d="M122 63 H158 L174 80 H122 Z" fill="#E0F2FE" stroke="#475569" strokeWidth="1.6" />
+          {/* Checkered taxi stripe */}
+          <rect x="52" y="92" width="12" height="7" fill="#1E293B" />
+          <rect x="76" y="92" width="12" height="7" fill="#1E293B" />
+          <rect x="100" y="92" width="12" height="7" fill="#1E293B" />
+          <rect x="124" y="92" width="12" height="7" fill="#1E293B" />
+          <rect x="148" y="92" width="12" height="7" fill="#1E293B" />
+          <rect x="172" y="92" width="12" height="7" fill="#1E293B" />
+          {/* Headlight & taillight */}
+          <rect x="210" y="88" width="10" height="8" rx="2" fill="#FEF9C3" />
+          <rect x="24" y="88" width="8" height="8" rx="2" fill="#DC2626" />
+          {/* Wheels */}
+          <circle cx="68" cy="112" r="15" fill="#0F172A" />
+          <circle cx="68" cy="112" r="7" fill="#94A3B8" />
+          <circle cx="176" cy="112" r="15" fill="#0F172A" />
+          <circle cx="176" cy="112" r="7" fill="#94A3B8" />
+        </svg>
+      );
+
+    case 'cinema-movie':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#1E1B4B" />
+          {/* Cinema screen */}
+          <rect x="26" y="14" width="188" height="74" rx="5" fill="#F8FAFC" stroke="#6366F1" strokeWidth="3" />
+          {/* Animated landscape playing on screen */}
+          <rect x="30" y="18" width="180" height="66" rx="3" fill="#38BDF8" />
+          <circle cx="176" cy="36" r="10" fill="#FDE047" />
+          <polygon points="30,84 82,42 134,84" fill="#15803D" />
+          <polygon points="94,84 148,46 210,84" fill="#166534" />
+          {/* Red curtains */}
+          <path d="M18 10 H36 Q32 52 24 94 H18 Z" fill="#B91C1C" />
+          <path d="M222 10 H204 Q208 52 216 94 H222 Z" fill="#B91C1C" />
+          {/* Theater seats row */}
+          <rect x="28" y="108" width="32" height="28" rx="6" fill="#DC2626" stroke="#7F1D1D" strokeWidth="2" />
+          <rect x="68" y="108" width="32" height="28" rx="6" fill="#DC2626" stroke="#7F1D1D" strokeWidth="2" />
+          <rect x="108" y="108" width="32" height="28" rx="6" fill="#DC2626" stroke="#7F1D1D" strokeWidth="2" />
+          <rect x="148" y="108" width="32" height="28" rx="6" fill="#DC2626" stroke="#7F1D1D" strokeWidth="2" />
+          <rect x="188" y="108" width="28" height="28" rx="6" fill="#DC2626" stroke="#7F1D1D" strokeWidth="2" />
+          {/* Popcorn bucket silhouette */}
+          <polygon points="104,104 114,104 112,120 106,120" fill="#FEF08A" stroke="#B45309" strokeWidth="1.2" />
+          <circle cx="109" cy="102" r="4" fill="#FEF9C3" />
+        </svg>
+      );
+
+    case 'cat-under-table':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FEFCE8" />
+          <rect y="114" width="240" height="36" fill="#E7D7BE" />
+          {/* Wooden table */}
+          <rect x="26" y="46" width="188" height="14" rx="4" fill="#92400E" />
+          <rect x="38" y="60" width="11" height="72" rx="2" fill="#78350F" />
+          <rect x="191" y="60" width="11" height="72" rx="2" fill="#78350F" />
+          {/* Small vase on top of table */}
+          <ellipse cx="164" cy="36" rx="10" ry="12" fill="#38BDF8" />
+          <circle cx="164" cy="20" r="6" fill="#F472B6" />
+          {/* Cute orange cat sitting under the table */}
+          <ellipse cx="118" cy="126" rx="34" ry="7" fill="#C4B094" />
+          <path d="M142 114 Q166 106 164 90" fill="none" stroke="#F97316" strokeWidth="7" strokeLinecap="round" />
+          <ellipse cx="116" cy="112" rx="26" ry="17" fill="#FB923C" />
+          <circle cx="112" cy="86" r="19" fill="#FB923C" />
+          {/* Cat ears */}
+          <polygon points="96,76 94,58 108,70" fill="#EA580C" />
+          <polygon points="128,76 130,58 116,70" fill="#EA580C" />
+          {/* Cat face */}
+          <circle cx="105" cy="85" r="2.8" fill="#1C1917" />
+          <circle cx="119" cy="85" r="2.8" fill="#1C1917" />
+          <polygon points="112,90 109,94 115,94" fill="#EC4899" />
+          <line x1="86" y1="88" x2="99" y2="90" stroke="#7C2D12" strokeWidth="1.6" />
+          <line x1="86" y1="94" x2="99" y2="94" stroke="#7C2D12" strokeWidth="1.6" />
+          <line x1="125" y1="90" x2="138" y2="88" stroke="#7C2D12" strokeWidth="1.6" />
+          <line x1="125" y1="94" x2="138" y2="94" stroke="#7C2D12" strokeWidth="1.6" />
+          {/* Paws */}
+          <ellipse cx="104" cy="126" rx="7" ry="4.5" fill="#FFEDD5" />
+          <ellipse cx="122" cy="126" rx="7" ry="4.5" fill="#FFEDD5" />
+        </svg>
+      );
+
+    case 'dog-playing':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#DBEAFE" />
+          <circle cx="204" cy="28" r="15" fill="#FDE047" />
+          <rect y="94" width="240" height="56" fill="#4ADE80" />
+          <ellipse cx="102" cy="130" rx="44" ry="8" fill="#22C55E" />
+          {/* Happy brown puppy */}
+          <path d="M58 92 Q44 76 54 68" fill="none" stroke="#92400E" strokeWidth="7" strokeLinecap="round" />
+          <ellipse cx="96" cy="100" rx="34" ry="20" fill="#B45309" />
+          <rect x="70" y="110" width="11" height="22" rx="5" fill="#92400E" />
+          <rect x="114" y="110" width="11" height="22" rx="5" fill="#92400E" />
+          {/* Puppy head & floppy ears */}
+          <circle cx="132" cy="72" r="21" fill="#D97706" />
+          <ellipse cx="114" cy="76" rx="8" ry="15" fill="#78350F" />
+          <ellipse cx="149" cy="76" rx="8" ry="15" fill="#78350F" />
+          <ellipse cx="134" cy="80" rx="10" ry="7" fill="#FEF3C7" />
+          <circle cx="126" cy="68" r="2.8" fill="#1C1917" />
+          <circle cx="140" cy="68" r="2.8" fill="#1C1917" />
+          <ellipse cx="134" cy="77" rx="4.2" ry="3" fill="#1C1917" />
+          <path d="M130 84 Q134 89 138 84" fill="#EF4444" />
+          {/* Red collar */}
+          <rect x="112" y="88" width="26" height="6" rx="3" fill="#DC2626" />
+          {/* Colorful ball */}
+          <circle cx="186" cy="118" r="15" fill="#EF4444" stroke="#991B1B" strokeWidth="2" />
+          <path d="M174 110 Q186 118 198 110" fill="none" stroke="#FEF08A" strokeWidth="3" />
+        </svg>
+      );
+
+    case 'apples-fruit':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FFF7ED" />
+          <rect y="108" width="240" height="42" fill="#FED7AA" />
+          {/* Woven fruit basket */}
+          <path d="M46 84 H194 L176 130 H64 Z" fill="#B45309" stroke="#78350F" strokeWidth="2.6" />
+          <line x1="56" y1="100" x2="184" y2="100" stroke="#F59E0B" strokeWidth="2.4" />
+          <line x1="60" y1="115" x2="180" y2="115" stroke="#F59E0B" strokeWidth="2.4" />
+          {/* Bright red & green apples piled in basket */}
+          <circle cx="84" cy="76" r="22" fill="#DC2626" />
+          <circle cx="78" cy="68" r="5" fill="#FCA5A5" opacity="0.65" />
+          <path d="M84 54 Q88 44 96 48" fill="none" stroke="#15803D" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="122" cy="68" r="24" fill="#EF4444" />
+          <circle cx="115" cy="60" r="6" fill="#FCA5A5" opacity="0.65" />
+          <ellipse cx="132" cy="44" rx="9" ry="4.5" fill="#22C55E" transform="rotate(-20 132 44)" />
+          <circle cx="158" cy="76" r="22" fill="#B91C1C" />
+          <circle cx="152" cy="68" r="5" fill="#FCA5A5" opacity="0.65" />
+          <ellipse cx="166" cy="52" rx="8" ry="4" fill="#16A34A" transform="rotate(20 166 52)" />
+          {/* Two apples resting on table */}
+          <circle cx="40" cy="116" r="15" fill="#22C55E" />
+          <circle cx="204" cy="116" r="16" fill="#EF4444" />
+          <circle cx="199" cy="110" r="4" fill="#FCA5A5" opacity="0.7" />
+        </svg>
+      );
+
+    case 'clothing-shop':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FDF2F8" />
+          <rect y="122" width="240" height="28" fill="#FBCFE8" />
+          {/* Clothing rack frame */}
+          <line x1="24" y1="30" x2="216" y2="30" stroke="#475569" strokeWidth="5" strokeLinecap="round" />
+          <line x1="34" y1="30" x2="34" y2="128" stroke="#475569" strokeWidth="5" strokeLinecap="round" />
+          <line x1="206" y1="30" x2="206" y2="128" stroke="#475569" strokeWidth="5" strokeLinecap="round" />
+          {/* Shirt 1 (Blue jacket) */}
+          <path d="M68 30 L52 46 L62 56 L66 50 V104 H94 V50 L98 56 L108 46 L92 30 Z" fill="#2563EB" stroke="#1E3A8A" strokeWidth="2" />
+          <line x1="80" y1="36" x2="80" y2="104" stroke="#93C5FD" strokeWidth="2" />
+          {/* Shirt 2 (Red dress) */}
+          <path d="M120 30 L108 46 L114 54 L110 112 H146 L142 54 L148 46 L136 30 Z" fill="#E11D48" stroke="#881337" strokeWidth="2" />
+          <rect x="112" y="68" width="32" height="5" fill="#FDE047" />
+          {/* Shirt 3 (Emerald sweater) */}
+          <path d="M168 30 L152 46 L160 56 L164 50 V102 H190 V50 L194 56 L202 46 L186 30 Z" fill="#10B981" stroke="#065F46" strokeWidth="2" />
+          <circle cx="177" cy="64" r="5" fill="#FEF3C7" />
+        </svg>
+      );
+
+    case 'driving-car':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#DBEAFE" />
+          <circle cx="42" cy="30" r="14" fill="#FBBF24" />
+          <rect y="98" width="240" height="52" fill="#475569" />
+          <line x1="16" y1="126" x2="72" y2="126" stroke="#FFFFFF" strokeWidth="3.5" strokeDasharray="16 14" />
+          <line x1="110" y1="126" x2="224" y2="126" stroke="#FFFFFF" strokeWidth="3.5" strokeDasharray="16 14" />
+          {/* Sedan car */}
+          <path d="M52 80 L76 52 H154 L182 80 H206 C214 80, 218 86, 218 94 V108 H24 V94 C24 85, 32 80, 42 80 Z" fill="#2563EB" stroke="#1E3A8A" strokeWidth="2.4" />
+          <path d="M82 58 H118 V80 H64 Z" fill="#E0F2FE" />
+          <path d="M124 58 H150 L170 80 H124 Z" fill="#E0F2FE" />
+          {/* Driver silhouette & steering wheel */}
+          <circle cx="140" cy="67" r="7.5" fill="#F8D2B4" />
+          <path d="M133 65 C133 58, 147 58, 147 65 Z" fill="#1C1917" />
+          <line x1="154" y1="78" x2="162" y2="69" stroke="#1E293B" strokeWidth="3" strokeLinecap="round" />
+          {/* Wheels */}
+          <circle cx="68" cy="110" r="15" fill="#0F172A" />
+          <circle cx="68" cy="110" r="7" fill="#CBD5E1" />
+          <circle cx="174" cy="110" r="15" fill="#0F172A" />
+          <circle cx="174" cy="110" r="7" fill="#CBD5E1" />
+        </svg>
+      );
+
+    case 'sleeping-bed':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#1E293B" />
+          {/* Window with crescent moon & stars */}
+          <rect x="158" y="16" width="60" height="52" rx="5" fill="#0F172A" stroke="#64748B" strokeWidth="3" />
+          <circle cx="196" cy="34" r="10" fill="#FDE047" />
+          <circle cx="201" cy="31" r="9" fill="#0F172A" />
+          <circle cx="174" cy="30" r="2.2" fill="#FEF08A" />
+          <circle cx="180" cy="48" r="1.8" fill="#FEF08A" />
+          <circle cx="206" cy="52" r="2" fill="#FEF08A" />
+          {/* Bed frame */}
+          <rect x="22" y="74" width="12" height="58" rx="3" fill="#92400E" />
+          <rect x="206" y="92" width="12" height="40" rx="3" fill="#92400E" />
+          <rect x="22" y="108" width="196" height="14" rx="3" fill="#B45309" />
+          {/* Pillow & sleeping person */}
+          <ellipse cx="56" cy="96" rx="22" ry="11" fill="#F8FAFC" />
+          <circle cx="62" cy="90" r="14" fill="#F8D2B4" />
+          <path d="M48 88 C48 74, 76 74, 76 88 Z" fill="#1C1917" />
+          <path d="M56 91 Q60 94 64 91" fill="none" stroke="#1C1917" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M67 91 Q70 94 73 91" fill="none" stroke="#1C1917" strokeWidth="1.8" strokeLinecap="round" />
+          {/* Cozy blue blanket */}
+          <path d="M74 86 C112 78, 178 82, 206 96 V110 H74 Z" fill="#3B82F6" stroke="#1D4ED8" strokeWidth="2" />
+          <path d="M74 86 H88 V110 H74 Z" fill="#BFDBFE" />
+        </svg>
+      );
+
+    case 'rainy-weather':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#CBD5E1" />
+          <rect y="118" width="240" height="32" fill="#94A3B8" />
+          {/* Rain clouds */}
+          <ellipse cx="70" cy="34" rx="34" ry="16" fill="#64748B" />
+          <ellipse cx="102" cy="30" rx="26" ry="15" fill="#475569" />
+          <ellipse cx="176" cy="34" rx="30" ry="15" fill="#64748B" />
+          {/* Raindrops */}
+          <line x1="48" y1="54" x2="42" y2="68" stroke="#0284C7" strokeWidth="2.8" strokeLinecap="round" />
+          <line x1="78" y1="58" x2="72" y2="72" stroke="#0284C7" strokeWidth="2.8" strokeLinecap="round" />
+          <line x1="158" y1="54" x2="152" y2="68" stroke="#0284C7" strokeWidth="2.8" strokeLinecap="round" />
+          <line x1="190" y1="56" x2="184" y2="70" stroke="#0284C7" strokeWidth="2.8" strokeLinecap="round" />
+          <line x1="210" y1="74" x2="204" y2="88" stroke="#0284C7" strokeWidth="2.8" strokeLinecap="round" />
+          <line x1="36" y1="86" x2="30" y2="100" stroke="#0284C7" strokeWidth="2.8" strokeLinecap="round" />
+          {/* Bright red umbrella */}
+          <path d="M68 88 A52 38 0 0 1 172 88 Z" fill="#DC2626" stroke="#991B1B" strokeWidth="2.2" />
+          <path d="M96 88 A24 38 0 0 1 144 88 Z" fill="#EF4444" />
+          <line x1="120" y1="88" x2="120" y2="126" stroke="#1E293B" strokeWidth="3.5" />
+          <path d="M120 126 A7 7 0 0 1 108 126" fill="none" stroke="#1E293B" strokeWidth="3.5" strokeLinecap="round" />
+          {/* Puddle ripples */}
+          <ellipse cx="178" cy="132" rx="24" ry="5" fill="#38BDF8" opacity="0.65" />
+          <ellipse cx="64" cy="134" rx="20" ry="4.5" fill="#38BDF8" opacity="0.65" />
+        </svg>
+      );
+
+    case 'snowy-weather':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#DBEAFE" />
+          <path d="M0 112 Q70 96 140 110 T240 106 V150 H0 Z" fill="#FFFFFF" />
+          {/* Snowy pine tree */}
+          <polygon points="48,44 26,96 70,96" fill="#15803D" />
+          <polygon points="48,44 38,66 58,66" fill="#F8FAFC" />
+          <rect x="44" y="96" width="8" height="16" fill="#78350F" />
+          {/* Cheerful snowman */}
+          <circle cx="144" cy="108" r="22" fill="#FFFFFF" stroke="#93C5FD" strokeWidth="2" />
+          <circle cx="144" cy="78" r="16" fill="#FFFFFF" stroke="#93C5FD" strokeWidth="2" />
+          {/* Scarf & hat */}
+          <rect x="130" y="90" width="28" height="6" rx="3" fill="#DC2626" />
+          <rect x="150" y="94" width="6" height="15" rx="2" fill="#DC2626" />
+          <rect x="132" y="54" width="24" height="10" rx="2" fill="#1E293B" />
+          <rect x="126" y="62" width="36" height="4" rx="2" fill="#1E293B" />
+          {/* Carrot nose & eyes */}
+          <circle cx="139" cy="74" r="2" fill="#1E293B" />
+          <circle cx="149" cy="74" r="2" fill="#1E293B" />
+          <polygon points="144,78 156,81 144,83" fill="#F97316" />
+          {/* Falling snowflakes */}
+          <circle cx="28" cy="28" r="4" fill="#FFFFFF" />
+          <circle cx="88" cy="24" r="4.5" fill="#FFFFFF" />
+          <circle cx="114" cy="46" r="3.5" fill="#FFFFFF" />
+          <circle cx="188" cy="28" r="4.5" fill="#FFFFFF" />
+          <circle cx="212" cy="54" r="4" fill="#FFFFFF" />
+          <circle cx="196" cy="84" r="3.5" fill="#FFFFFF" />
+          <circle cx="86" cy="72" r="3.5" fill="#FFFFFF" />
+        </svg>
+      );
+
+    case 'taking-medicine':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#ECFEFF" />
+          <rect y="106" width="240" height="44" fill="#E2E8F0" />
+          {/* Medicine bottle */}
+          <rect x="44" y="42" width="46" height="68" rx="8" fill="#F59E0B" stroke="#B45309" strokeWidth="2.4" />
+          <rect x="52" y="28" width="30" height="14" rx="3" fill="#FFFFFF" stroke="#64748B" strokeWidth="2" />
+          <rect x="46" y="60" width="42" height="30" fill="#FFFFFF" />
+          {/* Red medical cross on label */}
+          <rect x="64" y="66" width="6" height="18" rx="1" fill="#DC2626" />
+          <rect x="58" y="72" width="18" height="6" rx="1" fill="#DC2626" />
+          {/* Two capsules */}
+          <rect x="104" y="100" width="24" height="11" rx="5.5" fill="#EF4444" stroke="#991B1B" strokeWidth="1.5" />
+          <rect x="116" y="100" width="12" height="11" rx="5.5" fill="#FFFFFF" />
+          <rect x="114" y="118" width="24" height="11" rx="5.5" fill="#3B82F6" stroke="#1D4ED8" strokeWidth="1.5" />
+          <rect x="126" y="118" width="12" height="11" rx="5.5" fill="#FFFFFF" />
+          {/* Glass of warm water with steam */}
+          <polygon points="154,50 198,50 192,110 160,110" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2.4" />
+          <polygon points="157,68 195,68 191,108 161,108" fill="#38BDF8" opacity="0.65" />
+          <path d="M168 42 Q164 32 170 24" fill="none" stroke="#94A3B8" strokeWidth="2.4" strokeLinecap="round" />
+          <path d="M184 42 Q180 32 186 24" fill="none" stroke="#94A3B8" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
+      );
+
+    case 'breakfast-bread-egg':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FEF9C3" />
+          <rect y="104" width="240" height="46" fill="#FDE68A" />
+          {/* White breakfast plate */}
+          <ellipse cx="104" cy="94" rx="74" ry="34" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="3" />
+          {/* Bread slice */}
+          <path d="M56 76 C56 62, 102 62, 102 76 V104 H56 Z" fill="#F59E0B" stroke="#92400E" strokeWidth="2.4" />
+          <path d="M62 78 C62 68, 96 68, 96 78 V99 H62 Z" fill="#FEF3C7" />
+          {/* Fried egg */}
+          <ellipse cx="132" cy="94" rx="28" ry="20" fill="#F8FAFC" stroke="#CBD5E1" strokeWidth="2" />
+          <circle cx="132" cy="93" r="11" fill="#FACC15" stroke="#D97706" strokeWidth="1.6" />
+          {/* Glass of milk */}
+          <polygon points="184,42 220,42 215,108 189,108" fill="#FFFFFF" stroke="#94A3B8" strokeWidth="2.4" />
+          <polygon points="186,58 218,58 214,106 190,106" fill="#F1F5F9" />
+          <path d="M196 36 Q202 24 208 36" fill="none" stroke="#CBD5E1" strokeWidth="2.2" />
+        </svg>
+      );
+
+    case 'train-station':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#E0F2FE" />
+          <rect y="108" width="240" height="42" fill="#94A3B8" />
+          {/* Railway tracks */}
+          <line x1="0" y1="122" x2="240" y2="122" stroke="#334155" strokeWidth="4" />
+          <line x1="0" y1="134" x2="240" y2="134" stroke="#334155" strokeWidth="4" />
+          {/* High-speed sleek bullet train */}
+          <path d="M18 60 H164 C194 60, 218 76, 224 98 V112 H18 Z" fill="#FFFFFF" stroke="#475569" strokeWidth="2.4" />
+          <path d="M18 92 H222 V102 H18 Z" fill="#DC2626" />
+          {/* Train windows */}
+          <rect x="30" y="70" width="24" height="16" rx="3" fill="#38BDF8" />
+          <rect x="62" y="70" width="24" height="16" rx="3" fill="#38BDF8" />
+          <rect x="94" y="70" width="24" height="16" rx="3" fill="#38BDF8" />
+          <rect x="126" y="70" width="24" height="16" rx="3" fill="#38BDF8" />
+          <path d="M160 70 H188 C196 74, 202 80, 206 86 H160 Z" fill="#0F172A" />
+          {/* Overhead power line */}
+          <line x1="0" y1="36" x2="240" y2="36" stroke="#64748B" strokeWidth="2" />
+          <path d="M90 60 L104 46 L94 36" fill="none" stroke="#475569" strokeWidth="2.4" />
+        </svg>
+      );
+
+    case 'airport-plane':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#BAE6FD" />
+          {/* Soft clouds */}
+          <ellipse cx="52" cy="36" rx="26" ry="11" fill="#FFFFFF" opacity="0.9" />
+          <ellipse cx="192" cy="40" rx="28" ry="12" fill="#FFFFFF" opacity="0.9" />
+          {/* Airport control tower & terminal */}
+          <rect x="16" y="106" width="110" height="32" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="2" />
+          <rect x="26" y="114" width="90" height="14" rx="2" fill="#38BDF8" />
+          <rect x="150" y="88" width="16" height="50" fill="#CBD5E1" stroke="#64748B" strokeWidth="2" />
+          <polygon points="140,88 176,88 170,74 146,74" fill="#38BDF8" stroke="#475569" strokeWidth="2" />
+          <rect y="134" width="240" height="16" fill="#475569" />
+          {/* Passenger airplane taking off */}
+          <g transform="translate(36, 22) rotate(-14)">
+            <ellipse cx="90" cy="48" rx="56" ry="11" fill="#FFFFFF" stroke="#334155" strokeWidth="2" />
+            <polygon points="78,48 56,18 76,18 104,48" fill="#2563EB" />
+            <polygon points="78,52 60,78 78,78 104,52" fill="#1D4ED8" />
+            <polygon points="44,44 30,24 44,24 58,44" fill="#DC2626" />
+            <circle cx="116" cy="46" r="3" fill="#38BDF8" />
+            <circle cx="104" cy="46" r="3" fill="#38BDF8" />
+            <circle cx="92" cy="46" r="3" fill="#38BDF8" />
+            <circle cx="80" cy="46" r="3" fill="#38BDF8" />
+          </g>
+        </svg>
+      );
+
+    case 'singing-song':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FAF5FF" />
+          <circle cx="120" cy="76" r="56" fill="#F3E8FF" />
+          {/* Singer */}
+          <circle cx="102" cy="54" r="18" fill="#F8D2B4" />
+          <path d="M84 52 C84 32, 120 32, 120 52 L122 68 L82 68 Z" fill="#3B2314" />
+          <circle cx="96" cy="54" r="2.2" fill="#1C1917" />
+          <circle cx="108" cy="54" r="2.2" fill="#1C1917" />
+          <ellipse cx="102" cy="62" rx="4.5" ry="3.5" fill="#BE123C" />
+          <path d="M76 94 C76 74, 128 74, 128 94 L132 142 H72 Z" fill="#9333EA" />
+          {/* Microphone */}
+          <path d="M122 96 L142 78" stroke="#9333EA" strokeWidth="9" strokeLinecap="round" />
+          <line x1="146" y1="74" x2="132" y2="88" stroke="#1E293B" strokeWidth="5" strokeLinecap="round" />
+          <circle cx="148" cy="72" r="8" fill="#64748B" stroke="#1E293B" strokeWidth="2" />
+          {/* Musical notes floating */}
+          <circle cx="176" cy="44" r="6" fill="#EC4899" />
+          <line x1="182" y1="44" x2="182" y2="20" stroke="#EC4899" strokeWidth="3" />
+          <line x1="182" y1="20" x2="204" y2="26" stroke="#EC4899" strokeWidth="3.5" />
+          <circle cx="198" cy="50" r="6" fill="#EC4899" />
+          <line x1="204" y1="50" x2="204" y2="26" stroke="#EC4899" strokeWidth="3" />
+          <circle cx="46" cy="48" r="5" fill="#8B5CF6" />
+          <line x1="51" y1="48" x2="51" y2="28" stroke="#8B5CF6" strokeWidth="2.6" />
+          <path d="M51 28 L62 32" stroke="#8B5CF6" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      );
+
+    case 'steamed-buns':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FFFBEB" />
+          <rect y="106" width="240" height="44" fill="#FDE68A" />
+          {/* Bamboo steamer basket */}
+          <ellipse cx="120" cy="112" rx="74" ry="22" fill="#B45309" />
+          <rect x="46" y="84" width="148" height="28" fill="#D97706" stroke="#92400E" strokeWidth="2.2" />
+          <ellipse cx="120" cy="84" rx="74" ry="22" fill="#F59E0B" stroke="#92400E" strokeWidth="2.4" />
+          <ellipse cx="120" cy="84" rx="64" ry="17" fill="#FEF3C7" />
+          {/* Fluffy white baozi steamed buns */}
+          <ellipse cx="90" cy="82" rx="22" ry="15" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="2" />
+          <circle cx="90" cy="70" r="3" fill="#CBD5E1" />
+          <ellipse cx="148" cy="82" rx="22" ry="15" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="2" />
+          <circle cx="148" cy="70" r="3" fill="#CBD5E1" />
+          <ellipse cx="120" cy="90" rx="24" ry="16" fill="#FFFFFF" stroke="#CBD5E1" strokeWidth="2" />
+          <circle cx="120" cy="77" r="3.5" fill="#CBD5E1" />
+          {/* Rising steam curls */}
+          <path d="M88 52 Q82 38 90 24" fill="none" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round" opacity="0.7" />
+          <path d="M120 48 Q114 32 122 18" fill="none" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round" opacity="0.7" />
+          <path d="M152 52 Q146 38 154 24" fill="none" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round" opacity="0.7" />
+        </svg>
+      );
+
+    case 'watching-tv':
+      return (
+        <svg viewBox="0 0 240 150" className={className} aria-hidden="true">
+          <rect width="240" height="150" rx="10" fill="#FEF3C7" />
+          <rect y="112" width="240" height="38" fill="#D6BE9B" />
+          {/* TV cabinet & glowing screen */}
+          <rect x="64" y="20" width="112" height="68" rx="6" fill="#1E293B" stroke="#0F172A" strokeWidth="3" />
+          <rect x="70" y="26" width="100" height="54" rx="3" fill="#38BDF8" />
+          <circle cx="148" cy="40" r="8" fill="#FDE047" />
+          <polygon points="70,80 108,46 146,80" fill="#22C55E" />
+          <rect x="110" y="88" width="20" height="10" fill="#334155" />
+          <rect x="92" y="96" width="56" height="6" rx="2" fill="#334155" />
+          <rect x="46" y="102" width="148" height="22" rx="4" fill="#92400E" />
+          {/* Potted plant beside TV */}
+          <rect x="14" y="100" width="22" height="24" rx="3" fill="#C2410C" />
+          <circle cx="25" cy="88" r="14" fill="#16A34A" />
+          {/* Cozy lamp on right */}
+          <rect x="208" y="96" width="10" height="28" fill="#78350F" />
+          <polygon points="198,96 228,96 222,74 204,74" fill="#F59E0B" />
         </svg>
       );
 
