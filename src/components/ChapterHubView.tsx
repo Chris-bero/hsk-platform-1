@@ -1,25 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   ClipboardCheck,
   GraduationCap,
   Layers,
+  Mic,
   PenTool,
   Sparkles,
+  Star,
   Volume2,
+  Zap,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { DRILL_METADATA } from '../data/chaptersData';
 import { ChapterData, DrillType, QuizMode, SessionDrillKey } from '../types';
+import { speakChinese, stopChineseSpeech } from '../utils/speech';
+import { BookmarkNoteControls } from './BookmarkNoteControls';
+import { RubyChinese } from './RubyChinese';
 
 interface ChapterHubViewProps {
   chapter: ChapterData;
   selectedMode: QuizMode;
   onModeChange: (mode: QuizMode) => void;
   onStartDrill: (drillKey: SessionDrillKey) => void;
+  onOpenLab: (tab: 'writing' | 'speaking' | 'speed', chapterId: number) => void;
   onBack: () => void;
 }
 
@@ -294,9 +303,32 @@ export function ChapterHubView({
   selectedMode,
   onModeChange,
   onStartDrill,
+  onOpenLab,
   onBack,
 }: ChapterHubViewProps) {
-  const { progress, analytics } = useApp();
+  const { progress, analytics, showPinyin, getItemNote, studyVault } = useApp();
+  const [studyDrawerOpen, setStudyDrawerOpen] = useState(false);
+  const [studyDrawerTab, setStudyDrawerTab] = useState<'vocab' | 'sentences'>('vocab');
+  const [speakingItemKey, setSpeakingItemKey] = useState<string | null>(null);
+
+  const chapterSavedCount = Object.values(studyVault).filter(
+    (entry) => entry.chapterId === chapter.id
+  ).length;
+
+  const handlePlayStudyAudio = (key: string, hanzi: string, rate: 1.0 | 0.7 = 1.0) => {
+    const playKey = `${key}-${rate}`;
+    if (speakingItemKey === playKey) {
+      stopChineseSpeech();
+      setSpeakingItemKey(null);
+      return;
+    }
+    setSpeakingItemKey(playKey);
+    const ok = speakChinese(hanzi, rate, {
+      onEnd: () => setSpeakingItemKey((cur) => (cur === playKey ? null : cur)),
+      onError: () => setSpeakingItemKey((cur) => (cur === playKey ? null : cur)),
+    });
+    if (!ok) setSpeakingItemKey(null);
+  };
 
   const chapterStats = progress?.chapterStats[chapter.id];
   const completedDrills = new Set<DrillType>(chapterStats?.completedDrills ?? []);
@@ -512,6 +544,296 @@ export function ChapterHubView({
                 {selectedMode === 'practice' ? 'ابدأ التدريب الشامل' : 'ابدأ الامتحان الشامل'}
               </span>
             </button>
+          </div>
+
+          {/* المختبرات التفاعلية للفصل (الكتابة + النطق الصوتي + تحدي السرعة) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] p-5 flex flex-col justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#B91C1C] dark:text-[#EF4444]">
+                  <PenTool className="w-3.5 h-3.5" />
+                  <span>تدريب الكتابة وترتيب الخطوط</span>
+                </div>
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                  مختبر الكتابة (Hanzi Lab)
+                </h3>
+                <p className="text-xs text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                  شاهد حركة الخطوط وتدرّب على رسم رموز هذا الفصل يدوياً على شبكة 米字格.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenLab('writing', chapter.id)}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[42px] rounded-lg border border-[#B91C1C] dark:border-[#EF4444] text-[#B91C1C] dark:text-[#EF4444] hover:bg-[#B91C1C] hover:text-white dark:hover:bg-[#EF4444] dark:hover:text-white font-bold text-xs transition-colors whitespace-nowrap"
+              >
+                <PenTool className="w-4 h-4 shrink-0" />
+                <span>افتح مختبر الكتابة</span>
+              </button>
+            </div>
+
+            <div className="rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] p-5 flex flex-col justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#15803D] dark:text-[#22C55E]">
+                  <Mic className="w-3.5 h-3.5" />
+                  <span>تدريب النطق المباشر بالمايكروفون</span>
+                </div>
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                  مدرّب النطق الصوتي (Speaking)
+                </h3>
+                <p className="text-xs text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                  انطق كلمات وجمل هذا الفصل بصوتك واحصل على تقييم فوري ودقة مطابقة الرموز.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenLab('speaking', chapter.id)}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[42px] rounded-lg border border-[#15803D] dark:border-[#22C55E] text-[#15803D] dark:text-[#22C55E] hover:bg-[#15803D] hover:text-white dark:hover:bg-[#22C55E] dark:hover:text-[#121110] font-bold text-xs transition-colors whitespace-nowrap"
+              >
+                <Mic className="w-4 h-4 shrink-0" />
+                <span>افتح مدرّب النطق</span>
+              </button>
+            </div>
+
+            <div className="rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] p-5 flex flex-col justify-between gap-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D97706] dark:text-[#F59E0B]">
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>تحدي التوصيل السريع (60 ثانية)</span>
+                </div>
+                <h3 className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                  تحدي السرعة ⚡
+                </h3>
+                <p className="text-xs text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                  طابق مفردات هذا الفصل بأسرع ما يمكنك خلال دقيقة واحدة وحطّم رقمك القياسي.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenLab('speed', chapter.id)}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[42px] rounded-lg border border-[#D97706] dark:border-[#F59E0B] text-[#B45309] dark:text-[#F59E0B] hover:bg-[#D97706] hover:text-white dark:hover:bg-[#F59E0B] dark:hover:text-[#121110] font-bold text-xs transition-colors whitespace-nowrap"
+              >
+                <Zap className="w-4 h-4 shrink-0" />
+                <span>ابدأ تحدي السرعة</span>
+              </button>
+            </div>
+          </div>
+
+          {/* دليل مفردات وجمل الفصل مع أزرار النجمة ⭐ والملاحظات الشخصية 📝 */}
+          <div className="rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setStudyDrawerOpen((prev) => !prev)}
+              className="w-full px-5 py-4 flex items-center justify-between gap-4 text-right hover:bg-[#F9F6F0]/70 dark:hover:bg-[#25221F]/60 transition-colors"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="w-10 h-10 rounded-lg border border-[#D97706]/30 dark:border-[#F59E0B]/35 bg-[#D97706]/10 dark:bg-[#F59E0B]/12 flex items-center justify-center shrink-0">
+                  <Star className="w-5 h-5 text-[#D97706] dark:text-[#F59E0B]" />
+                </span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-[#57534E] dark:text-[#A8A29E] tabular-nums">
+                    <span className="font-bold text-[#D97706] dark:text-[#F59E0B]">
+                      مراجعة وحفظ ليلة الامتحان
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>{chapter.vocab.length} مفردة</span>
+                    <span aria-hidden="true">·</span>
+                    <span>{chapter.sentences.length} جملة</span>
+                    {chapterSavedCount > 0 && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span className="font-bold text-[#15803D] dark:text-[#22C55E]">
+                          محفوظ في محفوظاتي: {chapterSavedCount}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <h2 className="text-base font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                    استعراض مفردات وجمل الفصل وإضافة ملاحظاتك الشخصية
+                  </h2>
+                </div>
+              </div>
+
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#B91C1C] dark:text-[#EF4444] shrink-0">
+                <span>{studyDrawerOpen ? 'إخفاء القائمة' : 'عرض الكلمات والجمل'}</span>
+                {studyDrawerOpen ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </span>
+            </button>
+
+            {studyDrawerOpen && (
+              <div className="border-t border-[#1C1917]/10 dark:border-[#F5F2EB]/10 p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="inline-flex p-1 rounded-lg bg-[#F2ECE1] dark:bg-[#141312] border border-[#1C1917]/10 dark:border-[#F5F2EB]/10">
+                    <button
+                      type="button"
+                      onClick={() => setStudyDrawerTab('vocab')}
+                      className={`px-4 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap tabular-nums ${
+                        studyDrawerTab === 'vocab'
+                          ? 'bg-white dark:bg-[#292623] text-[#B91C1C] dark:text-[#EF4444] shadow-xs'
+                          : 'text-[#57534E] dark:text-[#A8A29E]'
+                      }`}
+                    >
+                      المفردات ({chapter.vocab.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStudyDrawerTab('sentences')}
+                      className={`px-4 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap tabular-nums ${
+                        studyDrawerTab === 'sentences'
+                          ? 'bg-white dark:bg-[#292623] text-[#15803D] dark:text-[#22C55E] shadow-xs'
+                          : 'text-[#57534E] dark:text-[#A8A29E]'
+                      }`}
+                    >
+                      الجمل والمحادثات ({chapter.sentences.length})
+                    </button>
+                  </div>
+                  <span className="text-xs text-[#57534E] dark:text-[#A8A29E]">
+                    اضغط ⭐ لحفظ العنصر في محفوظاتي أو 📝 لكتابة ملاحظة شخصية
+                  </span>
+                </div>
+
+                {studyDrawerTab === 'vocab' ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {chapter.vocab.map((v) => {
+                      const note = getItemNote('vocab', v.id);
+                      const isPlaying = speakingItemKey === `${v.id}-1`;
+                      return (
+                        <div
+                          key={v.id}
+                          className="rounded-lg border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-[#F9F6F0]/60 dark:bg-[#141312] p-3.5 space-y-2"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="flex items-baseline gap-2 flex-wrap">
+                                <span className="font-hanzi text-xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                                  {v.hanzi}
+                                </span>
+                                {showPinyin && (
+                                  <span className="font-pinyin text-xs font-semibold text-[#57534E] dark:text-[#A8A29E]">
+                                    {v.pinyin}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs font-semibold text-[#57534E] dark:text-[#A8A29E] mt-0.5">
+                                {v.arabic}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handlePlayStudyAudio(v.id, v.hanzi, 1.0)}
+                                aria-label={`استمع إلى ${v.hanzi}`}
+                                className={`inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors ${
+                                  isPlaying
+                                    ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
+                                    : 'border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] text-[#57534E] dark:text-[#A8A29E] hover:text-[#B91C1C]'
+                                }`}
+                              >
+                                <Volume2 className="w-3.5 h-3.5" />
+                              </button>
+                              <BookmarkNoteControls
+                                itemType="vocab"
+                                itemId={v.id}
+                                chapterId={chapter.id}
+                                hanzi={v.hanzi}
+                                pinyin={v.pinyin}
+                                arabic={v.arabic}
+                              />
+                            </div>
+                          </div>
+
+                          {note && (
+                            <p className="text-[11px] text-[#B91C1C] dark:text-[#EF4444] bg-white/80 dark:bg-[#1E1C1A] rounded px-2.5 py-1.5 border border-[#B91C1C]/15 dark:border-[#EF4444]/20">
+                              <strong className="ml-1">ملاحظتك:</strong>
+                              {note}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[#1C1917]/10 dark:divide-[#F5F2EB]/10 rounded-lg border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-[#F9F6F0]/45 dark:bg-[#141312]">
+                    {chapter.sentences.map((s, idx) => {
+                      const note = getItemNote('sentence', s.id);
+                      const activeNormal = speakingItemKey === `${s.id}-1`;
+                      const activeSlow = speakingItemKey === `${s.id}-0.7`;
+                      return (
+                        <div
+                          key={s.id}
+                          className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        >
+                          <div className="space-y-1.5 min-w-0">
+                            <div className="flex items-start gap-2.5">
+                              <span className="text-xs font-bold tabular-nums text-[#57534E] dark:text-[#A8A29E] mt-1">
+                                {idx + 1}.
+                              </span>
+                              <div className="space-y-1 min-w-0">
+                                <div className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                                  <RubyChinese
+                                    hanzi={s.hanzi}
+                                    pinyin={s.pinyin}
+                                    showPinyin={showPinyin}
+                                  />
+                                </div>
+                                <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E]">
+                                  {s.arabic}
+                                </p>
+                                {note && (
+                                  <p className="text-[11px] text-[#B91C1C] dark:text-[#EF4444] bg-white dark:bg-[#1E1C1A] rounded px-2.5 py-1.5 border border-[#B91C1C]/15 dark:border-[#EF4444]/20">
+                                    <strong className="ml-1">ملاحظتك:</strong>
+                                    {note}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                            <button
+                              type="button"
+                              onClick={() => handlePlayStudyAudio(s.id, s.hanzi, 1.0)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[34px] rounded-md border text-xs font-bold tabular-nums ${
+                                activeNormal
+                                  ? 'border-[#B91C1C] bg-[#B91C1C] text-white'
+                                  : 'border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-[#1C1917] dark:text-[#F5F2EB]'
+                              }`}
+                            >
+                              <Volume2 className="w-3.5 h-3.5" />
+                              <span>1.0x</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handlePlayStudyAudio(s.id, s.hanzi, 0.7)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[34px] rounded-md border text-xs font-bold tabular-nums ${
+                                activeSlow
+                                  ? 'border-[#D97706] bg-[#D97706] text-white'
+                                  : 'border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-[#1C1917] dark:text-[#F5F2EB]'
+                              }`}
+                            >
+                              <Volume2 className="w-3.5 h-3.5" />
+                              <span>0.7x</span>
+                            </button>
+                            <BookmarkNoteControls
+                              itemType="sentence"
+                              itemId={s.id}
+                              chapterId={chapter.id}
+                              hanzi={s.hanzi}
+                              pinyin={s.pinyin}
+                              arabic={s.arabic}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* القسم الأول: المستوى التأسيسي — مفردات ونطق */}

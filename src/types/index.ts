@@ -75,11 +75,37 @@ export type AppView =
   | 'chapters'
   | 'chapter-hub'
   | 'collections'
+  | 'labs'
+  | 'vault'
   | 'custom-builder'
   | 'hsk-portal'
   | 'mock-exam'
   | 'drill'
   | 'analytics';
+
+export type StudyBookmarkItemType = 'vocab' | 'sentence';
+
+export interface StudentStudyBookmark {
+  key: string;
+  itemType: StudyBookmarkItemType;
+  itemId: string;
+  chapterId: number;
+  bookmarked: boolean;
+  note: string;
+  updatedAt: string;
+}
+
+export type BroadcastStyle = 'info' | 'important' | 'promo';
+
+export interface TeacherBroadcast {
+  id: string;
+  enabled: boolean;
+  message: string;
+  style: BroadcastStyle;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  updatedAt: string;
+}
 
 export type HskPatternId =
   | 'listening-p1'

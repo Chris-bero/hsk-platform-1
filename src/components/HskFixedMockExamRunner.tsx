@@ -706,7 +706,7 @@ export function HskFixedMockExamRunner({ paper, onExit }: HskFixedMockExamRunner
       className="mx-auto max-w-5xl px-4 sm:px-6 py-6 space-y-5"
     >
       {/* الشريط العلوي للامتحان مع المؤقت وحالة القفل */}
-      <div className="rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] px-5 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div className="sticky top-16 z-30 rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white/95 dark:bg-[#1E1C1A]/95 backdrop-blur-sm shadow-xs px-4 sm:px-5 py-3 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3">
           <span className="font-hanzi text-sm font-bold text-[#B91C1C] dark:text-[#EF4444]">
             {phase === 'listening' ? '第一部分 · 听力' : '第二部分 · 阅读'}

@@ -5,7 +5,6 @@ import {
   BookOpenText,
   Check,
   Download,
-  FileText,
   Grid2x2,
   LayoutGrid,
   ListTree,
@@ -20,6 +19,7 @@ import {
 import { motion } from 'motion/react';
 import { useApp } from '../context/AppContext';
 import { CHAPTERS_DATA } from '../data/chaptersData';
+import { GRAMMAR_COLLECTION_DATA } from '../data/grammarCollectionData';
 import { groupVocabularyByCategory } from '../data/vocabCategories';
 import { ChapterData } from '../types';
 import { isChapterUnlocked } from '../utils/accessControl';
@@ -30,6 +30,9 @@ import {
   VocabSheetMode,
 } from '../utils/exportVocabWord';
 import { initChineseVoices, speakChinese, stopChineseSpeech } from '../utils/speech';
+import { BookmarkNoteControls } from './BookmarkNoteControls';
+import { DialoguesCollectionTab } from './collections/DialoguesCollectionTab';
+import { GrammarCollectionTab } from './collections/GrammarCollectionTab';
 import { LockedAccessModal } from './LockedAccessModal';
 
 type CollectionSubTab = 'vocab' | 'grammar' | 'dialogues';
@@ -88,6 +91,11 @@ export function CollectionsView() {
     () => unlockedChapters.reduce((sum, ch) => sum + ch.sentences.length, 0),
     [unlockedChapters]
   );
+
+  const totalUnlockedGrammar = useMemo(() => {
+    const unlockedIds = new Set(unlockedChapters.map((ch) => ch.id));
+    return GRAMMAR_COLLECTION_DATA.filter((item) => unlockedIds.has(item.lessonId)).length;
+  }, [unlockedChapters]);
 
   const scopedChapters = useMemo(() => {
     if (selectedChapterId === 'all') return unlockedChapters;
@@ -150,11 +158,17 @@ export function CollectionsView() {
     [categorizedGroups]
   );
 
-  // ضبط مقاس الصفحة @page ديناميكياً عند الطباعة: A4 عمودي للمصنّفة، A3 أفقي لشيت الورقة الواحدة
+  // ضبط مقاس الصفحة @page ديناميكياً عند الطباعة:
+  // A4 عمودي للقواعد والمحادثات والتجميعة المصنّفة، وA3 أفقي لشيت الورقة الواحدة
   useEffect(() => {
     const styleId = 'collections-dynamic-print-page';
+    const needsA4Portrait =
+      subTab === 'grammar' ||
+      subTab === 'dialogues' ||
+      (subTab === 'vocab' && sheetMode === 'categorized');
+
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
-    if (sheetMode === 'categorized') {
+    if (needsA4Portrait) {
       if (!styleEl) {
         styleEl = document.createElement('style');
         styleEl.id = styleId;
@@ -168,7 +182,7 @@ export function CollectionsView() {
       const existing = document.getElementById(styleId);
       if (existing) existing.remove();
     };
-  }, [sheetMode]);
+  }, [subTab, sheetMode]);
 
   const activeScopeLabelAr = useMemo(() => {
     if (selectedChapterId === 'all') {
@@ -324,7 +338,7 @@ export function CollectionsView() {
               }`}
             >
               <BookOpenText className="w-4 h-4 shrink-0" />
-              <span>تجميعة القواعد</span>
+              <span>تجميعة القواعد ({totalUnlockedGrammar})</span>
             </button>
 
             <button
@@ -412,48 +426,55 @@ export function CollectionsView() {
               </div>
 
               {/* زرا التصدير الرئيسيان وشارة مقاس الطباعة */}
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg border border-[#D97706]/35 dark:border-[#F59E0B]/35 bg-[#D97706]/8 dark:bg-[#F59E0B]/12 text-[#92400E] dark:text-[#F59E0B] text-xs font-bold whitespace-nowrap shrink-0">
-                  <Maximize2 className="w-3.5 h-3.5 shrink-0" />
-                  <span>
-                    {sheetMode === 'categorized'
-                      ? 'مقاس الطباعة: A4 عمودي (15 قسماً موضوعياً)'
-                      : 'مقاس الطباعة: A3 أفقي (ورقة واحدة شاملة)'}
-                  </span>
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg border border-[#D97706]/35 dark:border-[#F59E0B]/35 bg-[#D97706]/8 dark:bg-[#F59E0B]/12 text-[#92400E] dark:text-[#F59E0B] text-xs font-bold whitespace-nowrap shrink-0">
+                    <Maximize2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      {sheetMode === 'categorized'
+                        ? 'مقاس الطباعة: A4 عمودي (15 قسماً موضوعياً)'
+                        : 'مقاس الطباعة: A3 أفقي (ورقة واحدة شاملة)'}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={filteredEntries.length === 0}
+                    onClick={handleExportWord}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white text-xs sm:text-sm font-bold transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B91C1C]"
+                  >
+                    {wordExported ? (
+                      <>
+                        <Check className="w-4 h-4 shrink-0" />
+                        <span>
+                          {sheetMode === 'categorized'
+                            ? 'تم تحميل ملف Word (المصنّفة)'
+                            : 'تم تحميل ملف Word (A3)'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 shrink-0" />
+                        <span>تحميل ملف Word (.doc)</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={filteredEntries.length === 0}
+                    onClick={handlePrintPdf}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg border border-[#1C1917]/20 dark:border-[#F5F2EB]/20 bg-[#F9F6F0] dark:bg-[#121110] hover:border-[#B91C1C]/55 dark:hover:border-[#EF4444]/55 text-[#1C1917] dark:text-[#F5F2EB] text-xs sm:text-sm font-bold transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C]"
+                  >
+                    <Printer className="w-4 h-4 text-[#D97706] dark:text-[#F59E0B] shrink-0" />
+                    <span>طباعة / حفظ PDF (أبيض وأسود)</span>
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  disabled={filteredEntries.length === 0}
-                  onClick={handleExportWord}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] dark:hover:bg-[#DC2626] text-white text-xs sm:text-sm font-bold transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#B91C1C]"
-                >
-                  {wordExported ? (
-                    <>
-                      <Check className="w-4 h-4 shrink-0" />
-                      <span>
-                        {sheetMode === 'categorized'
-                          ? 'تم تحميل ملف Word (المصنّفة)'
-                          : 'تم تحميل ملف Word (A3)'}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-4 h-4 shrink-0" />
-                      <span>تحميل ملف Word (.doc)</span>
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  disabled={filteredEntries.length === 0}
-                  onClick={handlePrintPdf}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg border border-[#1C1917]/20 dark:border-[#F5F2EB]/20 bg-[#F9F6F0] dark:bg-[#121110] hover:border-[#B91C1C]/55 dark:hover:border-[#EF4444]/55 text-[#1C1917] dark:text-[#F5F2EB] text-xs sm:text-sm font-bold transition-colors disabled:opacity-45 whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C]"
-                >
-                  <Printer className="w-4 h-4 text-[#D97706] dark:text-[#F59E0B] shrink-0" />
-                  <span>طباعة / حفظ PDF (أبيض وأسود)</span>
-                </button>
+                <p className="text-[11px] sm:text-xs text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                  ملاحظة: ورقة A3 الأفقية مثالية للطباعة أو الفتح عبر الكمبيوتر، بينما تجميعات A4
+                  العمودية مناسبة لجميع الهواتف والتابلت.
+                </p>
               </div>
             </div>
 
@@ -734,7 +755,7 @@ export function CollectionsView() {
                                 <th className="w-20 py-2.5 px-2 text-center border-l border-[#1C1917]/10 dark:border-[#F5F2EB]/10">
                                   الفصل
                                 </th>
-                                <th className="w-16 py-2.5 px-2 text-center">استماع</th>
+                                <th className="w-32 py-2.5 px-2 text-center">استماع وحفظ</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -776,21 +797,31 @@ export function CollectionsView() {
                                       <span className="font-hanzi">第{entry.chapterId}课</span>
                                     </td>
                                     <td className="py-2.5 px-2 text-center">
-                                      <button
-                                        type="button"
-                                        aria-label={`استمع إلى نطق ${entry.hanzi}`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handlePlayWord(entry);
-                                        }}
-                                        className={`inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors ${
-                                          isSpeaking
-                                            ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
-                                            : 'border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-[#57534E] dark:text-[#A8A29E] hover:text-[#B91C1C] dark:hover:text-[#EF4444]'
-                                        }`}
-                                      >
-                                        <Volume2 className="w-3.5 h-3.5" />
-                                      </button>
+                                      <div className="inline-flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          aria-label={`استمع إلى نطق ${entry.hanzi}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handlePlayWord(entry);
+                                          }}
+                                          className={`inline-flex items-center justify-center w-8 h-8 rounded-md border transition-colors ${
+                                            isSpeaking
+                                              ? 'border-[#B91C1C] dark:border-[#EF4444] bg-[#B91C1C] dark:bg-[#EF4444] text-white'
+                                              : 'border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-white dark:bg-[#1E1C1A] text-[#57534E] dark:text-[#A8A29E] hover:text-[#B91C1C] dark:hover:text-[#EF4444]'
+                                          }`}
+                                        >
+                                          <Volume2 className="w-3.5 h-3.5" />
+                                        </button>
+                                        <BookmarkNoteControls
+                                          itemType="vocab"
+                                          itemId={entry.id}
+                                          chapterId={entry.chapterId}
+                                          hanzi={entry.hanzi}
+                                          pinyin={entry.pinyin}
+                                          arabic={entry.arabic}
+                                        />
+                                      </div>
                                     </td>
                                   </tr>
                                 );
@@ -846,7 +877,7 @@ export function CollectionsView() {
                                       : 'bg-white dark:bg-[#1E1C1A] hover:bg-[#F9F6F0] dark:hover:bg-[#25221F] text-[#1C1917] dark:text-[#F5F2EB]'
                                   }`}
                                 >
-                                  <div className="relative flex items-center justify-center">
+                                  <div className="relative flex flex-col items-center justify-center gap-1">
                                     <span
                                       className={`font-hanzi font-bold leading-snug ${
                                         hanziCols === 10
@@ -856,13 +887,17 @@ export function CollectionsView() {
                                     >
                                       {entry.hanzi}
                                     </span>
-                                    <Volume2
-                                      className={`w-3 h-3 absolute right-0.5 transition-opacity ${
-                                        isSpeaking
-                                          ? 'opacity-100 text-[#B91C1C] dark:text-[#EF4444]'
-                                          : 'opacity-0 group-hover:opacity-65 text-[#57534E] dark:text-[#A8A29E]'
-                                      }`}
-                                    />
+                                    <div className="opacity-80 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                      <BookmarkNoteControls
+                                        itemType="vocab"
+                                        itemId={entry.id}
+                                        chapterId={entry.chapterId}
+                                        hanzi={entry.hanzi}
+                                        pinyin={entry.pinyin}
+                                        arabic={entry.arabic}
+                                        compact
+                                      />
+                                    </div>
                                   </div>
                                 </td>
                               </Fragment>
@@ -965,12 +1000,14 @@ export function CollectionsView() {
                                         <span className="text-[11px] sm:text-xs font-semibold text-[#1C1917] dark:text-[#F5F2EB] leading-snug">
                                           {entry.arabic}
                                         </span>
-                                        <Volume2
-                                          className={`w-3 h-3 shrink-0 transition-opacity ${
-                                            isSpeaking
-                                              ? 'opacity-100 text-[#B91C1C] dark:text-[#EF4444]'
-                                              : 'opacity-0 group-hover:opacity-65 text-[#57534E] dark:text-[#A8A29E]'
-                                          }`}
+                                        <BookmarkNoteControls
+                                          itemType="vocab"
+                                          itemId={entry.id}
+                                          chapterId={entry.chapterId}
+                                          hanzi={entry.hanzi}
+                                          pinyin={entry.pinyin}
+                                          arabic={entry.arabic}
+                                          compact
                                         />
                                       </div>
                                     </div>
@@ -1161,72 +1198,17 @@ export function CollectionsView() {
       )}
 
       {/* ===================================================================== */}
-      {/* التبويب ٢: تجميعة القواعد (مهيّأ للخطوة القادمة)                        */}
+      {/* التبويب ٢: تجميعة القواعد الشاملة (الفصول ١ – ١٥)                      */}
       {/* ===================================================================== */}
       {subTab === 'grammar' && (
-        <div className="no-print neo-frame rounded-xl p-8 sm:p-12 bg-white dark:bg-[#1E1C1A] text-center space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-xl border border-[#D97706]/35 bg-[#D97706]/10 dark:bg-[#F59E0B]/15 flex items-center justify-center">
-            <FileText className="w-7 h-7 text-[#B45309] dark:text-[#F59E0B]" />
-          </div>
-          <div className="space-y-1.5 max-w-lg mx-auto">
-            <p className="text-xs font-bold text-[#B45309] dark:text-[#F59E0B]">
-              قريباً في التحديث القادم
-            </p>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              تجميعة القواعد النحوية للمستوى الأول (HSK 3.0)
-            </h2>
-            <p className="text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
-              يجري تجهيز ملخص القواعد الشامل لجميع الفصول الخمسة عشر (بما يشمل التراكيب الأساسية،
-              أدوات الاستفهام، النفي <span className="font-hanzi">不/没</span>،{' '}
-              <span className="font-hanzi">了</span>،{' '}
-              <span className="font-hanzi">在/正在</span>، والأفعال المنفصلة) مع التصدير المباشر
-              بصيغة Word وPDF.
-            </p>
-          </div>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => setSubTab('vocab')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] text-white text-xs sm:text-sm font-bold transition-colors"
-            >
-              <BookMarked className="w-4 h-4" />
-              <span>استعراض تجميعة المفردات الآن</span>
-            </button>
-          </div>
-        </div>
+        <GrammarCollectionTab onSelectLockedChapter={(ch) => setLockedChapterModal(ch)} />
       )}
 
       {/* ===================================================================== */}
-      {/* التبويب ٣: تجميعة المحادثات والجمل (مهيّأ للخطوة القادمة)               */}
+      {/* التبويب ٣: تجميعة المحادثات والجمل (278 جملة عبر الفصول ١ – ١٥)         */}
       {/* ===================================================================== */}
       {subTab === 'dialogues' && (
-        <div className="no-print neo-frame rounded-xl p-8 sm:p-12 bg-white dark:bg-[#1E1C1A] text-center space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-xl border border-[#15803D]/35 bg-[#15803D]/10 dark:bg-[#22C55E]/15 flex items-center justify-center">
-            <MessageSquareText className="w-7 h-7 text-[#15803D] dark:text-[#22C55E]" />
-          </div>
-          <div className="space-y-1.5 max-w-lg mx-auto">
-            <p className="text-xs font-bold text-[#15803D] dark:text-[#22C55E] tabular-nums">
-              قريباً في التحديث القادم · {totalUnlockedSentences} جملة جاهزة للإدراج
-            </p>
-            <h2 className="text-xl sm:text-2xl font-bold text-[#1C1917] dark:text-[#F5F2EB]">
-              تجميعة المحادثات والجمل التطبيقية
-            </h2>
-            <p className="text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
-              ستضم هذه المساحة جميع الجمل والحوارات المنهجية (٢٧٨ جملة عبر الفصول الـ ١٥) بنظام
-              جداول منظمة مع الاستماع الصوتي والتصدير المباشر لملفات Word وPDF.
-            </p>
-          </div>
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={() => setSubTab('vocab')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-lg bg-[#B91C1C] hover:bg-[#991B1B] dark:bg-[#EF4444] text-white text-xs sm:text-sm font-bold transition-colors"
-            >
-              <BookMarked className="w-4 h-4" />
-              <span>استعراض تجميعة المفردات الآن</span>
-            </button>
-          </div>
-        </div>
+        <DialoguesCollectionTab onSelectLockedChapter={(ch) => setLockedChapterModal(ch)} />
       )}
 
       {/* نافذة القفل عند الضغط على فصل غير مفعّل */}

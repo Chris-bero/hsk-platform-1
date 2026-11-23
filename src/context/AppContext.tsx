@@ -29,6 +29,8 @@ import {
   SheetsSyncPayload,
   Student,
   StudentProgress,
+  StudentStudyBookmark,
+  StudyBookmarkItemType,
   UnlockedAccess,
 } from '../types';
 import { getOrCreateClientDeviceId, parseUnlockedAccess } from '../utils/accessControl';
@@ -40,7 +42,61 @@ const STORAGE_KEYS = {
   THEME: 'chinese_portal_theme_v1',
   PINYIN: 'chinese_portal_show_pinyin_v1',
   PROGRESS_PREFIX: 'chinese_portal_progress_v1_',
+  BOOKMARKS_PREFIX: 'chinese_portal_bookmarks_v1_',
 };
+
+export function makeStudyBookmarkKey(itemType: StudyBookmarkItemType, itemId: string): string {
+  return `${itemType}:${itemId}`;
+}
+
+function loadStudentBookmarks(studentId: string): Record<string, StudentStudyBookmark> {
+  try {
+    const raw = localStorage.getItem(`${STORAGE_KEYS.BOOKMARKS_PREFIX}${studentId}`);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, StudentStudyBookmark>;
+    if (!parsed || typeof parsed !== 'object') return {};
+    const cleaned: Record<string, StudentStudyBookmark> = {};
+    for (const [k, v] of Object.entries(parsed)) {
+      if (
+        v &&
+        (v.itemType === 'vocab' || v.itemType === 'sentence') &&
+        typeof v.itemId === 'string' &&
+        typeof v.chapterId === 'number'
+      ) {
+        const noteText = typeof v.note === 'string' ? v.note : '';
+        const isBookmarked = Boolean(v.bookmarked);
+        if (isBookmarked || noteText.trim().length > 0) {
+          cleaned[k] = {
+            key: k,
+            itemType: v.itemType,
+            itemId: v.itemId,
+            chapterId: v.chapterId,
+            bookmarked: isBookmarked,
+            note: noteText,
+            updatedAt: typeof v.updatedAt === 'string' ? v.updatedAt : new Date().toISOString(),
+          };
+        }
+      }
+    }
+    return cleaned;
+  } catch {
+    return {};
+  }
+}
+
+function saveStudentBookmarks(
+  studentId: string,
+  bookmarks: Record<string, StudentStudyBookmark>
+): void {
+  try {
+    localStorage.setItem(
+      `${STORAGE_KEYS.BOOKMARKS_PREFIX}${studentId}`,
+      JSON.stringify(bookmarks)
+    );
+  } catch {
+    // تجاهل أخطاء مساحة التخزين
+  }
+}
 
 function getTodayIsoDate(): string {
   const now = new Date();
@@ -279,6 +335,18 @@ interface AppContextValue {
     correct: number
   ) => Promise<SyncResult | null>;
   recordHskFixedMockExam: (result: HskMockExamResult) => Promise<SyncResult | null>;
+  studyVault: Record<string, StudentStudyBookmark>;
+  vaultCount: number;
+  isItemBookmarked: (itemType: StudyBookmarkItemType, itemId: string) => boolean;
+  getItemNote: (itemType: StudyBookmarkItemType, itemId: string) => string;
+  toggleBookmark: (itemType: StudyBookmarkItemType, itemId: string, chapterId: number) => void;
+  saveItemNote: (
+    itemType: StudyBookmarkItemType,
+    itemId: string,
+    chapterId: number,
+    note: string
+  ) => void;
+  removeVaultEntry: (key: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -328,6 +396,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const [lastSyncResult, setLastSyncResult] = useState<SyncResult | null>(null);
+
+  const [studyVault, setStudyVault] = useState<Record<string, StudentStudyBookmark>>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.SESSION);
+      if (!saved) return {};
+      const student = JSON.parse(saved) as Student;
+      return loadStudentBookmarks(student.id);
+    } catch {
+      return {};
+    }
+  });
 
   useEffect(() => {
     const root = document.documentElement;
@@ -498,6 +577,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       loaded.lastActive = new Date().toISOString();
       saveStudentProgress(loaded);
       setProgress(loaded);
+      setStudyVault(loadStudentBookmarks(normalizedStudent.id));
 
       try {
         localStorage.setItem(STORAGE_KEYS.SESSION, JSON.stringify(normalizedStudent));
@@ -512,6 +592,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setCurrentStudent(null);
     setProgress(null);
+    setStudyVault({});
     setLastSyncResult(null);
     try {
       localStorage.removeItem(STORAGE_KEYS.SESSION);
@@ -519,6 +600,96 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // تجاهل
     }
   }, []);
+
+  const isItemBookmarked = useCallback(
+    (itemType: StudyBookmarkItemType, itemId: string): boolean => {
+      const entry = studyVault[makeStudyBookmarkKey(itemType, itemId)];
+      return Boolean(entry?.bookmarked);
+    },
+    [studyVault]
+  );
+
+  const getItemNote = useCallback(
+    (itemType: StudyBookmarkItemType, itemId: string): string => {
+      const entry = studyVault[makeStudyBookmarkKey(itemType, itemId)];
+      return entry?.note ?? '';
+    },
+    [studyVault]
+  );
+
+  const toggleBookmark = useCallback(
+    (itemType: StudyBookmarkItemType, itemId: string, chapterId: number) => {
+      if (!currentStudent) return;
+      const key = makeStudyBookmarkKey(itemType, itemId);
+      setStudyVault((prev) => {
+        const existing = prev[key];
+        const nextBookmarked = !existing?.bookmarked;
+        const existingNote = existing?.note ?? '';
+        const next = { ...prev };
+        if (!nextBookmarked && existingNote.trim().length === 0) {
+          delete next[key];
+        } else {
+          next[key] = {
+            key,
+            itemType,
+            itemId,
+            chapterId,
+            bookmarked: nextBookmarked,
+            note: existingNote,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        saveStudentBookmarks(currentStudent.id, next);
+        return next;
+      });
+    },
+    [currentStudent]
+  );
+
+  const saveItemNote = useCallback(
+    (itemType: StudyBookmarkItemType, itemId: string, chapterId: number, note: string) => {
+      if (!currentStudent) return;
+      const key = makeStudyBookmarkKey(itemType, itemId);
+      const trimmed = note.trim();
+      setStudyVault((prev) => {
+        const existing = prev[key];
+        const nextBookmarked = trimmed.length > 0 ? true : Boolean(existing?.bookmarked);
+        const next = { ...prev };
+        if (!nextBookmarked && trimmed.length === 0) {
+          delete next[key];
+        } else {
+          next[key] = {
+            key,
+            itemType,
+            itemId,
+            chapterId,
+            bookmarked: nextBookmarked,
+            note: trimmed,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        saveStudentBookmarks(currentStudent.id, next);
+        return next;
+      });
+    },
+    [currentStudent]
+  );
+
+  const removeVaultEntry = useCallback(
+    (key: string) => {
+      if (!currentStudent) return;
+      setStudyVault((prev) => {
+        if (!prev[key]) return prev;
+        const next = { ...prev };
+        delete next[key];
+        saveStudentBookmarks(currentStudent.id, next);
+        return next;
+      });
+    },
+    [currentStudent]
+  );
+
+  const vaultCount = useMemo(() => Object.keys(studyVault).length, [studyVault]);
 
   const addDrillElapsedTime = useCallback(
     (drillElapsedSeconds: Partial<Record<DrillType, number>>) => {
@@ -952,6 +1123,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     recordMockExamAttempt,
     recordHskPatternPractice,
     recordHskFixedMockExam,
+    studyVault,
+    vaultCount,
+    isItemBookmarked,
+    getItemNote,
+    toggleBookmark,
+    saveItemNote,
+    removeVaultEntry,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -9,6 +9,7 @@ import {
   Flame,
   RotateCcw,
   SlidersHorizontal,
+  Star,
   Target,
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -24,7 +25,7 @@ interface HomeViewProps {
 }
 
 export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
-  const { currentStudent, progress, analytics } = useApp();
+  const { currentStudent, progress, analytics, vaultCount } = useApp();
   const [heroImgError, setHeroImgError] = useState(false);
 
   const mistakesCount = progress?.mistakes?.length ?? 0;
@@ -166,8 +167,8 @@ export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
         </span>
       </button>
 
-      {/* بطاقتا الأدوات السريعة: تدريب واختبار مخصص + مراجعة أخطائي */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* بطاقات الأدوات السريعة: تدريب مخصص + مراجعة أخطائي + محفوظاتي وملاحظاتي */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
           type="button"
           onClick={() => onNavigate('custom-builder')}
@@ -239,6 +240,33 @@ export function HomeView({ onNavigate, onStartMistakeReview }: HomeViewProps) {
           {mistakesCount > 0 && (
             <ArrowLeft className="w-5 h-5 text-[#B91C1C] dark:text-[#EF4444] shrink-0" />
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate('vault')}
+          className="text-right rounded-xl border border-[#1C1917]/12 dark:border-[#F5F2EB]/12 bg-white dark:bg-[#1E1C1A] hover:border-[#D97706]/55 dark:hover:border-[#F59E0B]/55 p-6 flex items-center justify-between gap-4 transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D97706]"
+        >
+          <div className="flex items-start gap-4">
+            <span className="w-12 h-12 rounded-lg border border-[#D97706]/30 dark:border-[#F59E0B]/35 bg-[#D97706]/10 dark:bg-[#F59E0B]/12 flex items-center justify-center shrink-0">
+              <Star className="w-5 h-5 text-[#D97706] dark:text-[#F59E0B] fill-current" />
+            </span>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-[#1C1917] dark:text-[#F5F2EB]">
+                  محفوظاتي وملاحظاتي
+                </h2>
+                <span className="text-xs font-bold tabular-nums text-[#D97706] dark:text-[#F59E0B]">
+                  ({vaultCount})
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#A8A29E] leading-relaxed">
+                خزنة ليلة الامتحان لكلماتك وجملك المميّزة وملاحظاتك الشخصية مع مراجعة سريعة وطباعة
+                PDF.
+              </p>
+            </div>
+          </div>
+          <ArrowLeft className="w-5 h-5 text-[#D97706] dark:text-[#F59E0B] shrink-0" />
         </button>
       </div>
 

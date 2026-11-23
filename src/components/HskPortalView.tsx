@@ -491,14 +491,14 @@ export function HskPortalView() {
           <div
             role="tablist"
             aria-label="اختيار مسار الامتحانات التجريبية"
-            className="inline-flex p-1 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F2ECE1] dark:bg-[#1E1C1A] self-start lg:self-auto"
+            className="inline-flex flex-wrap max-w-full gap-1 p-1 rounded-lg border border-[#1C1917]/15 dark:border-[#F5F2EB]/15 bg-[#F2ECE1] dark:bg-[#1E1C1A] self-start lg:self-auto"
           >
             <button
               type="button"
               role="tab"
               aria-selected={examTrackTab === 'international'}
               onClick={() => setExamTrackTab('international')}
-              className={`inline-flex items-center gap-2 px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap tabular-nums ${
+              className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap tabular-nums ${
                 examTrackTab === 'international'
                   ? 'bg-white dark:bg-[#292623] text-[#B91C1C] dark:text-[#EF4444] shadow-xs'
                   : 'text-[#57534E] dark:text-[#A8A29E] hover:text-[#1C1917] dark:hover:text-[#F5F2EB]'
@@ -512,7 +512,7 @@ export function HskPortalView() {
               role="tab"
               aria-selected={examTrackTab === 'arabic'}
               onClick={() => setExamTrackTab('arabic')}
-              className={`inline-flex items-center gap-2 px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap tabular-nums ${
+              className={`inline-flex items-center gap-2 px-3 sm:px-4 py-2 min-h-[40px] rounded-md text-xs sm:text-sm font-bold transition-colors whitespace-nowrap tabular-nums ${
                 examTrackTab === 'arabic'
                   ? 'bg-white dark:bg-[#292623] text-[#15803D] dark:text-[#22C55E] shadow-xs'
                   : 'text-[#57534E] dark:text-[#A8A29E] hover:text-[#1C1917] dark:hover:text-[#F5F2EB]'

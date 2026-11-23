@@ -10,6 +10,9 @@ import { HskPortalView } from './components/HskPortalView';
 import { LoginGate } from './components/LoginGate';
 import { MockExamView } from './components/MockExamView';
 import { Navbar } from './components/Navbar';
+import { SkillLabTab, SkillsLabsView } from './components/SkillsLabsView';
+import { TeacherBroadcastBanner } from './components/TeacherBroadcastBanner';
+import { VaultView } from './components/VaultView';
 import { AppProvider, useApp } from './context/AppContext';
 import { AppView, ChapterData, CustomQuizConfig, QuizMode, SessionDrillKey } from './types';
 import { isChapterUnlocked } from './utils/accessControl';
@@ -21,6 +24,11 @@ function MainShell() {
   const [quizMode, setQuizMode] = useState<QuizMode>('practice');
   const [sessionSource, setSessionSource] = useState<DrillSessionSource | null>(null);
   const [sessionReturnView, setSessionReturnView] = useState<AppView>('home');
+  const [labConfig, setLabConfig] = useState<{
+    tab: SkillLabTab;
+    chapterId?: number;
+    nonce: number;
+  }>({ tab: 'writing', nonce: 0 });
 
   if (!currentStudent) {
     return <LoginGate />;
@@ -28,6 +36,16 @@ function MainShell() {
 
   const handleNavigate = (nextView: AppView) => {
     setView(nextView);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenLab = (tab: SkillLabTab, chapterId?: number) => {
+    setLabConfig((prev) => ({
+      tab,
+      chapterId,
+      nonce: prev.nonce + 1,
+    }));
+    setView('labs');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -71,6 +89,7 @@ function MainShell() {
   return (
     <div className="min-h-screen paper-lattice bg-[#F9F6F0] dark:bg-[#121110] text-[#1C1917] dark:text-[#F5F2EB] flex flex-col">
       <Navbar currentView={view} onNavigate={handleNavigate} />
+      <TeacherBroadcastBanner />
 
       <main className="flex-1">
         {view === 'home' && (
@@ -88,6 +107,7 @@ function MainShell() {
             selectedMode={quizMode}
             onModeChange={setQuizMode}
             onStartDrill={handleStartChapterDrill}
+            onOpenLab={handleOpenLab}
             onBack={() => handleNavigate('chapters')}
           />
         )}
@@ -100,6 +120,16 @@ function MainShell() {
         )}
 
         {view === 'collections' && <CollectionsView />}
+
+        {view === 'labs' && (
+          <SkillsLabsView
+            initialTab={labConfig.tab}
+            initialChapterId={labConfig.chapterId}
+            launchNonce={labConfig.nonce}
+          />
+        )}
+
+        {view === 'vault' && <VaultView onNavigate={handleNavigate} />}
 
         {view === 'hsk-portal' && <HskPortalView />}
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Copy, Lock, RefreshCw, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -19,6 +19,17 @@ export function LockedAccessModal({
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshMsg, setRefreshMsg] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !currentStudent) return null;
 
@@ -57,7 +68,7 @@ export function LockedAccessModal({
       onClick={onClose}
     >
       <div
-        className="neo-frame w-full max-w-md rounded-xl p-6 sm:p-7 bg-white dark:bg-[#1E1C1A] space-y-5 shadow-xl"
+        className="neo-frame w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl p-6 sm:p-7 bg-white dark:bg-[#1E1C1A] space-y-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-3">

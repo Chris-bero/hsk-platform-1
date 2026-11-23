@@ -57,6 +57,28 @@ function doPost(e) {
       return -1;
     }
 
+    // حفظ إعلان المعلم العام في PropertiesService دون المساس بصفوف الطلاب
+    if (data.action === 'setBroadcast') {
+      var allowedStyles = ['info', 'important', 'promo'];
+      var styleVal = String(data.style || 'info');
+      if (allowedStyles.indexOf(styleVal) === -1) styleVal = 'info';
+      var broadcastObj = {
+        id: String(data.id || ('bc_' + new Date().getTime())),
+        enabled: Boolean(data.enabled),
+        message: String(data.message || '').trim(),
+        style: styleVal,
+        ctaLabel: String(data.ctaLabel || '').trim(),
+        ctaUrl: String(data.ctaUrl || '').trim(),
+        updatedAt: String(data.updatedAt || new Date().toISOString())
+      };
+      PropertiesService.getScriptProperties().setProperty(
+        'TEACHER_BROADCAST_JSON',
+        JSON.stringify(broadcastObj)
+      );
+      return ContentService.createTextOutput(JSON.stringify({ ok: true, broadcast: broadcastObj }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     // تسجيل طالب جديد من لوحة المعلم (بإحصائيات صفرية وصلاحية تجريبية افتراضية دون ربط جهاز)
     if (data.action === 'registerStudent') {
       var newCode = String(data.studentCode || '').trim();
@@ -214,6 +236,22 @@ function doPost(e) {
 
 function doGet(e) {
   try {
+    // جلب شريط إعلان المعلم النشط للطلاب عبر ?action=getBroadcast
+    if (e && e.parameter && e.parameter.action === 'getBroadcast') {
+      var rawBroadcast = PropertiesService.getScriptProperties().getProperty('TEACHER_BROADCAST_JSON');
+      var parsedBroadcast = null;
+      if (rawBroadcast) {
+        try {
+          parsedBroadcast = JSON.parse(rawBroadcast);
+        } catch (errB) {
+          parsedBroadcast = null;
+        }
+      }
+      return ContentService.createTextOutput(
+        JSON.stringify({ ok: true, broadcast: parsedBroadcast })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var values = sheet.getDataRange().getValues();
 
@@ -303,7 +341,13 @@ function doGet(e) {
 */
 
 import { ALLOWED_STUDENTS, authenticateStudent } from '../data/students';
-import { SheetsSyncPayload, Student, UnlockedAccess } from '../types';
+import {
+  BroadcastStyle,
+  SheetsSyncPayload,
+  Student,
+  TeacherBroadcast,
+  UnlockedAccess,
+} from '../types';
 import { getOrCreateClientDeviceId, parseUnlockedAccess } from '../utils/accessControl';
 
 export const GOOGLE_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxA27jKarngLH1l9aIK8vVxd_vNj1UZG6dXTMqluOcaBe6VoFd0VzE7snVvPXqQFdR_fQ/exec ';
@@ -868,3 +912,111 @@ export async function syncStudentStatsToSheets(
     };
   }
 }
+
+export const TEACHER_BROADCAST_LOCAL_KEY = 'chinese_portal_teacher_broadcast_v1';
+
+export function sanitizeBroadcastUrl(rawUrl?: string): string | undefined {
+  if (!rawUrl || typeof rawUrl !== 'string') return undefined;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return undefined;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+      return parsed.toString();
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeTeacherBroadcast(raw: unknown): TeacherBroadcast | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const obj = raw as Record<string, unknown>;
+  const styleCandidate = String(obj.style ?? 'info');
+  const style: BroadcastStyle =
+    styleCandidate === 'important' || styleCandidate === 'promo' ? styleCandidate : 'info';
+  const message = String(obj.message ?? '').trim();
+  const enabled = Boolean(obj.enabled);
+  const updatedAt =
+    typeof obj.updatedAt === 'string' && obj.updatedAt.trim()
+      ? obj.updatedAt.trim()
+      : new Date().toISOString();
+  const id =
+    typeof obj.id === 'string' && obj.id.trim()
+      ? obj.id.trim()
+      : `bc_${message.slice(0, 24)}_${updatedAt}`;
+  const ctaLabel = typeof obj.ctaLabel === 'string' ? obj.ctaLabel.trim() : '';
+  const ctaUrl = sanitizeBroadcastUrl(typeof obj.ctaUrl === 'string' ? obj.ctaUrl : undefined);
+
+  return {
+    id,
+    enabled,
+    message,
+    style,
+    ctaLabel: ctaLabel || undefined,
+    ctaUrl,
+    updatedAt,
+  };
+}
+
+export function loadLocalTeacherBroadcast(): TeacherBroadcast | null {
+  try {
+    const raw = localStorage.getItem(TEACHER_BROADCAST_LOCAL_KEY);
+    if (!raw) return null;
+    return normalizeTeacherBroadcast(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * جلب إعلان المعلم النشط من Google Sheets عبر ?action=getBroadcast
+ * مع تراجع صامت وآمن للتخزين المحلي عند عدم التوفر أو عدم تحديث السكربت بعد.
+ */
+export async function fetchTeacherBroadcast(): Promise<TeacherBroadcast | null> {
+  const endpoint = getConfiguredSheetsUrl();
+
+  if (endpoint) {
+    try {
+      const separator = endpoint.includes('?') ? '&' : '?';
+      const response = await fetch(`${endpoint}${separator}action=getBroadcast`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+      if (response.ok) {
+        const data: unknown = await response.json();
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          const payload = data as Record<string, unknown>;
+          if ('broadcast' in payload) {
+            const normalized = normalizeTeacherBroadcast(payload.broadcast);
+            try {
+              if (normalized) {
+                localStorage.setItem(TEACHER_BROADCAST_LOCAL_KEY, JSON.stringify(normalized));
+              } else {
+                localStorage.removeItem(TEACHER_BROADCAST_LOCAL_KEY);
+              }
+            } catch {
+              // تجاهل
+            }
+            return normalized;
+          }
+          const direct = normalizeTeacherBroadcast(payload);
+          if (direct) {
+            try {
+              localStorage.setItem(TEACHER_BROADCAST_LOCAL_KEY, JSON.stringify(direct));
+            } catch {
+              // تجاهل
+            }
+            return direct;
+          }
+        }
+      }
+    } catch {
+      // تراجع صامت للتخزين المحلي في حال انقطاع الشبكة
+    }
+  }
+
+  return loadLocalTeacherBroadcast();
+}
+

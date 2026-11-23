@@ -608,6 +608,153 @@
         display: flex;
       }
 
+      /* ===================== بطاقة شريط إعلانات الطلاب (Broadcast) ===================== */
+      .broadcast-card {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        margin-bottom: 18px;
+        overflow: hidden;
+      }
+
+      .broadcast-card-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 13px 18px;
+        background-color: var(--surface-subtle);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .broadcast-head-info {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .broadcast-title {
+        margin: 0;
+        font-size: 14.5px;
+        font-weight: 800;
+        color: var(--ink);
+      }
+
+      .broadcast-status-text {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ink-muted);
+      }
+
+      .broadcast-status-text.is-live {
+        color: var(--jade);
+      }
+
+      .broadcast-body {
+        padding: 16px 18px;
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .broadcast-body.open {
+        display: flex;
+      }
+
+      .broadcast-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 210px;
+        gap: 10px;
+        align-items: start;
+      }
+
+      .broadcast-cta-row {
+        display: grid;
+        grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      .broadcast-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+      }
+
+      .broadcast-toggle-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .broadcast-toggle-label input[type='checkbox'] {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--jade);
+        cursor: pointer;
+      }
+
+      .broadcast-preview {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        font-size: 12.5px;
+        line-height: 1.5;
+      }
+
+      .broadcast-preview.style-info {
+        background-color: rgba(29, 78, 216, 0.08);
+        border-color: rgba(29, 78, 216, 0.28);
+        color: #1E3A8A;
+      }
+
+      .dark .broadcast-preview.style-info {
+        background-color: rgba(59, 130, 246, 0.16);
+        border-color: rgba(96, 165, 250, 0.35);
+        color: #DBEAFE;
+      }
+
+      .broadcast-preview.style-important {
+        background-color: var(--amber-soft);
+        border-color: var(--amber-border);
+        color: #78350F;
+      }
+
+      .dark .broadcast-preview.style-important {
+        color: #FEF3C7;
+      }
+
+      .broadcast-preview.style-promo {
+        background-color: var(--jade-soft);
+        border-color: var(--jade-border);
+        color: #14532D;
+      }
+
+      .dark .broadcast-preview.style-promo {
+        color: #DCFCE7;
+      }
+
+      @media (max-width: 760px) {
+        .broadcast-grid,
+        .broadcast-cta-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
       /* ===================== الجداول التنفيذية عالية الكثافة ===================== */
       .table-scroll {
         width: 100%;
@@ -1486,6 +1633,76 @@
               <span id="kpiHskAvgScore" class="kpi-value tabular-nums tone-accent">—</span>
               <span id="kpiHskAvgScoreSub" class="kpi-sub tabular-nums">0 محاولة · نسبة النجاح: —</span>
             </article>
+          </section>
+
+          <!-- ==================== شريط إعلانات الطلاب (Broadcast Control) ==================== -->
+          <section class="broadcast-card" aria-label="شريط إعلانات الطلاب">
+            <div class="broadcast-card-head">
+              <div class="broadcast-head-info">
+                <h2 class="broadcast-title">شريط إعلانات الطلاب (Broadcast)</h2>
+                <span aria-hidden="true" style="color:var(--border-strong)">·</span>
+                <span id="broadcastLiveStatus" class="broadcast-status-text">الشريط مخفي حالياً</span>
+              </div>
+              <button type="button" id="toggleBroadcastCardBtn" class="btn btn-sm">
+                إدارة الإعلان
+              </button>
+            </div>
+
+            <div id="broadcastCardBody" class="broadcast-body">
+              <div class="broadcast-grid">
+                <input
+                  id="broadcastMessageInput"
+                  type="text"
+                  class="input"
+                  maxlength="240"
+                  placeholder="اكتب رسالة الإعلان للطلاب (مثال: حصة المراجعة المباشرة غداً الساعة ٨ مساءً بتوقيت القاهرة)..."
+                  aria-label="نص إعلان المعلم"
+                />
+                <select id="broadcastStyleSelect" class="select" aria-label="نمط الشريط">
+                  <option value="info">إعلان عام (أزرق)</option>
+                  <option value="important">تنبيه هام (كهرماني)</option>
+                  <option value="promo">عرض أو موعد حصة (أخضر)</option>
+                </select>
+              </div>
+
+              <div class="broadcast-cta-row">
+                <input
+                  id="broadcastCtaLabelInput"
+                  type="text"
+                  class="input"
+                  maxlength="40"
+                  placeholder="نص زر الرابط اختياري (مثال: دخول الحصة)"
+                  aria-label="نص زر الرابط الاختياري"
+                />
+                <input
+                  id="broadcastCtaUrlInput"
+                  type="url"
+                  dir="ltr"
+                  class="input"
+                  placeholder="رابط اختياري يبدأ بـ https:// (اختياري)"
+                  aria-label="رابط الإعلان الاختياري"
+                />
+              </div>
+
+              <div id="broadcastPreviewBar" class="broadcast-preview style-info">
+                <span id="broadcastPreviewText">معاينة الإعلان: اكتب نص الإعلان لمعاينته قبل النشر.</span>
+                <span id="broadcastPreviewCta" style="font-weight:800;white-space:nowrap;display:none"></span>
+              </div>
+
+              <div class="broadcast-actions">
+                <label class="broadcast-toggle-label">
+                  <input id="broadcastEnabledCheckbox" type="checkbox" />
+                  <span>تفعيل الشريط وإظهاره للطلاب</span>
+                </label>
+
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                  <span id="broadcastSaveMeta" style="font-size:12px;font-weight:700;color:var(--ink-muted)"></span>
+                  <button type="button" id="publishBroadcastBtn" class="btn btn-primary btn-sm">
+                    نشر الإعلان للطلاب
+                  </button>
+                </div>
+              </div>
+            </div>
           </section>
 
           <!-- ==================== تبويب ١: إدارة الطلاب والصلاحيات ==================== -->
@@ -4281,9 +4498,201 @@
           }
         });
 
+        // ==================== إدارة شريط إعلانات الطلاب (Broadcast) ====================
+        var BROADCAST_LOCAL_KEY = 'chinese_portal_teacher_broadcast_v1';
+        var elToggleBroadcastCardBtn = document.getElementById('toggleBroadcastCardBtn');
+        var elBroadcastCardBody = document.getElementById('broadcastCardBody');
+        var elBroadcastLiveStatus = document.getElementById('broadcastLiveStatus');
+        var elBroadcastMessageInput = document.getElementById('broadcastMessageInput');
+        var elBroadcastStyleSelect = document.getElementById('broadcastStyleSelect');
+        var elBroadcastCtaLabelInput = document.getElementById('broadcastCtaLabelInput');
+        var elBroadcastCtaUrlInput = document.getElementById('broadcastCtaUrlInput');
+        var elBroadcastEnabledCheckbox = document.getElementById('broadcastEnabledCheckbox');
+        var elBroadcastPreviewBar = document.getElementById('broadcastPreviewBar');
+        var elBroadcastPreviewText = document.getElementById('broadcastPreviewText');
+        var elBroadcastPreviewCta = document.getElementById('broadcastPreviewCta');
+        var elBroadcastSaveMeta = document.getElementById('broadcastSaveMeta');
+        var elPublishBroadcastBtn = document.getElementById('publishBroadcastBtn');
+
+        var STYLE_LABELS_MAP = {
+          info: 'إعلان المعلم',
+          important: 'تنبيه هام',
+          promo: 'عرض / موعد'
+        };
+
+        function sanitizeHttpUrl(rawUrl) {
+          var s = String(rawUrl || '').trim();
+          if (!s) return '';
+          try {
+            var u = new URL(s);
+            if (u.protocol === 'https:' || u.protocol === 'http:') return u.toString();
+          } catch (err) {
+            return '';
+          }
+          return '';
+        }
+
+        function updateBroadcastPreviewUI() {
+          if (!elBroadcastPreviewBar) return;
+          var styleVal = elBroadcastStyleSelect.value || 'info';
+          var msg = (elBroadcastMessageInput.value || '').trim();
+          var enabled = Boolean(elBroadcastEnabledCheckbox.checked);
+          var ctaUrl = sanitizeHttpUrl(elBroadcastCtaUrlInput.value);
+          var ctaLabel = (elBroadcastCtaLabelInput.value || '').trim() || 'التفاصيل';
+
+          elBroadcastPreviewBar.className = 'broadcast-preview style-' + styleVal;
+          elBroadcastPreviewText.textContent = msg
+            ? (STYLE_LABELS_MAP[styleVal] || 'إعلان المعلم') + ': ' + msg
+            : 'معاينة الإعلان: اكتب نص الإعلان لمعاينته قبل النشر.';
+
+          if (ctaUrl) {
+            elBroadcastPreviewCta.textContent = ctaLabel + ' ↗';
+            elBroadcastPreviewCta.style.display = 'inline';
+          } else {
+            elBroadcastPreviewCta.style.display = 'none';
+          }
+
+          if (enabled && msg) {
+            elBroadcastLiveStatus.textContent = 'مفعّل وظاهر للطلاب الآن';
+            elBroadcastLiveStatus.classList.add('is-live');
+          } else {
+            elBroadcastLiveStatus.textContent = 'الشريط مخفي حالياً';
+            elBroadcastLiveStatus.classList.remove('is-live');
+          }
+        }
+
+        function applyBroadcastDataToForm(b) {
+          if (!b || typeof b !== 'object') {
+            updateBroadcastPreviewUI();
+            return;
+          }
+          elBroadcastMessageInput.value = String(b.message || '');
+          elBroadcastStyleSelect.value =
+            b.style === 'important' || b.style === 'promo' ? b.style : 'info';
+          elBroadcastCtaLabelInput.value = String(b.ctaLabel || '');
+          elBroadcastCtaUrlInput.value = String(b.ctaUrl || '');
+          elBroadcastEnabledCheckbox.checked = Boolean(b.enabled);
+          updateBroadcastPreviewUI();
+        }
+
+        function loadTeacherBroadcast() {
+          try {
+            var localRaw = localStorage.getItem(BROADCAST_LOCAL_KEY);
+            if (localRaw) {
+              applyBroadcastDataToForm(JSON.parse(localRaw));
+            }
+          } catch (eLocal) {
+            // تجاهل
+          }
+
+          var endpoint = getSavedUrl();
+          if (!endpoint) return;
+          var sep = endpoint.indexOf('?') >= 0 ? '&' : '?';
+
+          fetch(endpoint + sep + 'action=getBroadcast', { method: 'GET', cache: 'no-store' })
+            .then(function (res) {
+              if (!res.ok) return null;
+              return res.json();
+            })
+            .then(function (data) {
+              if (data && typeof data === 'object' && !Array.isArray(data) && data.broadcast) {
+                applyBroadcastDataToForm(data.broadcast);
+                try {
+                  localStorage.setItem(BROADCAST_LOCAL_KEY, JSON.stringify(data.broadcast));
+                } catch (eSave) {}
+              }
+            })
+            .catch(function () {
+              // تراجع صامت للتخزين المحلي
+            });
+        }
+
+        function handlePublishBroadcast() {
+          var message = (elBroadcastMessageInput.value || '').trim();
+          var enabled = Boolean(elBroadcastEnabledCheckbox.checked);
+          var styleVal = elBroadcastStyleSelect.value || 'info';
+          var rawUrl = (elBroadcastCtaUrlInput.value || '').trim();
+          var safeUrl = sanitizeHttpUrl(rawUrl);
+
+          if (rawUrl && !safeUrl) {
+            showToast('يرجى إدخال رابط صحيح يبدأ بـ https:// أو تركه فارغاً.', 'err');
+            return;
+          }
+          if (enabled && !message) {
+            showToast('اكتب نص الإعلان أولاً قبل تفعيل الشريط للطلاب.', 'err');
+            elBroadcastMessageInput.focus();
+            return;
+          }
+
+          var payload = {
+            action: 'setBroadcast',
+            id: 'bc_' + Date.now(),
+            enabled: enabled,
+            message: message,
+            style: styleVal,
+            ctaLabel: (elBroadcastCtaLabelInput.value || '').trim(),
+            ctaUrl: safeUrl,
+            updatedAt: new Date().toISOString()
+          };
+
+          try {
+            localStorage.setItem(BROADCAST_LOCAL_KEY, JSON.stringify(payload));
+          } catch (eLocal) {}
+
+          elPublishBroadcastBtn.disabled = true;
+          elBroadcastSaveMeta.textContent = 'جارٍ النشر...';
+
+          var endpoint = getSavedUrl();
+          var finalize = function (okRemote) {
+            elPublishBroadcastBtn.disabled = false;
+            updateBroadcastPreviewUI();
+            elBroadcastSaveMeta.textContent = okRemote
+              ? 'تم النشر في Google Sheets'
+              : 'تم الحفظ محلياً';
+            showToast(
+              enabled
+                ? 'تم نشر شريط الإعلان للطلاب بنجاح.'
+                : 'تم إخفاء شريط الإعلانات عن الطلاب.',
+              'ok'
+            );
+          };
+
+          if (!endpoint) {
+            finalize(false);
+            return;
+          }
+
+          fetch(endpoint, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          })
+            .then(function () {
+              finalize(true);
+            })
+            .catch(function () {
+              finalize(false);
+            });
+        }
+
+        if (elToggleBroadcastCardBtn) {
+          elToggleBroadcastCardBtn.addEventListener('click', function () {
+            var isOpen = elBroadcastCardBody.classList.toggle('open');
+            elToggleBroadcastCardBtn.textContent = isOpen ? 'إخفاء اللوحة' : 'إدارة الإعلان';
+          });
+          elBroadcastMessageInput.addEventListener('input', updateBroadcastPreviewUI);
+          elBroadcastStyleSelect.addEventListener('change', updateBroadcastPreviewUI);
+          elBroadcastCtaLabelInput.addEventListener('input', updateBroadcastPreviewUI);
+          elBroadcastCtaUrlInput.addEventListener('input', updateBroadcastPreviewUI);
+          elBroadcastEnabledCheckbox.addEventListener('change', updateBroadcastPreviewUI);
+          elPublishBroadcastBtn.addEventListener('click', handlePublishBroadcast);
+        }
+
         // التشغيل الابتدائي
         initTheme();
         fetchStudentData(false);
+        loadTeacherBroadcast();
       })();
     </script>
   </body>

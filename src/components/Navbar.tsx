@@ -9,15 +9,18 @@ interface NavbarProps {
 }
 
 export function Navbar({ currentView, onNavigate }: NavbarProps) {
-  const { theme, toggleTheme, showPinyin, togglePinyin, currentStudent, logout } = useApp();
+  const { theme, toggleTheme, showPinyin, togglePinyin, currentStudent, logout, vaultCount } =
+    useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems: { view: AppView; label: string }[] = [
+  const navItems: { view: AppView; label: string; count?: number }[] = [
     { view: 'home', label: 'الرئيسية' },
-    { view: 'chapters', label: 'الفصول الخمسة عشر' },
+    { view: 'chapters', label: 'الفصول' },
     { view: 'collections', label: 'التجميعات' },
-    { view: 'hsk-portal', label: 'بوابة الامتحانات الدولية' },
-    { view: 'analytics', label: 'صفحتي والإحصائيات' },
+    { view: 'labs', label: 'المختبرات' },
+    { view: 'vault', label: 'محفوظاتي', count: vaultCount },
+    { view: 'hsk-portal', label: 'امتحانات HSK' },
+    { view: 'analytics', label: 'إحصائياتي' },
   ];
 
   const isNavActive = (view: AppView) => {
@@ -42,12 +45,12 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#1C1917]/10 dark:border-[#F5F2EB]/10 bg-[#F9F6F0]/95 dark:bg-[#121110]/95 backdrop-blur-sm">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between gap-4 sm:gap-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between gap-3 sm:gap-5">
         {/* العلامة التجارية */}
         <button
           type="button"
           onClick={() => handleNavClick('home')}
-          className="flex items-center gap-3 text-right shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] dark:focus-visible:ring-[#EF4444] rounded-md py-1"
+          className="flex items-center gap-2.5 text-right min-w-0 lg:shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] dark:focus-visible:ring-[#EF4444] rounded-md py-1"
         >
           <span
             aria-hidden="true"
@@ -55,7 +58,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
           >
             汉
           </span>
-          <span className="text-base sm:text-lg font-bold tracking-tight text-[#1C1917] dark:text-[#F5F2EB] whitespace-nowrap">
+          <span className="text-sm sm:text-base xl:text-lg font-bold tracking-tight text-[#1C1917] dark:text-[#F5F2EB] truncate">
             بوابة اللغة الصينية - المستوى الأول
           </span>
         </button>
@@ -63,7 +66,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
         {/* روابط التنقل الرئيسية */}
         <nav
           aria-label="التنقل الرئيسي"
-          className="hidden lg:flex items-center gap-5 xl:gap-6 text-sm font-semibold"
+          className="hidden lg:flex items-center gap-3.5 xl:gap-5 text-xs xl:text-sm font-semibold"
         >
           {navItems.map((item) => {
             const active = isNavActive(item.view);
@@ -72,13 +75,18 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
                 key={item.view}
                 type="button"
                 onClick={() => handleNavClick(item.view)}
-                className={`relative py-2 whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] dark:focus-visible:ring-[#EF4444] rounded-sm ${
+                className={`relative py-2 inline-flex items-center gap-1 whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B91C1C] dark:focus-visible:ring-[#EF4444] rounded-sm ${
                   active
                     ? 'text-[#B91C1C] dark:text-[#EF4444]'
                     : 'text-[#57534E] dark:text-[#A8A29E] hover:text-[#1C1917] dark:hover:text-[#F5F2EB]'
                 }`}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.count !== undefined && item.count > 0 && (
+                  <span className="text-[11px] font-bold tabular-nums text-[#D97706] dark:text-[#F59E0B]">
+                    ({item.count})
+                  </span>
+                )}
                 {active && (
                   <span
                     aria-hidden="true"
@@ -151,19 +159,24 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
                   key={item.view}
                   type="button"
                   onClick={() => handleNavClick(item.view)}
-                  className={`w-full text-right px-3 py-2.5 rounded-md text-sm font-semibold transition-colors ${
+                  className={`w-full text-right px-3 py-2.5 rounded-md text-sm font-semibold flex items-center justify-between transition-colors ${
                     active
                       ? 'bg-[#B91C1C]/10 dark:bg-[#EF4444]/15 text-[#B91C1C] dark:text-[#EF4444]'
                       : 'text-[#1C1917] dark:text-[#F5F2EB] hover:bg-[#F9F6F0] dark:hover:bg-[#292623]'
                   }`}
                 >
-                  {item.label}
+                  <span>{item.label}</span>
+                  {item.count !== undefined && item.count > 0 && (
+                    <span className="text-xs font-bold tabular-nums text-[#D97706] dark:text-[#F59E0B]">
+                      {item.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
 
-          <div className="pt-3 border-t border-[#1C1917]/10 dark:border-[#F5F2EB]/10 flex flex-wrap items-center gap-2">
+          <div className="md:hidden pt-3 border-t border-[#1C1917]/10 dark:border-[#F5F2EB]/10 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={togglePinyin}
