@@ -1640,7 +1640,7 @@
               <div class="panel-header">
                 <div>
                   <h2 class="panel-title">توزيع الأسئلة على أنواع التدريبات اليومية (١٠ أنواع)</h2>
-                  <p class="panel-subtitle" id="bankInventoryMeta">الفصول المتاحة حالياً: ١–٥</p>
+                  <p class="panel-subtitle" id="bankInventoryMeta">جميع الفصول الـ ١٥ متاحة بالكامل</p>
                 </div>
               </div>
               <div id="bankDrillsGrid" class="bank-drills-grid"></div>
@@ -2055,16 +2055,16 @@
           { id: 3, zh: '三', lessonZh: '第3课', ar: 'الفصل الثالث', subtitle: 'أنا صيني (我是中国人)', vocabCount: 22, sentenceCount: 22 },
           { id: 4, zh: '四', lessonZh: '第4课', ar: 'الفصل الرابع', subtitle: 'لديّ طفلان (我有两个孩子)', vocabCount: 21, sentenceCount: 22 },
           { id: 5, zh: '五', lessonZh: '第5课', ar: 'الفصل الخامس', subtitle: 'اليوم أنا في إجازة (今天我休息)', vocabCount: 22, sentenceCount: 22 },
-          { id: 6, zh: '六', lessonZh: '第6课', ar: 'الفصل السادس', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 7, zh: '七', lessonZh: '第7课', ar: 'الفصل السابع', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 8, zh: '八', lessonZh: '第8课', ar: 'الفصل الثامن', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 9, zh: '九', lessonZh: '第9课', ar: 'الفصل التاسع', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 10, zh: '十', lessonZh: '第10课', ar: 'الفصل العاشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 11, zh: '十一', lessonZh: '第11课', ar: 'الفصل الحادي عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 12, zh: '十二', lessonZh: '第12课', ar: 'الفصل الثاني عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 13, zh: '十三', lessonZh: '第13课', ar: 'الفصل الثالث عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 14, zh: '十四', lessonZh: '第14课', ar: 'الفصل الرابع عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 },
-          { id: 15, zh: '十五', lessonZh: '第15课', ar: 'الفصل الخامس عشر', subtitle: 'قيد الإضافة', vocabCount: 0, sentenceCount: 0 }
+          { id: 6, zh: '六', lessonZh: '第6课', ar: 'الفصل السادس', subtitle: 'ما هو رقم هاتفك المحمول؟ (你的手机号是多少？)', vocabCount: 23, sentenceCount: 18 },
+          { id: 7, zh: '七', lessonZh: '第7课', ar: 'الفصل السابع', subtitle: 'أنهي عملي في السادسة والنصف مساءً (我晚上六点半下班)', vocabCount: 28, sentenceCount: 18 },
+          { id: 8, zh: '八', lessonZh: '第8课', ar: 'الفصل الثامن', subtitle: 'والدي يعمل في المستشفى أيضاً (我爸爸也在医院工作)', vocabCount: 24, sentenceCount: 18 },
+          { id: 9, zh: '九', lessonZh: '第9课', ar: 'الفصل التاسع', subtitle: 'سأدرس في الجامعة غداً صباحاً (我明天上午在学校学习)', vocabCount: 23, sentenceCount: 18 },
+          { id: 10, zh: '十', lessonZh: '第10课', ar: 'الفصل العاشر', subtitle: 'التفاح هنا رخيص حقاً! (这儿的苹果真便宜！)', vocabCount: 23, sentenceCount: 18 },
+          { id: 11, zh: '十一', lessonZh: '第11课', ar: 'الفصل الحادي عشر', subtitle: 'أنا أدرس في الجامعة (我读大学呢)', vocabCount: 25, sentenceCount: 18 },
+          { id: 12, zh: '十二', lessonZh: '第12课', ar: 'الفصل الثاني عشر', subtitle: 'لقد تساقط الثلج بالأمس (昨天下雪了)', vocabCount: 23, sentenceCount: 18 },
+          { id: 13, zh: '十三', lessonZh: '第13课', ar: 'الفصل الثالث عشر', subtitle: 'من فضلك أعطني كوباً من الشاي (请给我一杯茶)', vocabCount: 20, sentenceCount: 18 },
+          { id: 14, zh: '十四', lessonZh: '第14课', ar: 'الفصل الرابع عشر', subtitle: 'لقد شاهدتُ فيلماً (我看了一个电影)', vocabCount: 27, sentenceCount: 18 },
+          { id: 15, zh: '十五', lessonZh: '第15课', ar: 'الفصل الخامس عشر', subtitle: 'نلتقي في مطار داشينغ! (大兴机场见！)', vocabCount: 20, sentenceCount: 18 }
         ];
 
         var DRILL_TYPES_BANK = [
@@ -3125,9 +3125,11 @@
           // ملخص بنك الأسئلة (١٠ تدريبات)
           var totalVocab = 0;
           var totalSentences = 0;
+          var populatedChapters = 0;
           var drillTotals = {};
           DRILL_TYPES_BANK.forEach(function (d) { drillTotals[d.key] = 0; });
           CHAPTERS_META.forEach(function (ch) {
+            if (ch.vocabCount > 0 || ch.sentenceCount > 0) populatedChapters += 1;
             totalVocab += ch.vocabCount;
             totalSentences += ch.sentenceCount;
             DRILL_TYPES_BANK.forEach(function (d) {
@@ -3141,7 +3143,7 @@
           });
 
           elBankInventoryMeta.textContent =
-            'الفصول المفعّلة في المنهج: ٥ من ١٥ · ' + totalVocab + ' مفردة · ' + totalSentences + ' جملة';
+            'الفصول المفعّلة في المنهج: ' + populatedChapters + ' من ' + CHAPTERS_META.length + ' · ' + totalVocab + ' مفردة · ' + totalSentences + ' جملة';
           elBankDrillsGrid.innerHTML = DRILL_TYPES_BANK.map(function (d, i) {
             return (
               '<div class="bank-drill-item">' +
