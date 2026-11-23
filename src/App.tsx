@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AnalyticsView } from './components/AnalyticsView';
 import { ChapterHubView } from './components/ChapterHubView';
 import { ChaptersGridView } from './components/ChaptersGridView';
+import { CollectionsView } from './components/CollectionsView';
 import { CustomQuizBuilderView } from './components/CustomQuizBuilderView';
 import { DrillSessionRunner, DrillSessionSource } from './components/drills/DrillSessionRunner';
 import { HomeView } from './components/HomeView';
@@ -97,6 +98,8 @@ function MainShell() {
             onBack={() => handleNavigate('home')}
           />
         )}
+
+        {view === 'collections' && <CollectionsView />}
 
         {view === 'hsk-portal' && <HskPortalView />}
 

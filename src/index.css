@@ -155,3 +155,85 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Ink-saving crisp Black & White A4 Print / PDF layout for Collections sheets */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm 9mm;
+  }
+
+  html,
+  body,
+  .dark,
+  .dark body,
+  .paper-lattice {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .vocab-print-root {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .vocab-print-sheet {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .vocab-print-sheet::before,
+  .vocab-print-sheet::after {
+    display: none !important;
+  }
+
+  .vocab-print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .vocab-print-table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .vocab-print-table th,
+  .vocab-print-table td {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+    background: #ffffff !important;
+  }
+
+  .vocab-print-table td.vocab-serial-cell {
+    background: #ececec !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+
+  .vocab-print-table .vocab-pinyin-text,
+  .vocab-print-table .vocab-arabic-text {
+    color: #000000 !important;
+  }
+}
+

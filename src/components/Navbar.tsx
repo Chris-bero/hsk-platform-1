@@ -15,6 +15,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
   const navItems: { view: AppView; label: string }[] = [
     { view: 'home', label: 'الرئيسية' },
     { view: 'chapters', label: 'الفصول الخمسة عشر' },
+    { view: 'collections', label: 'التجميعات' },
     { view: 'hsk-portal', label: 'بوابة الامتحانات الدولية' },
     { view: 'analytics', label: 'صفحتي والإحصائيات' },
   ];
@@ -62,7 +63,7 @@ export function Navbar({ currentView, onNavigate }: NavbarProps) {
         {/* روابط التنقل الرئيسية */}
         <nav
           aria-label="التنقل الرئيسي"
-          className="hidden lg:flex items-center gap-7 text-sm font-semibold"
+          className="hidden lg:flex items-center gap-5 xl:gap-6 text-sm font-semibold"
         >
           {navItems.map((item) => {
             const active = isNavActive(item.view);

@@ -74,6 +74,7 @@ export type AppView =
   | 'home'
   | 'chapters'
   | 'chapter-hub'
+  | 'collections'
   | 'custom-builder'
   | 'hsk-portal'
   | 'mock-exam'
